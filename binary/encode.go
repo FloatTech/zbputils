@@ -3,7 +3,7 @@ package binary
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
@@ -12,7 +12,7 @@ import (
 // GBK2UTF8 GBK 转 UTF-8
 func GBK2UTF8(s []byte) ([]byte, error) {
 	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewDecoder())
-	d, e := ioutil.ReadAll(reader)
+	d, e := io.ReadAll(reader)
 	if e != nil {
 		return nil, e
 	}
@@ -22,7 +22,7 @@ func GBK2UTF8(s []byte) ([]byte, error) {
 // UTF82GBK UTF-8 转 GBK
 func UTF82GBK(s []byte) ([]byte, error) {
 	reader := transform.NewReader(bytes.NewReader(s), simplifiedchinese.GBK.NewEncoder())
-	d, e := ioutil.ReadAll(reader)
+	d, e := io.ReadAll(reader)
 	if e != nil {
 		return nil, e
 	}

@@ -2,9 +2,9 @@
 package txt2img
 
 import (
-	"bytes"
 	"encoding/base64"
 	"image/jpeg"
+	"io"
 	"os"
 	"strings"
 
@@ -12,6 +12,7 @@ import (
 	"github.com/mattn/go-runewidth"
 	log "github.com/sirupsen/logrus"
 
+	"github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/file"
 	"github.com/FloatTech/zbputils/process"
 )
@@ -36,14 +37,18 @@ func init() {
 	}()
 }
 
+type TxtCanvas struct {
+	canvas *gg.Context
+}
+
 // RenderToBase64 文字转base64
 func RenderToBase64(text string, width, fontSize int) (base64Bytes []byte, err error) {
-	canvas, err := Render(text, width, fontSize)
+	txtc, err := Render(text, width, fontSize)
 	if err != nil {
 		log.Println("[txt2img]:", err)
 		return nil, err
 	}
-	base64Bytes, err = CanvasToBase64(canvas)
+	base64Bytes, err = txtc.ToBase64()
 	if err != nil {
 		log.Println("[txt2img]:", err)
 		return nil, err
@@ -52,7 +57,7 @@ func RenderToBase64(text string, width, fontSize int) (base64Bytes []byte, err e
 }
 
 // Render 文字转图片
-func Render(text string, width, fontSize int) (canvas *gg.Context, err error) {
+func Render(text string, width, fontSize int) (txtc TxtCanvas, err error) {
 	buff := make([]string, 0)
 	line := ""
 	count := 0
@@ -74,32 +79,54 @@ func Render(text string, width, fontSize int) (canvas *gg.Context, err error) {
 		}
 	}
 
-	canvas = gg.NewContext((fontSize+4)*width/2, (len(buff)+2)*fontSize)
-	canvas.SetRGB(1, 1, 1)
-	canvas.Clear()
-	canvas.SetRGB(0, 0, 0)
-	if err = canvas.LoadFontFace(FontFile, float64(fontSize)); err != nil {
-		log.Println("[txt2img]:", err)
-		return nil, err
+	txtc.canvas = gg.NewContext((fontSize+4)*width/2, (len(buff)+2)*fontSize)
+	txtc.canvas.SetRGB(1, 1, 1)
+	txtc.canvas.Clear()
+	txtc.canvas.SetRGB(0, 0, 0)
+	if err = txtc.canvas.LoadFontFace(FontFile, float64(fontSize)); err != nil {
+		log.Errorln("[txt2img]:", err)
+		return
 	}
 	for i, v := range buff {
 		if v != "" {
-			canvas.DrawString(v, float64(width/2), float64((i+2)*fontSize))
+			txtc.canvas.DrawString(v, float64(width/2), float64((i+2)*fontSize))
 		}
 	}
 	return
 }
 
-// CanvasToBase64 gg内容转为base64
-func CanvasToBase64(canvas *gg.Context) (base64Bytes []byte, err error) {
-	buffer := new(bytes.Buffer)
+// ToBase64 gg内容转为base64
+func (txtc TxtCanvas) ToBase64() (base64Bytes []byte, err error) {
+	buffer := binary.SelectWriter()
 	encoder := base64.NewEncoder(base64.StdEncoding, buffer)
 	var opt jpeg.Options
 	opt.Quality = 70
-	if err = jpeg.Encode(encoder, canvas.Image(), &opt); err != nil {
+	if err = jpeg.Encode(encoder, txtc.canvas.Image(), &opt); err != nil {
 		return nil, err
 	}
 	encoder.Close()
 	base64Bytes = buffer.Bytes()
+	binary.PutWriter(buffer)
+	return
+}
+
+// ToBytes gg内容转为 []byte
+// 使用完 data 后必须调用 cl 放回缓冲区
+func (txtc TxtCanvas) ToBytes() (data []byte, cl func()) {
+	return binary.OpenWriterF(func(w *binary.Writer) {
+		_ = jpeg.Encode(w, txtc.canvas.Image(), &jpeg.Options{Quality: 70})
+	})
+}
+
+// WriteTo gg内容写入 Writer
+// 使用完 data 后必须调用 cl 放回缓冲区
+func (txtc TxtCanvas) WriteTo(f io.Writer) (n int64, err error) {
+	data, cl := txtc.ToBytes()
+	defer cl()
+	if len(data) > 0 {
+		var c int
+		c, err = f.Write(data)
+		return int64(c), err
+	}
 	return
 }
