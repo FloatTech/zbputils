@@ -38,7 +38,7 @@ func init() {
 }
 
 type TxtCanvas struct {
-	canvas *gg.Context
+	Canvas *gg.Context
 }
 
 // RenderToBase64 文字转base64
@@ -79,17 +79,17 @@ func Render(text string, width, fontSize int) (txtc TxtCanvas, err error) {
 		}
 	}
 
-	txtc.canvas = gg.NewContext((fontSize+4)*width/2, (len(buff)+2)*fontSize)
-	txtc.canvas.SetRGB(1, 1, 1)
-	txtc.canvas.Clear()
-	txtc.canvas.SetRGB(0, 0, 0)
-	if err = txtc.canvas.LoadFontFace(FontFile, float64(fontSize)); err != nil {
+	txtc.Canvas = gg.NewContext((fontSize+4)*width/2, (len(buff)+2)*fontSize)
+	txtc.Canvas.SetRGB(1, 1, 1)
+	txtc.Canvas.Clear()
+	txtc.Canvas.SetRGB(0, 0, 0)
+	if err = txtc.Canvas.LoadFontFace(FontFile, float64(fontSize)); err != nil {
 		log.Errorln("[txt2img]:", err)
 		return
 	}
 	for i, v := range buff {
 		if v != "" {
-			txtc.canvas.DrawString(v, float64(width/2), float64((i+2)*fontSize))
+			txtc.Canvas.DrawString(v, float64(width/2), float64((i+2)*fontSize))
 		}
 	}
 	return
@@ -101,7 +101,7 @@ func (txtc TxtCanvas) ToBase64() (base64Bytes []byte, err error) {
 	encoder := base64.NewEncoder(base64.StdEncoding, buffer)
 	var opt jpeg.Options
 	opt.Quality = 70
-	if err = jpeg.Encode(encoder, txtc.canvas.Image(), &opt); err != nil {
+	if err = jpeg.Encode(encoder, txtc.Canvas.Image(), &opt); err != nil {
 		return nil, err
 	}
 	encoder.Close()
@@ -114,7 +114,7 @@ func (txtc TxtCanvas) ToBase64() (base64Bytes []byte, err error) {
 // 使用完 data 后必须调用 cl 放回缓冲区
 func (txtc TxtCanvas) ToBytes() (data []byte, cl func()) {
 	return binary.OpenWriterF(func(w *binary.Writer) {
-		_ = jpeg.Encode(w, txtc.canvas.Image(), &jpeg.Options{Quality: 70})
+		_ = jpeg.Encode(w, txtc.Canvas.Image(), &jpeg.Options{Quality: 70})
 	})
 }
 
