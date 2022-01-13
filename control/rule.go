@@ -487,7 +487,7 @@ func init() {
 							text += msg + "\n\n"
 							return true
 						})
-						data, err := txt2img.RenderToBase64(text, txt2img.FontFile, 40, 20)
+						data, err := txt2img.RenderToBase64(text, txt2img.FontFile, 400, 20)
 						if err != nil {
 							log.Errorf("[control] %v", err)
 						}
