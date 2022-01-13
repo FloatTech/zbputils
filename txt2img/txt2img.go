@@ -13,7 +13,6 @@ import (
 
 	"github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/process"
 )
 
 const (
@@ -25,16 +24,13 @@ const (
 	BoldFontFile = FontPath + "regular-bold.ttf"
 	// SakuraFontFile ...
 	SakuraFontFile = FontPath + "sakura.ttf"
+	// ConsolasFontFile ...
+	ConsolasFontFile = FontPath + "consolas.ttf"
 )
 
 // 加载数据库
 func init() {
-	go func() {
-		process.SleepAbout1sTo2s()
-		_ = os.MkdirAll(FontPath, 0755)
-		_, _ = file.GetLazyData(FontFile, false, true)
-		_, _ = file.GetLazyData(BoldFontFile, false, true)
-	}()
+	_ = os.MkdirAll(FontPath, 0755)
 }
 
 type TxtCanvas struct {
@@ -58,6 +54,11 @@ func RenderToBase64(text, font string, width, fontSize int) (base64Bytes []byte,
 
 // Render 文字转图片 width 是图片宽度
 func Render(text, font string, width, fontSize int) (txtc TxtCanvas, err error) {
+	_, err = file.GetLazyData(font, false, true)
+	if err != nil {
+		return
+	}
+
 	txtc.Canvas = gg.NewContext(width, fontSize) // fake
 	if err = txtc.Canvas.LoadFontFace(font, float64(fontSize)); err != nil {
 		log.Errorln("[txt2img]", err)
