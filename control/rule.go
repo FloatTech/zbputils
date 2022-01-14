@@ -16,6 +16,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/sql"
 	"github.com/FloatTech/zbputils/txt2img"
 )
@@ -286,13 +287,6 @@ func copyMap(m map[string]*Control) map[string]*Control {
 	return ret
 }
 
-func userOrGrpAdmin(ctx *zero.Ctx) bool {
-	if zero.OnlyGroup(ctx) {
-		return zero.AdminPermission(ctx)
-	}
-	return zero.OnlyToMe(ctx)
-}
-
 func init() {
 	if !hasinit {
 		mu.Lock()
@@ -304,7 +298,7 @@ func init() {
 				hasinit = true
 				zero.OnCommandGroup([]string{
 					"启用", "enable", "禁用", "disable",
-				}, userOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
 					model := extension.CommandModel{}
 					_ = ctx.Parse(&model)
 					service, ok := Lookup(model.Args)
@@ -345,7 +339,7 @@ func init() {
 					}
 				})
 
-				zero.OnCommandGroup([]string{"还原", "reset"}, userOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
 					model := extension.CommandModel{}
 					_ = ctx.Parse(&model)
 					service, ok := Lookup(model.Args)
@@ -435,7 +429,7 @@ func init() {
 					ctx.SendChain(message.Text("参数错误!"))
 				})
 
-				zero.OnCommandGroup([]string{"用法", "usage"}, userOrGrpAdmin).SetBlock(true).FirstPriority().
+				zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
 					Handle(func(ctx *zero.Ctx) {
 						model := extension.CommandModel{}
 						_ = ctx.Parse(&model)
@@ -451,7 +445,7 @@ func init() {
 						}
 					})
 
-				zero.OnCommandGroup([]string{"服务列表", "service_list"}, userOrGrpAdmin).SetBlock(true).FirstPriority().
+				zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
 					Handle(func(ctx *zero.Ctx) {
 						msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
 						i := 0
@@ -469,7 +463,7 @@ func init() {
 						ctx.SendChain(message.Text(msg))
 					})
 
-				zero.OnCommandGroup([]string{"服务详情", "service_detail"}, userOrGrpAdmin).SetBlock(true).FirstPriority().
+				zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
 					Handle(func(ctx *zero.Ctx) {
 						text := "---服务详情---\n"
 						i := 0
