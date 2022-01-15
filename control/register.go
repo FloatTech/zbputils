@@ -1,15 +1,10 @@
 package control
 
-import (
-	zero "github.com/wdvxdr1123/ZeroBot"
-)
-
-var enmap = make(map[string]*zero.Engine)
+var enmap = make(map[string]engineinstance)
 
 // Register 注册插件控制器
-func Register(service string, o *Options) *zero.Engine {
-	engine := zero.New()
-	engine.UsePreHandler(newctrl(service, o).Handler)
+func Register(service string, prio int, o *Options) Engine {
+	engine := newengine(service, prio, o)
 	enmap[service] = engine
 	return engine
 }
