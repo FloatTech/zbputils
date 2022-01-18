@@ -13,7 +13,7 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/logoove/sqlite v1.13.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220117142919-4ad1916ac4c8
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220118054520-51ea28a32e7e
 	golang.org/x/text v0.3.7
 )
 
