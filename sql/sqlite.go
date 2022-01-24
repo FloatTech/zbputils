@@ -430,6 +430,10 @@ func values(objptr interface{}) []interface{} {
 		elem = elem.Field(0)
 	}
 	for i, flen := 0, elem.Type().NumField(); i < flen; i++ {
+		if elem.Field(i).Type() == reflect.SliceOf(reflect.TypeOf("")) { // []string
+			values = append(values, elem.Field(i).Index(0).Interface()) // string
+			continue
+		}
 		values = append(values, elem.Field(i).Interface())
 	}
 	return values
@@ -444,6 +448,12 @@ func addrs(objptr interface{}) []interface{} {
 		elem = elem.Field(0)
 	}
 	for i, flen := 0, elem.Type().NumField(); i < flen; i++ {
+		if elem.Field(i).Type() == reflect.SliceOf(reflect.TypeOf("")) { // []string
+			s := reflect.ValueOf(make([]string, 1))
+			elem.Field(i).Set(s)
+			addrs = append(addrs, s.Index(0).Addr().Interface()) // string
+			continue
+		}
 		addrs = append(addrs, elem.Field(i).Addr().Interface())
 	}
 	return addrs
