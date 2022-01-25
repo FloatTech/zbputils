@@ -7,13 +7,12 @@ import (
 	"time"
 
 	"github.com/fumiama/go-registry"
-
-	"github.com/FloatTech/zbputils/process"
 )
 
 var (
 	reg         = registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
 	wg          sync.WaitGroup
+	connmu      sync.Mutex
 	isconnected bool
 )
 
@@ -35,23 +34,26 @@ func NewItem(name, u string) (*Item, error) {
 
 // GetItem 唯一标识文件名
 func GetItem(name string) (*Item, error) {
+	wg.Add(1)
+	defer wg.Done()
+	connmu.Lock()
 	if !isconnected {
 		err := reg.ConnectIn(time.Second * 4)
 		if err != nil {
 			return nil, err
 		}
 		isconnected = true
+		connmu.Unlock()
 		go func() {
-			for c := 0; c < 10; c++ {
-				process.SleepAbout1sTo2s()
-				wg.Wait()
-			}
+			wg.Wait()
 			_ = reg.Close()
+			connmu.Lock()
 			isconnected = false
+			connmu.Unlock()
 		}()
+	} else {
+		connmu.Unlock()
 	}
-	wg.Add(1)
-	defer wg.Done()
 	u, err := reg.Get(name)
 	if err != nil {
 		return nil, err
