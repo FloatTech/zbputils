@@ -3,17 +3,9 @@ package pool
 
 import (
 	"errors"
-	"sync"
 	"time"
 
 	"github.com/fumiama/go-registry"
-)
-
-var (
-	reg         = registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
-	wg          sync.WaitGroup
-	connmu      sync.Mutex
-	isconnected bool
 )
 
 type Item struct {
@@ -34,30 +26,16 @@ func NewItem(name, u string) (*Item, error) {
 
 // GetItem 唯一标识文件名
 func GetItem(name string) (*Item, error) {
-	wg.Add(1)
-	defer wg.Done()
-	connmu.Lock()
-	if !isconnected {
-		err := reg.ConnectIn(time.Second * 4)
-		if err != nil {
-			return nil, err
-		}
-		isconnected = true
-		connmu.Unlock()
-		go func() {
-			wg.Wait()
-			_ = reg.Close()
-			connmu.Lock()
-			isconnected = false
-			connmu.Unlock()
-		}()
-	} else {
-		connmu.Unlock()
+	reg := registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
+	err := reg.ConnectIn(time.Second * 4)
+	if err != nil {
+		return nil, err
 	}
 	u, err := reg.Get(name)
 	if err != nil {
 		return nil, err
 	}
+	_ = reg.Close()
 	return &Item{name: name, u: u}, nil
 }
 
