@@ -18,8 +18,14 @@ func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
 	}
 }
 
-func SendMessage(ctx *zero.Ctx, user int64) NoCtxSendMsg {
+func SendTo(ctx *zero.Ctx, user int64) NoCtxSendMsg {
 	return func(msg interface{}) int64 {
 		return ctx.SendPrivateMessage(user, msg)
+	}
+}
+
+func Send(ctx *zero.Ctx) NoCtxSendMsg {
+	return func(msg interface{}) int64 {
+		return ctx.Send(msg).ID()
 	}
 }
