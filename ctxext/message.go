@@ -29,3 +29,9 @@ func Send(ctx *zero.Ctx) NoCtxSendMsg {
 		return ctx.Send(msg).ID()
 	}
 }
+
+func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
+	return func(msg interface{}) int64 {
+		return ctx.SendPrivateMessage(ctx.Event.SelfID, msg)
+	}
+}
