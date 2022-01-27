@@ -12,8 +12,8 @@ import (
 
 	manager "github.com/FloatTech/bot-manager"
 	// 依赖gin监听server
+	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 
 	// 前端静态文件
 	log "github.com/sirupsen/logrus"
