@@ -7,6 +7,10 @@ import (
 	"net/http"
 )
 
+var (
+	ErrEmptyBody = errors.New("web.GetData: empty body")
+)
+
 // ReqWith 使用自定义请求头获取数据
 func ReqWith(url string, method string, referer string, ua string) (data []byte, err error) {
 	client := &http.Client{}
@@ -33,7 +37,23 @@ func GetData(url string) (data []byte, err error) {
 	response, err = http.Get(url)
 	if err == nil {
 		if response.ContentLength <= 0 {
-			err = errors.New("web.GetData: empty body")
+			err = ErrEmptyBody
+			response.Body.Close()
+			return
+		}
+		data, err = io.ReadAll(response.Body)
+		response.Body.Close()
+	}
+	return
+}
+
+// PostData 获取数据
+func PostData(url string, contentType string, body io.Reader) (data []byte, err error) {
+	var response *http.Response
+	response, err = http.Post(url, contentType, body)
+	if err == nil {
+		if response.ContentLength <= 0 {
+			err = ErrEmptyBody
 			response.Body.Close()
 			return
 		}
