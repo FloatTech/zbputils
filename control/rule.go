@@ -291,11 +291,11 @@ func init() {
 	if !hasinit {
 		mu.Lock()
 		if !hasinit {
+			hasinit = true
 			err := os.MkdirAll("data/control", 0755)
 			if err != nil {
 				panic(err)
 			}
-			hasinit = true
 			err = initBlock()
 			if err != nil {
 				panic(err)

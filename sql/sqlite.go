@@ -57,17 +57,24 @@ func (db *Sqlite) Create(table string, objptr interface{}) (err error) {
 	cmd = append(cmd, "CREATE TABLE IF NOT EXISTS")
 	cmd = append(cmd, table)
 	cmd = append(cmd, "(")
-	for i := range tags {
-		cmd = append(cmd, tags[i])
-		cmd = append(cmd, kinds[i])
-		switch i {
-		default:
-			cmd = append(cmd, "NULL,")
-		case 0:
-			cmd = append(cmd, "PRIMARY KEY")
-			cmd = append(cmd, "NOT NULL,")
-		case top:
-			cmd = append(cmd, "NULL);")
+	if top == 0 {
+		cmd = append(cmd, tags[0])
+		cmd = append(cmd, kinds[0])
+		cmd = append(cmd, "PRIMARY KEY")
+		cmd = append(cmd, "NOT NULL);")
+	} else {
+		for i := range tags {
+			cmd = append(cmd, tags[i])
+			cmd = append(cmd, kinds[i])
+			switch i {
+			default:
+				cmd = append(cmd, "NULL,")
+			case 0:
+				cmd = append(cmd, "PRIMARY KEY")
+				cmd = append(cmd, "NOT NULL,")
+			case top:
+				cmd = append(cmd, "NULL)")
+			}
 		}
 	}
 	_, err = db.DB.Exec(strings.Join(cmd, " ") + ";")
