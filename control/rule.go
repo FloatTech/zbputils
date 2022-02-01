@@ -252,7 +252,7 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 	grp := ctx.Event.GroupID
 	if grp == 0 {
 		// 个人用户
-		return m.IsEnabledIn(-ctx.Event.UserID)
+		grp = -ctx.Event.UserID
 	}
 	log.Debugln("[control] handler get gid =", grp)
 	return m.IsEnabledIn(grp) && !m.IsBannedIn(ctx.Event.UserID, grp)
@@ -294,202 +294,241 @@ func init() {
 			err := os.MkdirAll("data/control", 0755)
 			if err != nil {
 				panic(err)
-			} else {
-				hasinit = true
-				zero.OnCommandGroup([]string{
-					"启用", "enable", "禁用", "disable",
-				}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
-					model := extension.CommandModel{}
-					_ = ctx.Parse(&model)
-					service, ok := Lookup(model.Args)
-					if !ok {
-						ctx.SendChain(message.Text("没有找到指定服务!"))
-						return
-					}
-					grp := ctx.Event.GroupID
-					if grp == 0 {
-						// 个人用户
-						grp = -ctx.Event.UserID
-					}
-					if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
-						service.Enable(grp)
-						ctx.SendChain(message.Text("已启用服务: " + model.Args))
-					} else {
-						service.Disable(grp)
-						ctx.SendChain(message.Text("已禁用服务: " + model.Args))
-					}
-				})
-
-				zero.OnCommandGroup([]string{
-					"全局启用", "enableall", "全局禁用", "disableall",
-				}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
-					model := extension.CommandModel{}
-					_ = ctx.Parse(&model)
-					service, ok := Lookup(model.Args)
-					if !ok {
-						ctx.SendChain(message.Text("没有找到指定服务!"))
-						return
-					}
-					if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
-						service.Enable(0)
-						ctx.SendChain(message.Text("已全局启用服务: " + model.Args))
-					} else {
-						service.Disable(0)
-						ctx.SendChain(message.Text("已全局禁用服务: " + model.Args))
-					}
-				})
-
-				zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
-					model := extension.CommandModel{}
-					_ = ctx.Parse(&model)
-					service, ok := Lookup(model.Args)
-					if !ok {
-						ctx.SendChain(message.Text("没有找到指定服务!"))
-						return
-					}
-					grp := ctx.Event.GroupID
-					if grp == 0 {
-						// 个人用户
-						grp = -ctx.Event.UserID
-					}
-					service.Reset(grp)
-					ctx.SendChain(message.Text("已还原服务的默认启用状态: " + model.Args))
-				})
-
-				zero.OnCommandGroup([]string{
-					"禁止", "ban", "允许", "permit",
-				}, zero.OnlyGroup, zero.AdminPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
-					model := extension.CommandModel{}
-					_ = ctx.Parse(&model)
-					args := strings.Split(model.Args, " ")
-					if len(args) >= 2 {
-						service, ok := Lookup(args[0])
-						if !ok {
-							ctx.SendChain(message.Text("没有找到指定服务!"))
-							return
-						}
-						grp := ctx.Event.GroupID
-						msg := "**" + args[0] + "报告**"
-						if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
-							for _, usr := range args[1:] {
-								uid, err := strconv.ParseInt(usr, 10, 64)
-								if err == nil {
-									service.Permit(uid, grp)
-									msg += "\n+ 已允许" + usr
-								}
-							}
-						} else {
-							for _, usr := range args[1:] {
-								uid, err := strconv.ParseInt(usr, 10, 64)
-								if err == nil {
-									service.Ban(uid, grp)
-									msg += "\n- 已禁止" + usr
-								}
-							}
-						}
-						ctx.SendChain(message.Text(msg))
-						return
-					}
-					ctx.SendChain(message.Text("参数错误!"))
-				})
-
-				zero.OnCommandGroup([]string{
-					"全局禁止", "banall", "全局允许", "permitall",
-				}, zero.OnlyGroup, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
-					model := extension.CommandModel{}
-					_ = ctx.Parse(&model)
-					args := strings.Split(model.Args, " ")
-					if len(args) >= 2 {
-						service, ok := Lookup(args[0])
-						if !ok {
-							ctx.SendChain(message.Text("没有找到指定服务!"))
-							return
-						}
-						msg := "**" + args[0] + "全局报告**"
-						if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
-							for _, usr := range args[1:] {
-								uid, err := strconv.ParseInt(usr, 10, 64)
-								if err == nil {
-									service.Permit(uid, 0)
-									msg += "\n+ 已允许" + usr
-								}
-							}
-						} else {
-							for _, usr := range args[1:] {
-								uid, err := strconv.ParseInt(usr, 10, 64)
-								if err == nil {
-									service.Ban(uid, 0)
-									msg += "\n- 已禁止" + usr
-								}
-							}
-						}
-						ctx.SendChain(message.Text(msg))
-						return
-					}
-					ctx.SendChain(message.Text("参数错误!"))
-				})
-
-				zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
-					Handle(func(ctx *zero.Ctx) {
-						model := extension.CommandModel{}
-						_ = ctx.Parse(&model)
-						service, ok := Lookup(model.Args)
-						if !ok {
-							ctx.SendChain(message.Text("没有找到指定服务!"))
-							return
-						}
-						if service.options.Help != "" {
-							ctx.SendChain(message.Text(service.options.Help))
-						} else {
-							ctx.SendChain(message.Text("该服务无帮助!"))
-						}
-					})
-
-				zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
-					Handle(func(ctx *zero.Ctx) {
-						msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
-						i := 0
-						gid := ctx.Event.GroupID
-						ForEach(func(key string, manager *Control) bool {
-							i++
-							msg += "\n" + strconv.Itoa(i) + `: `
-							if manager.IsEnabledIn(gid) {
-								msg += "●" + key
-							} else {
-								msg += "○" + key
-							}
-							return true
-						})
-						ctx.SendChain(message.Text(msg))
-					})
-
-				zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
-					Handle(func(ctx *zero.Ctx) {
-						text := "---服务详情---\n"
-						i := 0
-						ForEach(func(key string, manager *Control) bool {
-							service, _ := Lookup(key)
-							help := service.options.Help
-							i++
-							msg := strconv.Itoa(i) + `: `
-							if manager.IsEnabledIn(ctx.Event.GroupID) {
-								msg += "●" + key
-							} else {
-								msg += "○" + key
-							}
-							msg += "\n" + help
-							text += msg + "\n\n"
-							return true
-						})
-						data, err := txt2img.RenderToBase64(text, txt2img.FontFile, 400, 20)
-						if err != nil {
-							log.Errorf("[control] %v", err)
-						}
-						if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
-							ctx.SendChain(message.Text("ERROR: 可能被风控了"))
-						}
-					})
 			}
+			hasinit = true
+			err = initBlock()
+			if err != nil {
+				panic(err)
+			}
+			zero.OnCommandGroup([]string{
+				"启用", "enable", "禁用", "disable",
+			}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				service, ok := Lookup(model.Args)
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
+				grp := ctx.Event.GroupID
+				if grp == 0 {
+					// 个人用户
+					grp = -ctx.Event.UserID
+				}
+				if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
+					service.Enable(grp)
+					ctx.SendChain(message.Text("已启用服务: " + model.Args))
+				} else {
+					service.Disable(grp)
+					ctx.SendChain(message.Text("已禁用服务: " + model.Args))
+				}
+			})
+
+			zero.OnCommandGroup([]string{
+				"全局启用", "allenable", "全局禁用", "alldisable",
+			}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				service, ok := Lookup(model.Args)
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
+				if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
+					service.Enable(0)
+					ctx.SendChain(message.Text("已全局启用服务: " + model.Args))
+				} else {
+					service.Disable(0)
+					ctx.SendChain(message.Text("已全局禁用服务: " + model.Args))
+				}
+			})
+
+			zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				service, ok := Lookup(model.Args)
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
+				grp := ctx.Event.GroupID
+				if grp == 0 {
+					// 个人用户
+					grp = -ctx.Event.UserID
+				}
+				service.Reset(grp)
+				ctx.SendChain(message.Text("已还原服务的默认启用状态: " + model.Args))
+			})
+
+			zero.OnCommandGroup([]string{
+				"禁止", "ban", "允许", "permit",
+			}, zero.AdminPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				args := strings.Split(model.Args, " ")
+				if len(args) >= 2 {
+					service, ok := Lookup(args[0])
+					if !ok {
+						ctx.SendChain(message.Text("没有找到指定服务!"))
+						return
+					}
+					grp := ctx.Event.GroupID
+					if grp == 0 {
+						grp = -ctx.Event.UserID
+					}
+					msg := "**" + args[0] + "报告**"
+					if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
+						for _, usr := range args[1:] {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								service.Permit(uid, grp)
+								msg += "\n+ 已允许" + usr
+							}
+						}
+					} else {
+						for _, usr := range args[1:] {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								service.Ban(uid, grp)
+								msg += "\n- 已禁止" + usr
+							}
+						}
+					}
+					ctx.SendChain(message.Text(msg))
+					return
+				}
+				ctx.SendChain(message.Text("参数错误!"))
+			})
+
+			zero.OnCommandGroup([]string{
+				"全局禁止", "allban", "全局允许", "allpermit",
+			}, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				args := strings.Split(model.Args, " ")
+				if len(args) >= 2 {
+					service, ok := Lookup(args[0])
+					if !ok {
+						ctx.SendChain(message.Text("没有找到指定服务!"))
+						return
+					}
+					msg := "**" + args[0] + "全局报告**"
+					if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
+						for _, usr := range args[1:] {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								service.Permit(uid, 0)
+								msg += "\n+ 已允许" + usr
+							}
+						}
+					} else {
+						for _, usr := range args[1:] {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								service.Ban(uid, 0)
+								msg += "\n- 已禁止" + usr
+							}
+						}
+					}
+					ctx.SendChain(message.Text(msg))
+					return
+				}
+				ctx.SendChain(message.Text("参数错误!"))
+			})
+
+			zero.OnCommandGroup([]string{
+				"封禁", "block", "解封", "unblock",
+			}, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+				model := extension.CommandModel{}
+				_ = ctx.Parse(&model)
+				args := strings.Split(model.Args, " ")
+				if len(args) >= 1 {
+					msg := "**" + args[0] + "报告**"
+					if strings.Contains(model.Command, "解") || strings.Contains(model.Command, "un") {
+						for _, usr := range args {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								if doUnblock(uid) == nil {
+									msg += "\n- 已解封" + usr
+								}
+							}
+						}
+					} else {
+						for _, usr := range args {
+							uid, err := strconv.ParseInt(usr, 10, 64)
+							if err == nil {
+								if doBlock(uid) == nil {
+									msg += "\n+ 已封禁" + usr
+								}
+							}
+						}
+					}
+					ctx.SendChain(message.Text(msg))
+					return
+				}
+				ctx.SendChain(message.Text("参数错误!"))
+			})
+
+			zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+				Handle(func(ctx *zero.Ctx) {
+					model := extension.CommandModel{}
+					_ = ctx.Parse(&model)
+					service, ok := Lookup(model.Args)
+					if !ok {
+						ctx.SendChain(message.Text("没有找到指定服务!"))
+						return
+					}
+					if service.options.Help != "" {
+						ctx.SendChain(message.Text(service.options.Help))
+					} else {
+						ctx.SendChain(message.Text("该服务无帮助!"))
+					}
+				})
+
+			zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+				Handle(func(ctx *zero.Ctx) {
+					msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
+					i := 0
+					gid := ctx.Event.GroupID
+					ForEach(func(key string, manager *Control) bool {
+						i++
+						msg += "\n" + strconv.Itoa(i) + `: `
+						if manager.IsEnabledIn(gid) {
+							msg += "●" + key
+						} else {
+							msg += "○" + key
+						}
+						return true
+					})
+					ctx.SendChain(message.Text(msg))
+				})
+
+			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+				Handle(func(ctx *zero.Ctx) {
+					text := "---服务详情---\n"
+					i := 0
+					ForEach(func(key string, manager *Control) bool {
+						service, _ := Lookup(key)
+						help := service.options.Help
+						i++
+						msg := strconv.Itoa(i) + `: `
+						if manager.IsEnabledIn(ctx.Event.GroupID) {
+							msg += "●" + key
+						} else {
+							msg += "○" + key
+						}
+						msg += "\n" + help
+						text += msg + "\n\n"
+						return true
+					})
+					data, err := txt2img.RenderToBase64(text, txt2img.FontFile, 400, 20)
+					if err != nil {
+						log.Errorf("[control] %v", err)
+					}
+					if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
+						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+					}
+				})
 		}
 		mu.Unlock()
 	}

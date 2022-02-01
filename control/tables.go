@@ -12,6 +12,10 @@ type ban struct {
 	GroupID int64 `db:"gid"`
 }
 
+type block struct {
+	UserID int64 `db:"uid"`
+}
+
 // Options holds the optional parameters for the Manager.
 type Options struct {
 	DisableOnDefault bool
