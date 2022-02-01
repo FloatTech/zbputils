@@ -7,7 +7,7 @@ import (
 )
 
 func initBlock() (err error) {
-	err = db.Create("__block", &block{})
+	err = db.Create("block__", &block{})
 	if err == nil {
 		zero.OnMessage(func(ctx *zero.Ctx) bool {
 			return isBlocked(ctx.Event.UserID)
@@ -17,13 +17,13 @@ func initBlock() (err error) {
 }
 
 func doBlock(uid int64) error {
-	return db.Insert("__block", &block{UserID: uid})
+	return db.Insert("block__", &block{UserID: uid})
 }
 
 func doUnblock(uid int64) error {
-	return db.Del("__block", "where uid = "+strconv.FormatInt(uid, 10))
+	return db.Del("block__", "where uid = "+strconv.FormatInt(uid, 10))
 }
 
 func isBlocked(uid int64) bool {
-	return db.CanFind("__block", "where uid = "+strconv.FormatInt(uid, 10))
+	return db.CanFind("block__", "where uid = "+strconv.FormatInt(uid, 10))
 }
