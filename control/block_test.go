@@ -15,3 +15,13 @@ func TestInit(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestBlock(t *testing.T) {
+	err := doBlock(2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !isBlocked(2) {
+		t.Fatal("set failed")
+	}
+}

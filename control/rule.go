@@ -443,7 +443,7 @@ func init() {
 				_ = ctx.Parse(&model)
 				args := strings.Split(model.Args, " ")
 				if len(args) >= 1 {
-					msg := "**" + args[0] + "报告**"
+					msg := "**报告**"
 					if strings.Contains(model.Command, "解") || strings.Contains(model.Command, "un") {
 						for _, usr := range args {
 							uid, err := strconv.ParseInt(usr, 10, 64)

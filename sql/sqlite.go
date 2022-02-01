@@ -102,32 +102,41 @@ func (db *Sqlite) Insert(table string, objptr interface{}) error {
 	)
 	cmd = append(cmd, "REPLACE INTO")
 	cmd = append(cmd, table)
-	for i := range tags {
-		switch i {
-		default:
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ",")
-		case 0:
-			cmd = append(cmd, "(")
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ",")
-		case top:
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ")")
+	if top == 0 {
+		cmd = append(cmd, "(")
+		cmd = append(cmd, tags[0])
+		cmd = append(cmd, ")")
+		cmd = append(cmd, "VALUES (")
+		cmd = append(cmd, "?")
+		cmd = append(cmd, ")")
+	} else {
+		for i := range tags {
+			switch i {
+			default:
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ",")
+			case 0:
+				cmd = append(cmd, "(")
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ",")
+			case top:
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ")")
+			}
 		}
-	}
-	for i := range tags {
-		switch i {
-		default:
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ",")
-		case 0:
-			cmd = append(cmd, "VALUES (")
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ",")
-		case top:
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ")")
+		for i := range tags {
+			switch i {
+			default:
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ",")
+			case 0:
+				cmd = append(cmd, "VALUES (")
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ",")
+			case top:
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ")")
+			}
 		}
 	}
 	stmt, err := db.DB.Prepare(strings.Join(cmd, " ") + ";")
@@ -162,32 +171,41 @@ func (db *Sqlite) InsertUnique(table string, objptr interface{}) error {
 	)
 	cmd = append(cmd, "INSERT INTO")
 	cmd = append(cmd, table)
-	for i := range tags {
-		switch i {
-		default:
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ",")
-		case 0:
-			cmd = append(cmd, "(")
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ",")
-		case top:
-			cmd = append(cmd, tags[i])
-			cmd = append(cmd, ")")
+	if top == 0 {
+		cmd = append(cmd, "(")
+		cmd = append(cmd, tags[0])
+		cmd = append(cmd, ")")
+		cmd = append(cmd, "VALUES (")
+		cmd = append(cmd, "?")
+		cmd = append(cmd, ")")
+	} else {
+		for i := range tags {
+			switch i {
+			default:
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ",")
+			case 0:
+				cmd = append(cmd, "(")
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ",")
+			case top:
+				cmd = append(cmd, tags[i])
+				cmd = append(cmd, ")")
+			}
 		}
-	}
-	for i := range tags {
-		switch i {
-		default:
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ",")
-		case 0:
-			cmd = append(cmd, "VALUES (")
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ",")
-		case top:
-			cmd = append(cmd, "?")
-			cmd = append(cmd, ")")
+		for i := range tags {
+			switch i {
+			default:
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ",")
+			case 0:
+				cmd = append(cmd, "VALUES (")
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ",")
+			case top:
+				cmd = append(cmd, "?")
+				cmd = append(cmd, ")")
+			}
 		}
 	}
 	stmt, err := db.DB.Prepare(strings.Join(cmd, " ") + ";")
