@@ -13,7 +13,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/logoove/sqlite v1.13.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220127075442-eb7b296fc97e
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220207114459-068919ac2b02
 	golang.org/x/text v0.3.7
 )
 
