@@ -21,13 +21,19 @@ var DefaultSingle = single.New(
 )
 
 // defaultLimiterManager 默认限速器管理
-//    每 10s 1次触发
-var defaultLimiterManager = rate.NewManager(time.Second*10, 1)
+//    每 10s 5次触发
+var defaultLimiterManager = rate.NewManager(time.Second*10, 5)
 
-// Limit 默认限速器 每 10s 1次触发
+// LimitByUser 默认限速器 每 10s 5次触发
 //    按 qq 号限制
-func Limit(ctx *zero.Ctx) *rate.Limiter {
+func LimitByUser(ctx *zero.Ctx) *rate.Limiter {
 	return defaultLimiterManager.Load(ctx.Event.UserID)
+}
+
+// LimitByGroup 默认限速器 每 10s 5次触发
+//    按群号限制
+func LimitByGroup(ctx *zero.Ctx) *rate.Limiter {
+	return defaultLimiterManager.Load(ctx.Event.GroupID)
 }
 
 // LimiterManager 自定义限速器管理
@@ -35,14 +41,20 @@ type LimiterManager struct {
 	m *rate.LimiterManager
 }
 
-// NewManager ...
-func NewManager(interval time.Duration, burst int) (m LimiterManager) {
+// NewLimiterManager 新限速器管理
+func NewLimiterManager(interval time.Duration, burst int) (m LimiterManager) {
 	m.m = rate.NewManager(interval, burst)
 	return
 }
 
-// Limit 自定义限速器
+// LimitByUser 自定义限速器
 //    按 qq 号限制
-func (m LimiterManager) Limit(ctx *zero.Ctx) *rate.Limiter {
+func (m LimiterManager) LimitByUser(ctx *zero.Ctx) *rate.Limiter {
 	return m.m.Load(ctx.Event.UserID)
+}
+
+// LimitByGroup 自定义限速器
+//    按群号限制
+func (m LimiterManager) LimitByGroup(ctx *zero.Ctx) *rate.Limiter {
+	return m.m.Load(ctx.Event.GroupID)
 }
