@@ -30,8 +30,19 @@ func Limit(ctx *zero.Ctx) *rate.Limiter {
 	return defaultLimiterManager.Load(ctx.Event.UserID)
 }
 
-// ApplyLimit 自定义限速器
+// LimiterManager 自定义限速器管理
+type LimiterManager struct {
+	m *rate.LimiterManager
+}
+
+// NewManager ...
+func NewManager(interval time.Duration, burst int) (m LimiterManager) {
+	m.m = rate.NewManager(interval, burst)
+	return
+}
+
+// Limit 自定义限速器
 //    按 qq 号限制
-func ApplyLimit(ctx *zero.Ctx, m *rate.LimiterManager) *rate.Limiter {
-	return m.Load(ctx.Event.UserID)
+func (m LimiterManager) Limit(ctx *zero.Ctx) *rate.Limiter {
+	return m.m.Load(ctx.Event.UserID)
 }

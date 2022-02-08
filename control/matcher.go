@@ -12,7 +12,7 @@ type Matcher interface {
 	Handle(handler zero.Handler)
 	// Limit 限速器
 	//    postfn 当请求被拒绝时的操作
-	Limit(limiter *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher
+	Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher
 }
 
 type matcherinstance struct {
