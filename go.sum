@@ -129,8 +129,8 @@ github.com/ugorji/go/codec v1.2.6 h1:7kbGefxLoDBuYXOms4yD7223OpNMMPNPZxXk5TvFcyQ
 github.com/ugorji/go/codec v1.2.6/go.mod h1:V6TCNZ4PHqoHGFZuSG1W8nrCzzdgA2DozYxWFFpvxTw=
 github.com/wdvxdr1123/ZeroBot v1.3.2/go.mod h1:i2DIqQjtjE+3gvVi9r9sc+QpNaUuyTXx/HNXXayIpwI=
 github.com/wdvxdr1123/ZeroBot v1.4.1/go.mod h1:7t9m4vDZPwWAmzKlhP6IvUoisOIiqNdm/3AJgiY3+ew=
-github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220207114459-068919ac2b02 h1:Tm5gEjJpm0M2sY6RegimsrRekqNBD26qZjYwTx5Gt6s=
-github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220207114459-068919ac2b02/go.mod h1:NwXIp7PgjV+kUALMXJ4v4/3QcsRSOodtjhLekuPXFog=
+github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220208041536-d463c1c92bb4 h1:T/m7vDUFKdLd0xfSZHVPQGaRZ73nwPzidLW7hTn25mg=
+github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220208041536-d463c1c92bb4/go.mod h1:NwXIp7PgjV+kUALMXJ4v4/3QcsRSOodtjhLekuPXFog=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.4.1/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

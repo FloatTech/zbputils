@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/single"
 )
 
 type Engine interface {
@@ -44,6 +45,8 @@ type Engine interface {
 	OnSuffixGroup(suffix []string, rules ...zero.Rule) Matcher
 	// OnShell shell命令触发器
 	OnShell(command string, model interface{}, rules ...zero.Rule) Matcher
+	// ApplySingle 应用反并发
+	ApplySingle(*single.Single) Engine
 }
 
 type engineinstance struct {
