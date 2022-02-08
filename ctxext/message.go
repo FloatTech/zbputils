@@ -8,8 +8,8 @@ import (
 )
 
 type (
-	NoCtxGetMsg  = func(int64) zero.Message
-	NoCtxSendMsg = func(interface{}) int64
+	NoCtxGetMsg  func(int64) zero.Message
+	NoCtxSendMsg func(interface{}) int64
 )
 
 func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
