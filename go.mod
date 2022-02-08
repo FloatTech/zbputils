@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/FloatTech/bot-manager v1.0.0
+	github.com/FloatTech/sqlite v0.1.0
 	github.com/RomiChan/websocket v1.4.3-0.20220123145318-307a86b127bc
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
@@ -11,7 +12,6 @@ require (
 	github.com/fumiama/go-base16384 v1.2.1
 	github.com/fumiama/go-registry v0.0.2
 	github.com/gin-gonic/gin v1.7.7
-	github.com/logoove/sqlite v1.13.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220208041536-d463c1c92bb4
 	golang.org/x/text v0.3.7
@@ -30,6 +30,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
+	github.com/logoove/sqlite v1.13.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
@@ -41,7 +42,7 @@ require (
 	golang.org/x/crypto v0.0.0-20220126234351-aa10faf2a1f8 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/mod v0.5.1 // indirect
-	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9 // indirect
+	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
 	golang.org/x/tools v0.1.9 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
@@ -53,7 +54,7 @@ require (
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.5 // indirect
 	modernc.org/opt v0.1.1 // indirect
-	modernc.org/sqlite v1.14.5 // indirect
+	modernc.org/sqlite v1.14.6 // indirect
 	modernc.org/strutil v1.1.1 // indirect
 	modernc.org/token v1.0.0 // indirect
 )

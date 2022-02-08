@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
-	"os"
 
 	"github.com/ericpauley/go-quantize/quantize"
 )
@@ -30,14 +29,4 @@ func MergeGif(delay int, im []*image.NRGBA) *gif.GIF {
 	}
 	g.LoopCount = 0
 	return g
-}
-
-// SaveGif 保存gif
-func SaveGif(g *gif.GIF, path string) error {
-	f, err := os.Create(path) // 创建文件
-	if err == nil {
-		gif.EncodeAll(f, g) // 写入
-		f.Close()           // 关闭文件
-	}
-	return err
 }

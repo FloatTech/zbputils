@@ -7,7 +7,6 @@ import (
 	"image/color"
 	"image/draw"
 	"image/gif"
-	"image/png"
 	"net/http"
 	"os"
 	"strings"
@@ -217,21 +216,6 @@ func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFact
 	draw.Over.Draw(dst.Im, dst.Im.Bounds(), dc1.Image(), dc1.Image().Bounds().Min)
 	dst.W, dst.H = dst.Im.Bounds().Size().X, dst.Im.Bounds().Size().Y
 	return &dst
-}
-
-// 保存png
-func SavePng(im image.Image, path string) error {
-	f, err := os.Create(path) // 创建文件
-	if err == nil {
-		err = png.Encode(f, im) // 写入
-		f.Close()
-		if err != nil {
-			logrus.Errorln("[img] save img err:", err)
-		}
-	} else {
-		logrus.Errorln("[img] create file at", path, "err:", err)
-	}
-	return err
 }
 
 // float64转uint8

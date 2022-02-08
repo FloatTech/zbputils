@@ -16,9 +16,9 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
+	sql "github.com/FloatTech/sqlite"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/sql"
-	"github.com/FloatTech/zbputils/txt2img"
+	"github.com/FloatTech/zbputils/img/text"
 )
 
 var (
@@ -505,7 +505,7 @@ func init() {
 
 			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
 				Handle(func(ctx *zero.Ctx) {
-					text := "---服务详情---\n"
+					t := "---服务详情---\n"
 					i := 0
 					ForEach(func(key string, manager *Control) bool {
 						service, _ := Lookup(key)
@@ -518,10 +518,10 @@ func init() {
 							msg += "○" + key
 						}
 						msg += "\n" + help
-						text += msg + "\n\n"
+						t += msg + "\n\n"
 						return true
 					})
-					data, err := txt2img.RenderToBase64(text, txt2img.FontFile, 400, 20)
+					data, err := text.RenderToBase64(t, text.FontFile, 400, 20)
 					if err != nil {
 						log.Errorf("[control] %v", err)
 					}
