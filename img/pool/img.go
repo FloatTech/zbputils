@@ -1,5 +1,5 @@
-// Package imgpool 图片缓存池
-package imgpool
+// Package pool 图片缓存池
+package pool
 
 import (
 	"errors"
