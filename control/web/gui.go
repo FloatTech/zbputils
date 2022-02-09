@@ -413,9 +413,7 @@ func messageHandle() {
 		}
 	}()
 
-	matcher := zero.OnMessage().SetBlock(false).SetPriority(1)
-
-	matcher.Handle(func(ctx *zero.Ctx) {
+	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
 		if conn != nil {
 			err := conn.WriteJSON(ctx.Event)
 			if err != nil {

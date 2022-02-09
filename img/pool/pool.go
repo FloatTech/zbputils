@@ -1,5 +1,4 @@
-// Package pool url 缓存池
-package pool
+package imgpool
 
 import (
 	"errors"
@@ -8,24 +7,24 @@ import (
 	"github.com/fumiama/go-registry"
 )
 
-type Item struct {
+type item struct {
 	name string
 	u    string
 }
 
-// NewItem 唯一标识文件名 文件链接
-func NewItem(name, u string) (*Item, error) {
+// newItem 唯一标识文件名 文件链接
+func newItem(name, u string) (*item, error) {
 	if len(name) > 126 {
 		return nil, errors.New("name too long")
 	}
 	if len(u) > 126 {
 		return nil, errors.New("url too long")
 	}
-	return &Item{name: name, u: u}, nil
+	return &item{name: name, u: u}, nil
 }
 
-// GetItem 唯一标识文件名
-func GetItem(name string) (*Item, error) {
+// getItem 唯一标识文件名
+func getItem(name string) (*item, error) {
 	reg := registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
 	err := reg.ConnectIn(time.Second * 4)
 	if err != nil {
@@ -36,11 +35,11 @@ func GetItem(name string) (*Item, error) {
 		return nil, err
 	}
 	_ = reg.Close()
-	return &Item{name: name, u: u}, nil
+	return &item{name: name, u: u}, nil
 }
 
-// Push 推送 item
-func (t *Item) Push(key string) (err error) {
+// push 推送 item
+func (t *item) push(key string) (err error) {
 	r := registry.NewRegedit("reilia.fumiama.top:35354", "fumiama", key)
 	err = r.ConnectIn(time.Second * 4)
 	if err != nil {
@@ -52,14 +51,4 @@ func (t *Item) Push(key string) (err error) {
 	}
 	err = r.Close()
 	return
-}
-
-// String item 的 url
-func (t *Item) String() string {
-	return t.u
-}
-
-// Name item 的 name
-func (t *Item) Name() string {
-	return t.name
 }

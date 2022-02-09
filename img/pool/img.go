@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/pool"
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -23,7 +22,7 @@ var (
 )
 
 type Image struct {
-	img  *pool.Item
+	*item
 	n, f string
 }
 
@@ -31,8 +30,8 @@ type Image struct {
 func GetImage(name string) (m *Image, err error) {
 	m = new(Image)
 	m.n = name
-	m.img, err = pool.GetItem(name)
-	if err == nil && m.img.String() != "" {
+	m.item, err = getItem(name)
+	if err == nil && m.item.u != "" {
 		_, err = http.Head(m.String())
 		if err != nil {
 			err = ErrImgFileOutdated
@@ -49,8 +48,8 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 	m = new(Image)
 	m.n = name
 	m.SetFile(f)
-	m.img, err = pool.GetItem(name)
-	if err == nil && m.img.String() != "" {
+	m.item, err = getItem(name)
+	if err == nil && m.item.u != "" {
 		_, err = http.Head(m.String())
 		if err == nil {
 			return
@@ -62,10 +61,10 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 
 // String url
 func (m *Image) String() string {
-	if m.img == nil {
+	if m.item == nil {
 		return m.f
 	}
-	return fmt.Sprintf(cacheurl, m.img.String())
+	return fmt.Sprintf(cacheurl, m.item.u)
 }
 
 // SetFile f
@@ -101,9 +100,9 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 			if u == "" {
 				break
 			}
-			m.img, err = pool.NewItem(m.n, u)
+			m.item, err = newItem(m.n, u)
 			logrus.Infoln("[imgpool] 缓存:", m.n, "url:", u)
-			_ = m.img.Push("minamoto")
+			_ = m.item.push("minamoto")
 			return
 		}
 	}
