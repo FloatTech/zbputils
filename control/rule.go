@@ -255,7 +255,8 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 		grp = -ctx.Event.UserID
 	}
 	log.Debugln("[control] handler get gid =", grp)
-	if ctx.State["__user_is_not_banned__"].(bool) {
+	s := ctx.State["__user_is_not_banned__"]
+	if s != nil && s.(bool) {
 		return m.IsEnabledIn(grp)
 	}
 	ok := !m.IsBannedIn(ctx.Event.UserID, grp)
