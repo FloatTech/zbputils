@@ -17,13 +17,13 @@ func Delete(service string) {
 	engine, ok := enmap[service]
 	if ok {
 		engine.Delete()
-		mu.RLock()
+		manmu.RLock()
 		_, ok = managers[service]
-		mu.RUnlock()
+		manmu.RUnlock()
 		if ok {
-			mu.Lock()
+			manmu.Lock()
 			delete(managers, service)
-			mu.Unlock()
+			manmu.Unlock()
 		}
 	}
 }

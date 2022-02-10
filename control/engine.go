@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/single"
 )
@@ -73,6 +74,12 @@ func newengine(service string, prio int, o *Options) (e engineinstance) {
 	priomu.Unlock()
 	e.en = zero.New()
 	e.en.UsePreHandler(newctrl(service, o).Handler)
+	e.en.UsePostHandler(func(ctx *zero.Ctx) {
+		ctxmu.Lock()
+		delete(ctxbanmap, ctx)
+		ctxmu.Unlock()
+		logrus.Debugf("[control] remove ban map of %p\n", ctx)
+	})
 	e.prio = prio
 	return
 }

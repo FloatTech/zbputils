@@ -24,9 +24,11 @@ import (
 var (
 	db = &sql.Sqlite{DBPath: "data/control/plugins.db"}
 	// managers 每个插件对应的管理
-	managers = map[string]*Control{}
-	mu       = sync.RWMutex{}
-	hasinit  bool
+	managers  = map[string]*Control{}
+	manmu     sync.RWMutex
+	ctxbanmap = map[*zero.Ctx]bool{}
+	ctxmu     sync.RWMutex
+	hasinit   bool
 )
 
 // Control is to control the plugins.
@@ -46,9 +48,9 @@ func newctrl(service string, o *Options) *Control {
 			return *o
 		}(),
 	}
-	mu.Lock()
+	manmu.Lock()
 	managers[service] = m
-	mu.Unlock()
+	manmu.Unlock()
 	err := db.Create(service, &grpcfg{})
 	if err != nil {
 		panic(err)
@@ -255,29 +257,36 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 		grp = -ctx.Event.UserID
 	}
 	log.Debugln("[control] handler get gid =", grp)
-	s := ctx.State["__user_is_not_banned__"]
-	if s != nil && s.(bool) {
+	ctxmu.RLock()
+	isnotbanned, ok := ctxbanmap[ctx]
+	ctxmu.RUnlock()
+	if ok && isnotbanned {
 		return m.IsEnabledIn(grp)
 	}
-	ok := !m.IsBannedIn(ctx.Event.UserID, grp)
-	ctx.State["__user_is_not_banned__"] = ok
-	return ok && m.IsEnabledIn(grp)
+	isnotbanned = !m.IsBannedIn(ctx.Event.UserID, grp)
+	if isnotbanned {
+		ctxmu.Lock()
+		ctxbanmap[ctx] = isnotbanned
+		ctxmu.Unlock()
+		log.Debugf("[control] insert ban map of %p\n", ctx)
+	}
+	return isnotbanned && m.IsEnabledIn(grp)
 }
 
 // Lookup returns a Manager by the service name, if
 // not exist, it will return nil.
 func Lookup(service string) (*Control, bool) {
-	mu.RLock()
+	manmu.RLock()
 	m, ok := managers[service]
-	mu.RUnlock()
+	manmu.RUnlock()
 	return m, ok
 }
 
 // ForEach iterates through managers.
 func ForEach(iterator func(key string, manager *Control) bool) {
-	mu.RLock()
+	manmu.RLock()
 	m := copyMap(managers)
-	mu.RUnlock()
+	manmu.RUnlock()
 	for k, v := range m {
 		if !iterator(k, v) {
 			return
@@ -295,7 +304,7 @@ func copyMap(m map[string]*Control) map[string]*Control {
 
 func init() {
 	if !hasinit {
-		mu.Lock()
+		manmu.Lock()
 		if !hasinit {
 			hasinit = true
 			err := os.MkdirAll("data/control", 0755)
@@ -536,6 +545,6 @@ func init() {
 					}
 				})
 		}
-		mu.Unlock()
+		manmu.Unlock()
 	}
 }

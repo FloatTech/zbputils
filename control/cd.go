@@ -61,9 +61,9 @@ func init() {
 				if err == nil {
 					gid := ctx.Event.GroupID
 					for _, s := range strings.Split(b14.DecodeString(msg), "\xfe\xff") {
-						mu.RLock()
+						manmu.RLock()
 						c, ok := managers[s]
-						mu.RUnlock()
+						manmu.RUnlock()
 						if ok && c.IsEnabledIn(gid) {
 							c.Disable(gid)
 						}
