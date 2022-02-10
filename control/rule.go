@@ -255,7 +255,12 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 		grp = -ctx.Event.UserID
 	}
 	log.Debugln("[control] handler get gid =", grp)
-	return m.IsEnabledIn(grp) && !m.IsBannedIn(ctx.Event.UserID, grp)
+	if ctx.State["__user_is_not_banned__"].(bool) {
+		return m.IsEnabledIn(grp)
+	}
+	ok := !m.IsBannedIn(ctx.Event.UserID, grp)
+	ctx.State["__user_is_not_banned__"] = ok
+	return ok && m.IsEnabledIn(grp)
 }
 
 // Lookup returns a Manager by the service name, if
