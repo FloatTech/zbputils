@@ -20,13 +20,15 @@ func GetPaletted(im image.Image) *image.Paletted {
 
 // MergeGif 合并成gif,1 dealy 10毫秒
 func MergeGif(delay int, im []*image.NRGBA) *gif.GIF {
-	g := &gif.GIF{}
-
-	for _, stc := range im {
-		g.Image = append(g.Image, GetPaletted(stc))             // 每帧图片
-		g.Delay = append(g.Delay, delay)                        // 每帧间隔，1=10毫秒
-		g.Disposal = append(g.Disposal, gif.DisposalBackground) // 透明图片需要设置
+	g := &gif.GIF{
+		Image:    make([]*image.Paletted, len(im)),
+		Delay:    make([]int, len(im)),
+		Disposal: make([]byte, len(im)),
 	}
-	g.LoopCount = 0
+	for i, stc := range im {
+		g.Image[i] = GetPaletted(stc)          // 每帧图片
+		g.Delay[i] = delay                     // 每帧间隔，1=10毫秒
+		g.Disposal[i] = gif.DisposalBackground // 透明图片需要设置
+	}
 	return g
 }

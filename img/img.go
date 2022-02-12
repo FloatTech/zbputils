@@ -1,7 +1,6 @@
 package img
 
 import (
-	"bufio"
 	"bytes"
 	"image"
 	"image/color"
@@ -13,44 +12,30 @@ import (
 
 	"github.com/disintegration/imaging"
 	"github.com/fogleman/gg"
-	"github.com/sirupsen/logrus"
 )
 
 //  加载图片
-func Load(path string) image.Image {
-	var img image.Image
+func Load(path string) (img image.Image, err error) {
 	if strings.HasPrefix(path, "http") {
-		res, err := http.Get(path)
+		var res *http.Response
+		res, err = http.Get(path)
 		if err != nil {
-			logrus.Errorln("[img] load err:", err)
-			return nil
+			return
 		}
-		// 获得get请求响应的reader对象
-		reader := bufio.NewReaderSize(res.Body, 32*1024)
-		// 读取路径
-		img, _, err = image.Decode(reader)
-		res.Body.Close()
-		if err != nil {
-			logrus.Errorln("[img] decode err:", err)
-			return nil
-		}
-	} else {
-		//  加载路径
-		file, err := os.Open(path)
-		if err == nil {
-			// 读取路径
-			img, _, err = image.Decode(file)
-			file.Close()
-			if err != nil {
-				logrus.Errorln("[img] decode err:", err)
-				return nil
-			}
-		} else {
-			logrus.Errorln("[img] open file", path, "err:", err)
-			return nil
-		}
+		img, _, err = image.Decode(res.Body)
+		_ = res.Body.Close()
+		return
 	}
-	return img
+	var file *os.File
+	// 加载路径
+	file, err = os.Open(path)
+	if err != nil {
+		return
+	}
+	// 读取路径
+	img, _, err = image.Decode(file)
+	_ = file.Close()
+	return
 }
 
 // 设置底图
@@ -72,57 +57,50 @@ func NewFactory(w, h int, fillColor color.Color) *ImgFactory {
 }
 
 // 载入图片第一帧作底图
-func LoadFirstFrame(path string, w, h int) *ImgFactory {
-	return Size(Load(path), w, h)
+func LoadFirstFrame(path string, w, h int) (*ImgFactory, error) {
+	im, err := Load(path)
+	if err != nil {
+		return nil, err
+	}
+	return Size(im, w, h), nil
 }
 
 //  加载图片每一帧图片
-func LoadAllFrames(path string, w, h int) []*image.NRGBA {
+func LoadAllFrames(path string, w, h int) ([]*image.NRGBA, error) {
 	var res *http.Response
 	var err error
 	var im *gif.GIF
-	var ims []*image.NRGBA
 	if strings.HasPrefix(path, "http") {
 		res, err = http.Get(path)
 		if err != nil {
-			logrus.Errorln("[img] load err:", err)
-			return nil
+			return nil, err
 		}
-		//  获得get请求响应的reader对象
-		reader := bufio.NewReaderSize(res.Body, 32*1024)
-		// 读取路径
-		im, err = gif.DecodeAll(reader)
-		res.Body.Close()
+		im, err = gif.DecodeAll(res.Body)
+		_ = res.Body.Close()
 		if err != nil {
-			logrus.Errorln("[img] decode err:", err)
-			return nil
+			return nil, err
 		}
 	} else {
-		//  加载路径
 		file, err := os.Open(path)
-		if err == nil {
-			im, err = gif.DecodeAll(file)
-			file.Close()
-			if err != nil {
-				logrus.Errorln("[img] decode err:", err)
-				return nil
-			}
-		} else {
-			logrus.Errorln("[img] open file", path, "err:", err)
-			return nil
+		if err != nil {
+			return nil, err
+		}
+		im, err = gif.DecodeAll(file)
+		_ = file.Close()
+		if err != nil {
+			return nil, err
 		}
 	}
-	im0 := Size(Load(path), w, h)
+	img, err := Load(path)
 	if err != nil {
-		ims = append(ims, Size(Load(path), w, h).Im)
-	} else {
-		for _, v := range im.Image {
-			im1 := Size(v, w, h).Im
-			im2 := im0.InsertUp(im1, 0, 0, 0, 0).Clone()
-			ims = append(ims, im2.Im)
-		}
+		return nil, err
 	}
-	return ims
+	im0 := Size(img, w, h)
+	ims := make([]*image.NRGBA, len(im.Image))
+	for i, v := range im.Image {
+		ims[i] = im0.InsertUp(Size(v, w, h).Im, 0, 0, 0, 0).Clone().Im
+	}
+	return ims, nil
 }
 
 // 变形
