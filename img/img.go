@@ -207,3 +207,25 @@ func floatUint8(a float64) uint8 {
 	}
 	return 0
 }
+
+// Limit 限制图片在 xmax*ymax 之内
+func Limit(img image.Image, xmax, ymax int) image.Image {
+	// 避免图片过大，最大 xmax*ymax
+	x := img.Bounds().Size().X
+	y := img.Bounds().Size().Y
+	hasChanged := false
+	if x > xmax {
+		y = y * xmax / x
+		x = xmax
+		hasChanged = true
+	}
+	if y > ymax {
+		x = x * ymax / y
+		y = ymax
+		hasChanged = true
+	}
+	if hasChanged {
+		img = Size(img, x, y).Im
+	}
+	return img
+}
