@@ -117,7 +117,6 @@ func (m *Control) Reset(groupID int64) {
 func (m *Control) IsEnabledIn(gid int64) bool {
 	var c grpcfg
 	var err error
-	log.Debugln("[control] IsEnabledIn recv gid =", gid)
 	if gid != 0 {
 		m.RLock()
 		err = db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(gid, 10))
@@ -141,7 +140,6 @@ func (m *Control) IsEnabledIn(gid int64) bool {
 func (m *Control) Ban(uid, gid int64) {
 	var err error
 	var digest [16]byte
-	log.Debugln("[control] Ban recv gid =", gid, "uid =", uid)
 	if gid != 0 { // 特定群
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
 		m.RLock()
@@ -165,7 +163,6 @@ func (m *Control) Ban(uid, gid int64) {
 // Permit 允许某人在某群使用本插件
 func (m *Control) Permit(uid, gid int64) {
 	var digest [16]byte
-	log.Debugln("[control] Permit recv gid =", gid, "uid =", uid)
 	if gid != 0 { // 特定群
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
 		m.RLock()
@@ -187,7 +184,6 @@ func (m *Control) IsBannedIn(uid, gid int64) bool {
 	var b ban
 	var err error
 	var digest [16]byte
-	log.Debugln("[control] IsBannedIn recv gid =", gid, "uid =", uid)
 	if gid != 0 {
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
 		m.RLock()
@@ -213,7 +209,6 @@ func (m *Control) IsBannedIn(uid, gid int64) bool {
 func (m *Control) GetData(gid int64) int64 {
 	var c grpcfg
 	var err error
-	log.Debugln("[control] IsEnabledIn recv gid =", gid)
 	m.RLock()
 	err = db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(gid, 10))
 	m.RUnlock()
@@ -256,7 +251,6 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 		// 个人用户
 		grp = -ctx.Event.UserID
 	}
-	log.Debugln("[control] handler get gid =", grp)
 	ctxmu.RLock()
 	isnotbanned, ok := ctxbanmap[ctx]
 	ctxmu.RUnlock()

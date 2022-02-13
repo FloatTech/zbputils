@@ -73,7 +73,13 @@ func newengine(service string, prio int, o *Options) (e engineinstance) {
 	priomap[prio] = service
 	priomu.Unlock()
 	e.en = zero.New()
-	e.en.UsePreHandler(newctrl(service, o).Handler)
+	e.en.UsePreHandler(
+		func(ctx *zero.Ctx) bool {
+			// 防止自触发
+			return ctx.Event.UserID != ctx.Event.SelfID
+		},
+		newctrl(service, o).Handler,
+	)
 	e.en.UsePostHandler(func(ctx *zero.Ctx) {
 		ctxmu.Lock()
 		delete(ctxbanmap, ctx)
