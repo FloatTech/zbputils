@@ -10,7 +10,7 @@ require (
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/go-base16384 v1.3.0
-	github.com/fumiama/go-registry v0.0.3
+	github.com/fumiama/go-registry v0.0.4
 	github.com/gin-gonic/gin v1.7.7
 	github.com/sirupsen/logrus v1.8.1
 	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220210161326-bffb4cc61866
@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/fumiama/gofastTEA v0.0.7 // indirect
+	github.com/fumiama/gofastTEA v0.0.9 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
