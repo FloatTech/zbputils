@@ -3,6 +3,7 @@ package control
 import (
 	"fmt"
 	"os"
+	"sync"
 	"unicode"
 
 	"github.com/FloatTech/zbputils/file"
@@ -55,9 +56,10 @@ type Engine interface {
 }
 
 type engineinstance struct {
-	en         *zero.Engine
-	prio       int
-	datafolder string
+	en           *zero.Engine
+	prio         int
+	datafolder   string
+	datafoldermu sync.Mutex
 }
 
 var priomap = make(map[int]string)      // priomap is map[prio]service
@@ -65,6 +67,8 @@ var foldermap = make(map[string]string) // foldermap is map[folder]service
 
 func newengine(service string, prio int, o *Options) (e *engineinstance) {
 	e = new(engineinstance)
+	e.datafoldermu.Lock()
+	defer e.datafoldermu.Unlock()
 	s, ok := priomap[prio]
 	if ok {
 		panic(fmt.Sprint("prio", prio, "is used by", s))
@@ -118,6 +122,8 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 
 // DataFolder 本插件数据目录，默认 data/zbp/
 func (e *engineinstance) DataFolder() string {
+	e.datafoldermu.Lock()
+	defer e.datafoldermu.Unlock()
 	return e.datafolder
 }
 
