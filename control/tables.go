@@ -18,6 +18,8 @@ type block struct {
 
 // Options holds the optional parameters for the Manager.
 type Options struct {
-	DisableOnDefault bool
-	Help             string // 帮助文本信息
+	DisableOnDefault  bool
+	Help              string // 帮助文本信息
+	PrivateDataFolder string // 全部小写的数据文件夹名，不出现在 zbpdata
+	PublicDataFolder  string // 驼峰的数据文件夹名，出现在 zbpdata
 }

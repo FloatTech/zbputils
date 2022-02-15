@@ -7,7 +7,7 @@ import (
 )
 
 // ApplySingle 应用反并发
-func (e engineinstance) ApplySingle(s *single.Single) Engine {
+func (e *engineinstance) ApplySingle(s *single.Single) Engine {
 	s.Apply(e.en)
 	return e
 }

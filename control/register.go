@@ -1,14 +1,11 @@
 package control
 
-import "github.com/sirupsen/logrus"
-
-var enmap = make(map[string]engineinstance)
+var enmap = make(map[string]*engineinstance)
 
 // Register 注册插件控制器
 func Register(service string, prio int, o *Options) Engine {
 	engine := newengine(service, prio, o)
 	enmap[service] = engine
-	logrus.Infoln("[control]插件", service, "已设置优先级", prio)
 	return engine
 }
 
