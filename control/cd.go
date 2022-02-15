@@ -8,8 +8,8 @@ import (
 	b14 "github.com/fumiama/go-base16384"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
+	binutils "github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/math"
 	"github.com/FloatTech/zbputils/process"
 )
@@ -34,19 +34,25 @@ func init() {
 	zero.OnRegex("^●cd([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).FirstPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
-				msg := ""
 				gid := ctx.Event.GroupID
+				w := binutils.SelectWriter()
 				ForEach(func(key string, manager *Control) bool {
 					if manager.IsEnabledIn(gid) {
-						msg += "\xfe\xff" + key
+						w.WriteString("\xfe\xff")
+						w.WriteString(key)
 					}
 					return true
 				})
-				if len(msg) > 2 {
-					my, err := b14.UTF16be2utf8(b14.EncodeString(msg[2:]))
-					mys := "●cd●" + helper.BytesToString(my)
+				if w.Len() > 2 {
+					my, err := b14.UTF16be2utf8(b14.Encode(w.Bytes()[2:]))
+					binutils.PutWriter(w)
 					if err == nil {
-						id := ctx.SendChain(message.Text(mys))
+						my, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
+							w.WriteString("●cd●")
+							w.Write(my)
+						})
+						id := ctx.SendChain(message.Text(binutils.BytesToString(my)))
+						cl()
 						process.SleepAbout1sTo2s()
 						ctx.DeleteMessage(id)
 					}
@@ -57,7 +63,7 @@ func init() {
 	zero.OnRegex("^●cd●(([\u4e00-\u8e00]*[\u3d01-\u3d06]?))", zero.OnlyGroup).SetBlock(true).FirstPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if time.Now().Unix()-startTime < 10 {
-				msg, err := b14.UTF82utf16be(helper.StringToBytes(ctx.State["regex_matched"].([]string)[1]))
+				msg, err := b14.UTF82utf16be(binutils.StringToBytes(ctx.State["regex_matched"].([]string)[1]))
 				if err == nil {
 					gid := ctx.Event.GroupID
 					for _, s := range strings.Split(b14.DecodeString(msg), "\xfe\xff") {
@@ -74,21 +80,26 @@ func init() {
 }
 
 func genToken() (tok string, err error) {
-	timebytes := make([]byte, 8)
-	binary.BigEndian.PutUint64(timebytes, uint64(time.Now().Unix()))
+	timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
+		w.WriteUInt64(uint64(time.Now().Unix()))
+	})
 	timebytes, err = b14.UTF16be2utf8(b14.Encode(timebytes[1:]))
+	cl()
 	if err == nil {
-		tok = helper.BytesToString(timebytes)
+		tok = binutils.BytesToString(timebytes)
 	}
 	return
 }
 
 func isValidToken(tok string) (yes bool) {
-	s, err := b14.UTF82utf16be(helper.StringToBytes(tok))
+	s, err := b14.UTF82utf16be(binutils.StringToBytes(tok))
 	if err == nil {
-		timebytes := make([]byte, 1, 8)
-		timebytes = append(timebytes, b14.Decode(s)...)
+		timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
+			w.WriteByte(0)
+			w.Write(b14.Decode(s))
+		})
 		yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < 10
+		cl()
 	}
 	return
 }
