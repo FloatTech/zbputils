@@ -26,6 +26,7 @@ func newItem(name, u string) (*item, error) {
 // getItem 唯一标识文件名
 func getItem(name string) (*item, error) {
 	reg := registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
+	defer reg.Close()
 	err := reg.ConnectIn(time.Second * 4)
 	if err != nil {
 		return nil, err
@@ -34,7 +35,6 @@ func getItem(name string) (*item, error) {
 	if err != nil {
 		return nil, err
 	}
-	_ = reg.Close()
 	return &item{name: name, u: u}, nil
 }
 
