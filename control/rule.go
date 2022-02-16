@@ -41,7 +41,9 @@ type Control struct {
 
 // newctrl returns Manager with settings.
 func newctrl(service string, o *Options) *Control {
-	m := &Control{service: service,
+	m := &Control{
+		service: service,
+		cache:   make(map[int64]bool, 16),
 		options: func() Options {
 			if o == nil {
 				return Options{}
