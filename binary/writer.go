@@ -36,7 +36,7 @@ func (w *Writer) FillUInt16() (pos int) {
 
 func (w *Writer) WriteUInt16At(pos int, v uint16) {
 	newdata := (*bytes.Buffer)(w).Bytes()[pos:]
-	binary.LittleEndian.PutUint16(newdata, v)
+	binary.BigEndian.PutUint16(newdata, v)
 }
 
 func (w *Writer) FillUInt32() (pos int) {
@@ -47,7 +47,7 @@ func (w *Writer) FillUInt32() (pos int) {
 
 func (w *Writer) WriteUInt32At(pos int, v uint32) {
 	newdata := (*bytes.Buffer)(w).Bytes()[pos:]
-	binary.LittleEndian.PutUint32(newdata, v)
+	binary.BigEndian.PutUint32(newdata, v)
 }
 
 func (w *Writer) Write(b []byte) (n int, err error) {
@@ -65,17 +65,35 @@ func (w *Writer) WriteByte(b byte) error {
 
 func (w *Writer) WriteUInt16(v uint16) {
 	b := make([]byte, 2)
-	binary.LittleEndian.PutUint16(b, v)
+	binary.BigEndian.PutUint16(b, v)
 	w.Write(b)
 }
 
 func (w *Writer) WriteUInt32(v uint32) {
 	b := make([]byte, 4)
-	binary.LittleEndian.PutUint32(b, v)
+	binary.BigEndian.PutUint32(b, v)
 	w.Write(b)
 }
 
 func (w *Writer) WriteUInt64(v uint64) {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, v)
+	w.Write(b)
+}
+
+func (w *Writer) WriteUInt16LE(v uint16) {
+	b := make([]byte, 2)
+	binary.LittleEndian.PutUint16(b, v)
+	w.Write(b)
+}
+
+func (w *Writer) WriteUInt32LE(v uint32) {
+	b := make([]byte, 4)
+	binary.LittleEndian.PutUint32(b, v)
+	w.Write(b)
+}
+
+func (w *Writer) WriteUInt64LE(v uint64) {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, v)
 	w.Write(b)
