@@ -35,6 +35,7 @@ var (
 type Control struct {
 	sync.RWMutex
 	service string
+	cache   map[int64]bool
 	options Options
 }
 
@@ -74,6 +75,7 @@ func (m *Control) Enable(groupID int64) {
 	}
 	c.Disable = int64(uint64(c.Disable) & 0xffffffff_fffffffe)
 	m.Lock()
+	m.cache[groupID] = true
 	err = db.Insert(m.service, &c)
 	m.Unlock()
 	if err != nil {
@@ -93,6 +95,7 @@ func (m *Control) Disable(groupID int64) {
 	}
 	c.Disable |= 1
 	m.Lock()
+	m.cache[groupID] = false
 	err = db.Insert(m.service, &c)
 	m.Unlock()
 	if err != nil {
@@ -105,6 +108,7 @@ func (m *Control) Disable(groupID int64) {
 func (m *Control) Reset(groupID int64) {
 	if groupID != 0 {
 		m.Lock()
+		delete(m.cache, groupID)
 		err := db.Del(m.service, "WHERE gid = "+strconv.FormatInt(groupID, 10))
 		m.Unlock()
 		if err != nil {
@@ -114,7 +118,18 @@ func (m *Control) Reset(groupID int64) {
 }
 
 // IsEnabledIn 开启群
-func (m *Control) IsEnabledIn(gid int64) bool {
+func (m *Control) IsEnabledIn(gid int64) (yes bool) {
+	yes, ok := m.cache[gid]
+	if ok {
+		log.Debugf("[control] read cached %s of grp %d : %v", m.service, gid, yes)
+		return
+	}
+	defer func() {
+		m.Lock()
+		m.cache[gid] = yes
+		m.Unlock()
+		log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
+	}()
 	var c grpcfg
 	var err error
 	if gid != 0 {
