@@ -31,15 +31,16 @@ func GetImage(name string) (m *Image, err error) {
 	m = new(Image)
 	m.n = name
 	m.item, err = getItem(name)
-	if err == nil && m.item.u != "" {
+	if err == nil && m.u != "" {
 		_, err = http.Head(m.String())
 		if err != nil {
 			err = ErrImgFileOutdated
-			return
+			logrus.Debugln("[imgpool] image", name, m, "outdated")
 		}
 		return
 	}
 	err = ErrNoSuchImg
+	logrus.Debugln("[imgpool] no such image", name)
 	return
 }
 
@@ -54,6 +55,7 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 		if err == nil {
 			return
 		}
+		logrus.Debugln("[imgpool] image", name, m, "outdated, updating...")
 	}
 	hassent, err = m.Push(send, get)
 	return
@@ -69,7 +71,7 @@ func (m *Image) String() string {
 
 // SetFile f
 func (m *Image) SetFile(f string) {
-	if strings.HasPrefix(f, "http") {
+	if strings.HasPrefix(f, "http://") || strings.HasPrefix(f, "https://") || strings.HasPrefix(f, "file:///") {
 		m.f = f
 	} else {
 		m.f = "file:///" + f
