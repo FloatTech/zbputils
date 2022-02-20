@@ -2,13 +2,8 @@
 package web
 
 import (
-	"errors"
 	"io"
 	"net/http"
-)
-
-var (
-	ErrEmptyBody = errors.New("web.GetData: empty body")
 )
 
 // ReqWith 使用自定义请求头获取数据
@@ -36,11 +31,6 @@ func GetData(url string) (data []byte, err error) {
 	var response *http.Response
 	response, err = http.Get(url)
 	if err == nil {
-		if response.ContentLength <= 0 {
-			err = ErrEmptyBody
-			response.Body.Close()
-			return
-		}
 		data, err = io.ReadAll(response.Body)
 		response.Body.Close()
 	}
@@ -52,11 +42,6 @@ func PostData(url string, contentType string, body io.Reader) (data []byte, err 
 	var response *http.Response
 	response, err = http.Post(url, contentType, body)
 	if err == nil {
-		if response.ContentLength <= 0 {
-			err = ErrEmptyBody
-			response.Body.Close()
-			return
-		}
 		data, err = io.ReadAll(response.Body)
 		response.Body.Close()
 	}
