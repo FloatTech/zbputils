@@ -103,7 +103,7 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 				break
 			}
 			m.item, err = newItem(m.n, "0-0"+u)
-			logrus.Infoln("[imgpool] 缓存:", m.n, "url:", u)
+			logrus.Infoln("[imgpool] 缓存:", m.n, "url:", "0-0"+u)
 			_ = m.item.push("minamoto")
 			return
 		}
