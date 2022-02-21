@@ -94,15 +94,15 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 				break
 			}
 			u = u[:i]
-			i = strings.LastIndex(u, "/")
+			i = strings.LastIndex(u, "-")
 			if i <= 0 {
 				break
 			}
-			u = u[i+1:]
+			u = u[i:]
 			if u == "" {
 				break
 			}
-			m.item, err = newItem(m.n, u)
+			m.item, err = newItem(m.n, "0-0"+u)
 			logrus.Infoln("[imgpool] 缓存:", m.n, "url:", u)
 			_ = m.item.push("minamoto")
 			return
