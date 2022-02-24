@@ -2,8 +2,6 @@ package pool
 
 import (
 	"errors"
-	"io"
-	"os"
 
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/file"
@@ -13,22 +11,17 @@ import (
 )
 
 // SendImageFromPool ...
-func SendImageFromPool(fallbackfile string, generatefallback func(io.Writer) error, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
-	m, err := GetImage(fallbackfile)
+func SendImageFromPool(imgname, imgpath string, genimg func() (string, error), send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
+	m, err := GetImage(imgname)
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
-		if file.IsNotExist(fallbackfile) {
-			f, err := os.Create(fallbackfile)
-			if err != nil {
-				return err
-			}
-			err = generatefallback(f)
-			_ = f.Close()
+		if file.IsNotExist(imgpath) {
+			imgpath, err = genimg()
 			if err != nil {
 				return err
 			}
 		}
-		m.SetFile(file.BOTPATH + "/" + fallbackfile)
+		m.SetFile(file.BOTPATH + "/" + imgpath)
 		hassent, err := m.Push(send, get)
 		if hassent {
 			return nil
