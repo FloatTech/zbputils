@@ -11,12 +11,12 @@ import (
 )
 
 // SendImageFromPool ...
-func SendImageFromPool(imgname, imgpath string, genimg func() (string, error), send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
+func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
 	m, err := GetImage(imgname)
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
 		if file.IsNotExist(imgpath) {
-			imgpath, err = genimg()
+			err = genimg()
 			if err != nil {
 				return err
 			}
