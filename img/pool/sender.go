@@ -9,12 +9,11 @@ import (
 	"github.com/FloatTech/zbputils/file"
 	"github.com/FloatTech/zbputils/web"
 	"github.com/sirupsen/logrus"
-	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 // SendImageFromPool ...
-func SendImageFromPool(ctx *zero.Ctx, fallbackfile string, generatefallback func(io.Writer) error, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
+func SendImageFromPool(fallbackfile string, generatefallback func(io.Writer) error, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
 	m, err := GetImage(fallbackfile)
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
