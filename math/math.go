@@ -9,8 +9,24 @@ func Max(a, b int) int {
 	return b
 }
 
+// Max64 返回两数最大值，该函数将被内联
+func Max64(a, b int64) int64 {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 // Min 返回两数最小值，该函数将被内联
 func Min(a, b int) int {
+	if a > b {
+		return b
+	}
+	return a
+}
+
+// Min64 返回两数最小值，该函数将被内联
+func Min64(a, b int64) int64 {
 	if a > b {
 		return b
 	}
