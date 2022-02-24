@@ -48,3 +48,36 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 	}
 	return nil
 }
+
+// SendRemoteImageFromPool ...
+func SendRemoteImageFromPool(imgname, imgurl string, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
+	m, err := GetImage(imgname)
+	if err != nil {
+		logrus.Debugln("[ctxext.img]", err)
+		m.SetFile(imgurl)
+		hassent, err := m.Push(send, get)
+		if hassent {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+	}
+	// 发送图片
+	img := message.Image(m.String())
+	id := send(message.Message{img})
+	if id == 0 {
+		id = send(message.Message{img.Add("cache", "0")})
+		if id == 0 {
+			data, err := web.GetData(m.String())
+			if err != nil {
+				return err
+			}
+			id = send(message.Message{message.ImageBytes(data)})
+			if id == 0 {
+				return errors.New("图片发送失败，可能被风控了~")
+			}
+		}
+	}
+	return nil
+}
