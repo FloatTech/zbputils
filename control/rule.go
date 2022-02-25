@@ -70,7 +70,7 @@ func newctrl(service string, o *Options) *Control {
 func (m *Control) Enable(groupID int64) {
 	var c grpcfg
 	m.RLock()
-	err := db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(groupID, 10))
+	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
 	m.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
@@ -90,7 +90,7 @@ func (m *Control) Enable(groupID int64) {
 func (m *Control) Disable(groupID int64) {
 	var c grpcfg
 	m.RLock()
-	err := db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(groupID, 10))
+	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
 	m.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
@@ -111,7 +111,7 @@ func (m *Control) Reset(groupID int64) {
 	if groupID != 0 {
 		m.Lock()
 		delete(m.cache, groupID)
-		err := db.Del(m.service, "WHERE gid = "+strconv.FormatInt(groupID, 10))
+		err := db.Del(m.service, "WHERE gid="+strconv.FormatInt(groupID, 10))
 		m.Unlock()
 		if err != nil {
 			log.Errorf("[control] %v", err)
@@ -119,36 +119,57 @@ func (m *Control) Reset(groupID int64) {
 	}
 }
 
-// IsEnabledIn 开启群
-func (m *Control) IsEnabledIn(gid int64) (yes bool) {
-	yes, ok := m.cache[gid]
-	if ok {
-		log.Debugf("[control] read cached %s of grp %d : %v", m.service, gid, yes)
-		return
-	}
-	defer func() {
-		m.Lock()
-		m.cache[gid] = yes
-		m.Unlock()
-		log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
-	}()
+// IsEnabledIn 查询开启群
+// 当全局未配置或与默认相同时，状态取决于单独配置，后备为默认配置；
+// 当全局与默认不同时，状态取决于全局配置，单独配置失效。
+func (m *Control) IsEnabledIn(gid int64) bool {
 	var c grpcfg
 	var err error
-	if gid != 0 {
+
+	m.RLock()
+	yes, ok := m.cache[0]
+	m.RUnlock()
+	if !ok {
 		m.RLock()
-		err = db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(gid, 10))
+		err = db.Find(m.service, &c, "WHERE gid=0")
+		m.RUnlock()
+		if err == nil && c.GroupID == 0 {
+			log.Debugf("[control] plugin %s of all : %d", m.service, c.Disable&1)
+			yes = c.Disable&1 == 0
+			ok = true
+			m.Lock()
+			m.cache[0] = yes
+			m.Unlock()
+			log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
+		}
+	}
+
+	if ok && yes == m.options.DisableOnDefault { // global enable status is different from default value
+		return yes
+	}
+
+	m.RLock()
+	yes, ok = m.cache[gid]
+	m.RUnlock()
+	if ok {
+		log.Debugf("[control] read cached %s of grp %d : %v", m.service, gid, yes)
+	} else {
+		m.RLock()
+		err = db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(gid, 10))
 		m.RUnlock()
 		if err == nil && gid == c.GroupID {
 			log.Debugf("[control] plugin %s of grp %d : %d", m.service, c.GroupID, c.Disable&1)
-			return c.Disable&1 == 0
+			yes = c.Disable&1 == 0
+			ok = true
+			m.Lock()
+			m.cache[gid] = yes
+			m.Unlock()
+			log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
 		}
 	}
-	m.RLock()
-	err = db.Find(m.service, &c, "WHERE gid = 0")
-	m.RUnlock()
-	if err == nil && c.GroupID == 0 {
-		log.Debugf("[control] plugin %s of all : %d", m.service, c.Disable&1)
-		return c.Disable&1 == 0
+
+	if ok {
+		return yes
 	}
 	return !m.options.DisableOnDefault
 }
@@ -227,7 +248,7 @@ func (m *Control) GetData(gid int64) int64 {
 	var c grpcfg
 	var err error
 	m.RLock()
-	err = db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(gid, 10))
+	err = db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(gid, 10))
 	m.RUnlock()
 	if err == nil && gid == c.GroupID {
 		log.Debugf("[control] plugin %s of grp %d : 0x%x", m.service, c.GroupID, c.Disable>>1)
@@ -240,7 +261,7 @@ func (m *Control) GetData(gid int64) int64 {
 func (m *Control) SetData(groupID int64, data int64) error {
 	var c grpcfg
 	m.RLock()
-	err := db.Find(m.service, &c, "WHERE gid = "+strconv.FormatInt(groupID, 10))
+	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
 	m.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
