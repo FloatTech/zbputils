@@ -5,7 +5,6 @@ import (
 
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/web"
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -22,15 +21,14 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 			}
 		}
 		m.SetFile(file.BOTPATH + "/" + imgpath)
-		if m.item == nil {
-			return nil
-		}
-		hassent, err := m.Push(send, get)
-		if hassent {
-			return nil
-		}
-		if err != nil {
-			return err
+		if m.item != nil {
+			hassent, err := m.Push(send, get)
+			if hassent {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
 		}
 	}
 	// 发送图片
@@ -39,14 +37,7 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 	if id == 0 {
 		id = send(message.Message{img.Add("cache", "0")})
 		if id == 0 {
-			data, err := web.GetData(m.String())
-			if err != nil {
-				return err
-			}
-			id = send(message.Message{message.ImageBytes(data)})
-			if id == 0 {
-				return errors.New("图片发送失败，可能被风控了~")
-			}
+			return errors.New("图片发送失败，可能被风控了~")
 		}
 	}
 	return nil
@@ -58,15 +49,14 @@ func SendRemoteImageFromPool(imgname, imgurl string, send ctxext.NoCtxSendMsg, g
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
 		m.SetFile(imgurl)
-		if err == ErrImgFileAsync {
-			return nil
-		}
-		hassent, err := m.Push(send, get)
-		if hassent {
-			return nil
-		}
-		if err != nil {
-			return err
+		if err != ErrImgFileAsync {
+			hassent, err := m.Push(send, get)
+			if hassent {
+				return nil
+			}
+			if err != nil {
+				return err
+			}
 		}
 	}
 	// 发送图片
