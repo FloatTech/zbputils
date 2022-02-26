@@ -22,6 +22,9 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 			}
 		}
 		m.SetFile(file.BOTPATH + "/" + imgpath)
+		if m.item == nil {
+			return nil
+		}
 		hassent, err := m.Push(send, get)
 		if hassent {
 			return nil
@@ -55,6 +58,9 @@ func SendRemoteImageFromPool(imgname, imgurl string, send ctxext.NoCtxSendMsg, g
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
 		m.SetFile(imgurl)
+		if err == ErrImgFileAsync {
+			return nil
+		}
 		hassent, err := m.Push(send, get)
 		if hassent {
 			return nil

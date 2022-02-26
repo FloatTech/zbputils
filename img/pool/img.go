@@ -46,6 +46,7 @@ func GetImage(name string) (m *Image, err error) {
 		_ = resp.Body.Close()
 		if err != nil || n <= 0 {
 			err = ErrImgFileAsync
+			m.item = nil
 			logrus.Debugln("[imgpool] image", name, m, "is async")
 		}
 		return
