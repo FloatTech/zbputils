@@ -69,11 +69,7 @@ func SendRemoteImageFromPool(imgname, imgurl string, send ctxext.NoCtxSendMsg, g
 	if id == 0 {
 		id = send(message.Message{img.Add("cache", "0")})
 		if id == 0 {
-			data, err := web.GetData(m.String())
-			if err != nil {
-				return err
-			}
-			id = send(message.Message{message.ImageBytes(data)})
+			id = send(message.Message{message.Image(imgurl)})
 			if id == 0 {
 				return errors.New("图片发送失败，可能被风控了~")
 			}
