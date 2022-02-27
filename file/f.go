@@ -16,3 +16,13 @@ func IsNotExist(path string) bool {
 	_, err := os.Stat(path)
 	return err != nil && os.IsNotExist(err)
 }
+
+// Size 获取文件大小
+func Size(path string) (n int64) {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return
+	}
+	n = stat.Size()
+	return
+}
