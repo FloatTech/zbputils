@@ -15,13 +15,13 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 	if err != nil {
 		logrus.Debugln("[ctxext.img]", err)
 		if file.IsNotExist(imgpath) {
-			err = genimg()
+			err := genimg()
 			if err != nil {
 				return err
 			}
 		}
 		m.SetFile(file.BOTPATH + "/" + imgpath)
-		if m.item != nil {
+		if err != ErrImgFileAsync {
 			hassent, err := m.Push(send, get)
 			if hassent {
 				return nil

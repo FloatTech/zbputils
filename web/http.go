@@ -2,13 +2,29 @@
 package web
 
 import (
+	"crypto/tls"
 	"io"
 	"net/http"
 )
 
-// ReqWith 使用自定义请求头获取数据
-func ReqWith(url string, method string, referer string, ua string) (data []byte, err error) {
-	client := &http.Client{}
+// NewDefaultClient ...
+func NewDefaultClient() *http.Client {
+	return &http.Client{}
+}
+
+// NewTLS12Client ...
+func NewTLS12Client() *http.Client {
+	return &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{
+				MaxVersion: tls.VersionTLS12,
+			},
+		},
+	}
+}
+
+// GetDataWith 使用自定义请求头获取数据
+func GetDataWith(client *http.Client, url string, method string, referer string, ua string) (data []byte, err error) {
 	// 提交请求
 	var request *http.Request
 	request, err = http.NewRequest(method, url, nil)
