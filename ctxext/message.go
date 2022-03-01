@@ -1,8 +1,10 @@
 package ctxext
 
 import (
+	"encoding/json"
 	"strconv"
 
+	"github.com/FloatTech/zbputils/binary"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -15,6 +17,26 @@ type (
 func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
 	return func(id int64) zero.Message {
 		return ctx.GetMessage(message.NewMessageID(strconv.FormatInt(id, 10)))
+	}
+}
+
+func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
+	return func(id int64) zero.Message {
+		msgs := ctx.GetForwardMessage(id).Array()
+		if len(msgs) == 0 {
+			return zero.Message{}
+		}
+		m := zero.Message{
+			Elements:    message.ParseMessage(binary.StringToBytes(msgs[0].Raw)),
+			MessageId:   message.NewMessageID(msgs[0].Get("message_id").Raw),
+			MessageType: msgs[0].Get("message_type").String(),
+			Sender:      &zero.User{},
+		}
+		err := json.Unmarshal(binary.StringToBytes(msgs[0].Get("sender").Raw), m.Sender)
+		if err != nil {
+			return zero.Message{}
+		}
+		return m
 	}
 }
 
@@ -34,4 +56,11 @@ func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
 	return func(msg interface{}) int64 {
 		return ctx.SendPrivateMessage(ctx.Event.SelfID, msg)
 	}
+}
+
+func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) message.MessageSegment {
+	return message.CustomNode(
+		ctx.Event.Sender.NickName,
+		ctx.Event.UserID,
+		msgs)
 }
