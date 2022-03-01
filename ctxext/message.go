@@ -26,15 +26,13 @@ func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
 		if len(msg.Elements) == 0 {
 			return zero.Message{}
 		}
-		msgs := ctx.GetForwardMessage(msg.Elements[0].Data["id"]).Get("message").Array()
+		msgs := ctx.GetForwardMessage(msg.Elements[0].Data["id"]).Get("messages").Array()
 		if len(msgs) == 0 {
 			return zero.Message{}
 		}
 		m := zero.Message{
-			Elements:    message.ParseMessage(binary.StringToBytes(msgs[0].Raw)),
-			MessageId:   message.NewMessageID(msgs[0].Get("message_id").Raw),
-			MessageType: msgs[0].Get("message_type").String(),
-			Sender:      &zero.User{},
+			Elements: message.ParseMessage(binary.StringToBytes(msgs[0].Get("content").Raw)),
+			Sender:   &zero.User{},
 		}
 		err := json.Unmarshal(binary.StringToBytes(msgs[0].Get("sender").Raw), m.Sender)
 		if err != nil {
