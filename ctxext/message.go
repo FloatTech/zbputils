@@ -22,7 +22,11 @@ func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
 
 func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
 	return func(id int64) zero.Message {
-		msgs := ctx.GetForwardMessage(id).Array()
+		msg := GetMessage(ctx)(id)
+		if len(msg.Elements) == 0 {
+			return zero.Message{}
+		}
+		msgs := ctx.GetForwardMessage(msg.Elements[0].Data["id"]).Get("message").Array()
 		if len(msgs) == 0 {
 			return zero.Message{}
 		}
