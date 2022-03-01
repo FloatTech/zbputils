@@ -83,12 +83,6 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 		},
 		newctrl(service, o).Handler,
 	)
-	e.en.UsePostHandler(func(ctx *zero.Ctx) {
-		ctxmu.Lock()
-		delete(ctxbanmap, ctx)
-		ctxmu.Unlock()
-		logrus.Debugf("[control] remove ban map of %p\n", ctx)
-	})
 	e.prio = prio
 	if o.PublicDataFolder != "" {
 		if unicode.IsLower([]rune(o.PublicDataFolder)[0]) {

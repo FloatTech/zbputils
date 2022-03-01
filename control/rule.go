@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -26,7 +27,7 @@ var (
 	// managers 每个插件对应的管理
 	managers  = map[string]*Control{}
 	manmu     sync.RWMutex
-	ctxbanmap = map[*zero.Ctx]bool{}
+	ctxbanmap = map[*zero.Ctx]uint8{}
 	ctxmu     sync.RWMutex
 	hasinit   bool
 )
@@ -290,17 +291,36 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 		grp = -ctx.Event.UserID
 	}
 	ctxmu.RLock()
-	isnotbanned, ok := ctxbanmap[ctx]
+	_, ok := ctxbanmap[ctx]
 	ctxmu.RUnlock()
-	if ok && isnotbanned {
+	if ok {
+		ctxmu.Lock()
+		ctxbanmap[ctx] = 0
+		ctxmu.Unlock()
 		return m.IsEnabledIn(grp)
 	}
-	isnotbanned = !m.IsBannedIn(ctx.Event.UserID, grp)
+	isnotbanned := !m.IsBannedIn(ctx.Event.UserID, grp)
 	if isnotbanned {
 		ctxmu.Lock()
-		ctxbanmap[ctx] = isnotbanned
+		ctxbanmap[ctx] = 0
 		ctxmu.Unlock()
 		log.Debugf("[control] insert ban map of %p\n", ctx)
+		go func() {
+			t := time.NewTicker(time.Second)
+			for range t.C {
+				ctxmu.Lock()
+				n := ctxbanmap[ctx]
+				ctxbanmap[ctx]++
+				ctxmu.Unlock()
+				if n > 10 { // 10s 未有查询，认为该 ctx 已失效
+					break
+				}
+			}
+			ctxmu.Lock()
+			delete(ctxbanmap, ctx)
+			ctxmu.Unlock()
+			log.Debugf("[control] remove ban map of %p\n", ctx)
+		}()
 	}
 	return isnotbanned && m.IsEnabledIn(grp)
 }
