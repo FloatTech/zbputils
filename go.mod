@@ -14,7 +14,7 @@ require (
 	github.com/fumiama/go-registry v0.1.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/sirupsen/logrus v1.8.1
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220301103916-37a3108954a3
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220304040741-8e53f210618c
 	golang.org/x/text v0.3.7
 )
 
@@ -35,16 +35,16 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
-	github.com/tidwall/gjson v1.13.0 // indirect
+	github.com/tidwall/gjson v1.14.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	github.com/ugorji/go/codec v1.2.6 // indirect
-	golang.org/x/crypto v0.0.0-20220126234351-aa10faf2a1f8 // indirect
-	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
+	github.com/ugorji/go/codec v1.2.7 // indirect
+	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+	golang.org/x/image v0.0.0-20220302094943-723b81ca9867 // indirect
+	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	modernc.org/libc v1.14.5 // indirect
+	modernc.org/libc v1.14.6 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.0.5 // indirect
 )
