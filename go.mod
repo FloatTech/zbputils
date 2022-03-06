@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/FloatTech/bot-manager v1.0.0
-	github.com/FloatTech/sqlite v0.2.0
+	github.com/FloatTech/sqlite v0.2.1
 	github.com/RomiChan/websocket v1.4.3-0.20220123145318-307a86b127bc
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
