@@ -11,10 +11,9 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/FloatTech/zbputils/process"
 	reg "github.com/fumiama/go-registry"
 	"github.com/sirupsen/logrus"
-
-	"github.com/FloatTech/zbputils/process"
 )
 
 const (
@@ -22,12 +21,24 @@ const (
 )
 
 var (
-	registry      = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
-	connmu, getmu sync.Mutex
-	processes     sync.WaitGroup
-	connerr       error
-	isconnected   bool
+	registry = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
+	getmu    sync.Mutex
+	connerr  error
 )
+
+func init() {
+	connerr = registry.ConnectIn(time.Second * 4)
+	if connerr != nil {
+		logrus.Warnln("[file]连接md5验证服务器失败:", connerr)
+		return
+	}
+	go func() {
+		process.GlobalInitMutex.Lock()
+		_ = registry.Close()
+		process.GlobalInitMutex.Unlock()
+		logrus.Infoln("[file]关闭到md5验证服务器的连接")
+	}()
+}
 
 // GetLazyData 获取懒加载数据
 // 传入的 path 的前缀 data/
@@ -42,35 +53,12 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 
 	u := dataurl + path[5:]
 
-	if !isconnected {
-		connmu.Lock()
-		if !isconnected && connerr == nil {
-			logrus.Infoln("[file]连接md5验证服务器...")
-			connerr = registry.ConnectIn(time.Second * 4)
-			if connerr == nil {
-				isconnected = true
-				go func() {
-					process.SleepAbout1sTo2s()
-					processes.Wait()
-					_ = registry.Close()
-					isconnected = false
-					logrus.Infoln("[file]关闭到md5验证服务器的连接")
-				}()
-			} else {
-				logrus.Warnln("[file]连接md5验证服务器失败:", connerr)
-			}
-		}
-		connmu.Unlock()
-	}
-
 	if connerr != nil {
 		logrus.Warnln("[file]无法连接到md5验证服务器，请自行确保下载文件", path, "的正确性")
 	} else {
-		processes.Add(1)
 		getmu.Lock()
 		ms, err = registry.Get(path)
 		getmu.Unlock()
-		processes.Done()
 		if err != nil || len(ms) != 16 {
 			logrus.Warnln("[file]获取md5失败，请自行确保下载文件", path, "的正确性:", err)
 		} else {
