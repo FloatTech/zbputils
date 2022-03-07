@@ -11,7 +11,7 @@ func initBlock() (err error) {
 	if err == nil {
 		zero.OnMessage(func(ctx *zero.Ctx) bool {
 			return isBlocked(ctx.Event.UserID)
-		}).SetBlock(true).SecondPriority()
+		}).SetBlock(true).ThirdPriority()
 	}
 	return
 }

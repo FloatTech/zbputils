@@ -18,7 +18,7 @@ var startTime int64
 
 func init() {
 	// 插件冲突检测 会在本群发送一条消息并在约 1s 后撤回
-	zero.OnFullMatch("插件冲突检测", zero.OnlyGroup, zero.AdminPermission, zero.OnlyToMe).SetBlock(true).FirstPriority().
+	zero.OnFullMatch("插件冲突检测", zero.OnlyGroup, zero.AdminPermission, zero.OnlyToMe).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
 			tok, err := genToken()
 			if err != nil {
@@ -31,7 +31,7 @@ func init() {
 			ctx.DeleteMessage(id)
 		})
 
-	zero.OnRegex("^●cd([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).FirstPriority().
+	zero.OnRegex("^●cd([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
 				gid := ctx.Event.GroupID
@@ -60,7 +60,7 @@ func init() {
 			}
 		})
 
-	zero.OnRegex("^●cd●(([\u4e00-\u8e00]*[\u3d01-\u3d06]?))", zero.OnlyGroup).SetBlock(true).FirstPriority().
+	zero.OnRegex("^●cd●(([\u4e00-\u8e00]*[\u3d01-\u3d06]?))", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if time.Now().Unix()-startTime < 10 {
 				msg, err := b14.UTF82utf16be(binutils.StringToBytes(ctx.State["regex_matched"].([]string)[1]))

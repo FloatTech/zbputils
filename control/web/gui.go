@@ -413,7 +413,7 @@ func messageHandle() {
 		}
 	}()
 
-	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+	zero.OnMessage().SetBlock(false).SecondPriority().Handle(func(ctx *zero.Ctx) {
 		if conn != nil {
 			err := conn.WriteJSON(ctx.Event)
 			if err != nil {
@@ -434,7 +434,7 @@ func messageHandle() {
 			}
 		}
 		return true
-	}).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+	}).SetBlock(false).SecondPriority().Handle(func(ctx *zero.Ctx) {
 		r := &request{
 			RequestType: ctx.Event.RequestType,
 			SubType:     ctx.Event.SubType,

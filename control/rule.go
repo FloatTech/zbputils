@@ -369,7 +369,7 @@ func init() {
 			}
 			zero.OnCommandGroup([]string{
 				"启用", "enable", "禁用", "disable",
-			}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
@@ -393,7 +393,7 @@ func init() {
 
 			zero.OnCommandGroup([]string{
 				"全局启用", "allenable", "全局禁用", "alldisable",
-			}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
@@ -410,7 +410,7 @@ func init() {
 				}
 			})
 
-			zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
@@ -429,7 +429,7 @@ func init() {
 
 			zero.OnCommandGroup([]string{
 				"禁止", "ban", "允许", "permit",
-			}, zero.AdminPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			}, zero.AdminPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				args := strings.Split(model.Args, " ")
@@ -469,7 +469,7 @@ func init() {
 
 			zero.OnCommandGroup([]string{
 				"全局禁止", "allban", "全局允许", "allpermit",
-			}, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				args := strings.Split(model.Args, " ")
@@ -505,7 +505,7 @@ func init() {
 
 			zero.OnCommandGroup([]string{
 				"封禁", "block", "解封", "unblock",
-			}, zero.SuperUserPermission).SetBlock(true).FirstPriority().Handle(func(ctx *zero.Ctx) {
+			}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				args := strings.Split(model.Args, " ")
@@ -536,7 +536,7 @@ func init() {
 				ctx.SendChain(message.Text("参数错误!"))
 			})
 
-			zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+			zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					model := extension.CommandModel{}
 					_ = ctx.Parse(&model)
@@ -552,7 +552,7 @@ func init() {
 					}
 				})
 
-			zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+			zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
 					i := 0
@@ -570,7 +570,7 @@ func init() {
 					ctx.SendChain(message.Text(msg))
 				})
 
-			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).FirstPriority().
+			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					t := "---服务详情---\n"
 					i := 0
