@@ -23,6 +23,7 @@ const (
 var (
 	registry = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
 	mu       sync.Mutex
+	wg       sync.WaitGroup
 	connerr  error
 )
 
@@ -36,6 +37,7 @@ func init() {
 	}
 	go func() {
 		process.GlobalInitMutex.Lock()
+		wg.Wait()
 		_ = registry.Close()
 		process.GlobalInitMutex.Unlock()
 		logrus.Infoln("[file]关闭到md5验证服务器的连接")
@@ -60,7 +62,9 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 		mu.Unlock()
 		logrus.Warnln("[file]无法连接到md5验证服务器，请自行确保下载文件", path, "的正确性")
 	} else {
+		wg.Add(1)
 		ms, err = registry.Get(path)
+		wg.Done()
 		mu.Unlock()
 		if err != nil || len(ms) != 16 {
 			logrus.Warnln("[file]获取md5失败，请自行确保下载文件", path, "的正确性:", err)
