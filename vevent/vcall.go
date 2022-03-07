@@ -20,6 +20,6 @@ func NewAPICallerHook(ctx *zero.Ctx, callback func(rsp zero.APIResponse, err err
 
 func (v *APICallerHook) CallApi(request zero.APIRequest) (rsp zero.APIResponse, err error) {
 	rsp, err = v.caller.CallApi(request)
-	v.callback(rsp, err)
+	go v.callback(rsp, err)
 	return
 }

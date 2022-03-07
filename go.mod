@@ -14,7 +14,7 @@ require (
 	github.com/fumiama/go-registry v0.1.1
 	github.com/gin-gonic/gin v1.7.7
 	github.com/sirupsen/logrus v1.8.1
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220304040741-8e53f210618c
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220307142419-a1b34e6da007
 	golang.org/x/text v0.3.7
 )
 
