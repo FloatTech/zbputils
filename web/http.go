@@ -3,6 +3,8 @@ package web
 
 import (
 	"crypto/tls"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 )
@@ -38,6 +40,10 @@ func GetDataWith(client *http.Client, url string, method string, referer string,
 			data, err = io.ReadAll(response.Body)
 			response.Body.Close()
 		}
+		if response.StatusCode != http.StatusOK {
+			s := fmt.Sprintf("status code: %d", response.StatusCode)
+			err = errors.New(s)
+		}
 	}
 	return
 }
@@ -50,6 +56,10 @@ func GetData(url string) (data []byte, err error) {
 		data, err = io.ReadAll(response.Body)
 		response.Body.Close()
 	}
+	if response.StatusCode != http.StatusOK {
+		s := fmt.Sprintf("status code: %d", response.StatusCode)
+		err = errors.New(s)
+	}
 	return
 }
 
@@ -60,6 +70,10 @@ func PostData(url string, contentType string, body io.Reader) (data []byte, err 
 	if err == nil {
 		data, err = io.ReadAll(response.Body)
 		response.Body.Close()
+	}
+	if response.StatusCode != http.StatusOK {
+		s := fmt.Sprintf("status code: %d", response.StatusCode)
+		err = errors.New(s)
 	}
 	return
 }

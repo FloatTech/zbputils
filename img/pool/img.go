@@ -16,7 +16,6 @@ const cacheurl = "https://gchat.qpic.cn/gchatpic_new//%s/0"
 
 var (
 	ErrImgFileOutdated = errors.New("img file outdated")
-	ErrImgFileAsync    = errors.New("img file async")
 	ErrNoSuchImg       = errors.New("no such img")
 	ErrSendImg         = errors.New("send image error")
 	ErrGetMsg          = errors.New("get msg error")
@@ -34,20 +33,11 @@ func GetImage(name string) (m *Image, err error) {
 	m.item, err = getItem(name)
 	if err == nil && m.u != "" {
 		var resp *http.Response
-		var buf [32]byte
-		resp, err = http.Get(m.String())
-		if err != nil {
+		resp, err = http.Head(m.String())
+		if err != nil || resp.StatusCode != http.StatusOK {
 			err = ErrImgFileOutdated
 			logrus.Debugln("[imgpool] image", name, m, "outdated")
 			return
-		}
-		n := 0
-		n, err = resp.Body.Read(buf[:])
-		_ = resp.Body.Close()
-		if err != nil || n <= 0 {
-			err = ErrImgFileAsync
-			m.item = nil
-			logrus.Debugln("[imgpool] image", name, m, "is async")
 		}
 		return
 	}
