@@ -30,6 +30,11 @@ func NewTLS12Client() *http.Client {
 	}
 }
 
+var defaultpixiviptables = map[string]string{
+	"pixiv.net":   "210.140.92.183",
+	"i.pximg.net": "210.140.92.144",
+}
+
 // NewPixivClient P站特殊客户端
 func NewPixivClient() *http.Client {
 	return &http.Client{
@@ -52,7 +57,11 @@ func NewPixivClient() *http.Client {
 				if !ok {
 					ips, err = resolver.LookupHost(context.TODO(), host) // 通过自定义nameserver查询域名
 					if err != nil {
-						return nil, err
+						ip, ok := defaultpixiviptables[host]
+						if !ok {
+							return nil, err
+						}
+						ips = append(ips, ip)
 					}
 					iptmu.Lock()
 					iptables[host] = ips
