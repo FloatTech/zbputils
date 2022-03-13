@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -41,6 +42,10 @@ func NewPixivClient() *http.Client {
 					return nil, err
 				}
 
+				if host[:4] == "www." {
+					host = host[4:]
+				}
+
 				iptmu.RLock()
 				ips, ok := iptables[host]
 				iptmu.RUnlock()
@@ -69,17 +74,19 @@ func NewPixivClient() *http.Client {
 			TLSClientConfig: &tls.Config{
 				ServerName:         "-",
 				InsecureSkipVerify: true,
+				MaxVersion:         tls.VersionTLS12,
 			},
-			DisableKeepAlives: true,
+			DisableKeepAlives:   true,
+			TLSHandshakeTimeout: 10 * time.Second,
 		},
 	}
 }
 
 // GetDataWith 使用自定义请求头获取数据
-func GetDataWith(client *http.Client, url string, method string, referer string, ua string) (data []byte, err error) {
+func GetDataWith(client *http.Client, url, referer, ua string) (data []byte, err error) {
 	// 提交请求
 	var request *http.Request
-	request, err = http.NewRequest(method, url, nil)
+	request, err = http.NewRequest("GET", url, nil)
 	if err == nil {
 		// 增加header选项
 		request.Header.Add("Referer", referer)
@@ -116,7 +123,7 @@ func GetData(url string) (data []byte, err error) {
 }
 
 // PostData 获取数据
-func PostData(url string, contentType string, body io.Reader) (data []byte, err error) {
+func PostData(url, contentType string, body io.Reader) (data []byte, err error) {
 	var response *http.Response
 	response, err = http.Post(url, contentType, body)
 	if err == nil {
