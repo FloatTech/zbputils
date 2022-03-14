@@ -12,7 +12,6 @@ import (
 	"github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/order"
-	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/process"
 	"github.com/FloatTech/zbputils/vevent"
 	"github.com/FloatTech/zbputils/web"
@@ -83,7 +82,7 @@ func init() {
 		logrus.Infoln("[job]本地环回初始化完成")
 		process.GlobalInitMutex.Unlock()
 	}()
-	en.OnRegex(`^记录在"(.*)"触发的指令$`, ctxext.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^记录在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
 		command := ctx.State["job_raw_event"].(string)
 		c := &cmd{
@@ -130,7 +129,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnRegex(`^取消在"(.*)"触发的指令$`, ctxext.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^取消在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
 		err := rmcmd(ctx.Event.SelfID, ctx.Event.UserID, cron)
 		if err != nil {
@@ -227,14 +226,14 @@ func init() {
 		}
 		ctx.SendChain(message.Text(lst))
 	})
-	en.OnPrefix("执行指令：", ctxext.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
+	en.OnPrefix("执行指令：", zero.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
 		return ctx.State["args"].(string) != ""
 	}, parseArgs).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		ev := strings.ReplaceAll(ctx.Event.RawEvent.Raw, "执行指令：", "")
 		logrus.Debugln("[job] inject:", ev)
 		inject(ctx.Event.SelfID, binary.StringToBytes(ev))()
 	})
-	en.OnPrefix("注入指令结果：", ctxext.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
+	en.OnPrefix("注入指令结果：", zero.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
 		return ctx.State["args"].(string) != ""
 	}, parseArgs).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		vevent.NewLoopOf(vevent.NewAPICallerHook(ctx, func(rsp zero.APIResponse, err error) {

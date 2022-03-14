@@ -18,7 +18,6 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
 	sql "github.com/FloatTech/sqlite"
-	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
 
@@ -369,7 +368,7 @@ func init() {
 			}
 			zero.OnCommandGroup([]string{
 				"启用", "enable", "禁用", "disable",
-			}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
@@ -410,7 +409,7 @@ func init() {
 				}
 			})
 
-			zero.OnCommandGroup([]string{"还原", "reset"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			zero.OnCommandGroup([]string{"还原", "reset"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
@@ -536,7 +535,7 @@ func init() {
 				ctx.SendChain(message.Text("参数错误!"))
 			})
 
-			zero.OnCommandGroup([]string{"用法", "usage"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+			zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					model := extension.CommandModel{}
 					_ = ctx.Parse(&model)
@@ -552,7 +551,7 @@ func init() {
 					}
 				})
 
-			zero.OnCommandGroup([]string{"服务列表", "service_list"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+			zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
 					i := 0
@@ -570,7 +569,7 @@ func init() {
 					ctx.SendChain(message.Text(msg))
 				})
 
-			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, ctxext.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+			zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 				Handle(func(ctx *zero.Ctx) {
 					t := "---服务详情---\n"
 					i := 0

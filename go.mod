@@ -15,7 +15,7 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.0
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220307142419-a1b34e6da007
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220314043738-2ff63b4ac217
 	golang.org/x/text v0.3.7
 )
 
