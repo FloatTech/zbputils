@@ -30,11 +30,11 @@ func getItem(name string) (*item, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer reg.Close()
 	u, err := reg.Get(name)
 	if err != nil {
 		return nil, err
 	}
+	_ = reg.Close()
 	return &item{name: name, u: u}, nil
 }
 
@@ -45,10 +45,10 @@ func (t *item) push(key string) (err error) {
 	if err != nil {
 		return
 	}
-	defer r.Close()
 	err = r.Set(t.name, t.u)
 	if err != nil {
 		return
 	}
+	_ = r.Close()
 	return
 }

@@ -54,20 +54,12 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 	m.item, err = getItem(name)
 	if err == nil && m.item.u != "" {
 		var resp *http.Response
-		var buf [32]byte
-		resp, err = http.Get(m.String())
-		if err == nil {
-			n := 0
-			n, err = resp.Body.Read(buf[:])
-			_ = resp.Body.Close()
-			if err == nil && n > 0 {
-				return
-			}
-			m.item = nil
-			logrus.Debugln("[imgpool] image", name, m, "is async, using local file instead...")
+		resp, err = http.Head(m.String())
+		if err == nil && resp.StatusCode == http.StatusOK {
 			return
 		}
 		logrus.Debugln("[imgpool] image", name, m, "outdated, updating...")
+		get = nil
 	}
 	hassent, err = m.Push(send, get)
 	return
@@ -97,29 +89,31 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 		return
 	}
 	hassent = true
-	msg := get(id)
-	for _, e := range msg.Elements {
-		if e.Type == "image" {
-			u := e.Data["url"]
-			i := strings.LastIndex(u, "/")
-			if i <= 0 {
-				break
+	if get != nil {
+		msg := get(id)
+		for _, e := range msg.Elements {
+			if e.Type == "image" {
+				u := e.Data["url"]
+				i := strings.LastIndex(u, "/")
+				if i <= 0 {
+					break
+				}
+				u = u[:i]
+				i = strings.LastIndex(u, "-")
+				if i <= 0 {
+					break
+				}
+				u = u[i:]
+				if u == "" {
+					break
+				}
+				m.item, err = newItem(m.n, "0-0"+u)
+				logrus.Infoln("[imgpool] 缓存:", m.n, "url:", "0-0"+u)
+				_ = m.item.push("minamoto")
+				return
 			}
-			u = u[:i]
-			i = strings.LastIndex(u, "-")
-			if i <= 0 {
-				break
-			}
-			u = u[i:]
-			if u == "" {
-				break
-			}
-			m.item, err = newItem(m.n, "0-0"+u)
-			logrus.Infoln("[imgpool] 缓存:", m.n, "url:", "0-0"+u)
-			_ = m.item.push("minamoto")
-			return
 		}
+		err = ErrGetMsg
 	}
-	err = ErrGetMsg
 	return
 }
