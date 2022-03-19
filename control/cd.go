@@ -20,8 +20,8 @@ func init() {
 	// 插件冲突检测 会在本群发送一条消息并在约 1s 后撤回
 	zero.OnFullMatch("插件冲突检测", zero.OnlyGroup, zero.AdminPermission, zero.OnlyToMe).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
-			tok, err := genToken()
-			if err != nil {
+			tok := genToken()
+			if tok == "" || len([]rune(tok)) != 4 {
 				return
 			}
 			t := message.Text("●cd" + tok)
@@ -44,18 +44,16 @@ func init() {
 					return true
 				})
 				if w.Len() > 2 {
-					my, err := b14.UTF16be2utf8(b14.Encode(w.Bytes()[2:]))
+					my := b14.EncodeFromString(w.String()[2:])
 					binutils.PutWriter(w)
-					if err == nil {
-						my, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
-							w.WriteString("●cd●")
-							w.Write(my)
-						})
-						id := ctx.SendChain(message.Text(binutils.BytesToString(my)))
-						cl()
-						process.SleepAbout1sTo2s()
-						ctx.DeleteMessage(id)
-					}
+					my, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
+						w.WriteString("●cd●")
+						w.Write(my)
+					})
+					id := ctx.SendChain(message.Text(binutils.BytesToString(my)))
+					cl()
+					process.SleepAbout1sTo2s()
+					ctx.DeleteMessage(id)
 				}
 			}
 		})
@@ -63,43 +61,35 @@ func init() {
 	zero.OnRegex("^●cd●(([\u4e00-\u8e00]*[\u3d01-\u3d06]?))", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if time.Now().Unix()-startTime < 10 {
-				msg, err := b14.UTF82utf16be(binutils.StringToBytes(ctx.State["regex_matched"].([]string)[1]))
-				if err == nil {
-					gid := ctx.Event.GroupID
-					for _, s := range strings.Split(b14.DecodeString(msg), "\xfe\xff") {
-						manmu.RLock()
-						c, ok := managers[s]
-						manmu.RUnlock()
-						if ok && c.IsEnabledIn(gid) {
-							c.Disable(gid)
-						}
+				gid := ctx.Event.GroupID
+				for _, s := range strings.Split(b14.DecodeString(ctx.State["regex_matched"].([]string)[1]), "\xfe\xff") {
+					manmu.RLock()
+					c, ok := managers[s]
+					manmu.RUnlock()
+					if ok && c.IsEnabledIn(gid) {
+						c.Disable(gid)
 					}
 				}
 			}
 		})
 }
 
-func genToken() (tok string, err error) {
+func genToken() (tok string) {
 	timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
 		w.WriteUInt64(uint64(time.Now().Unix()))
 	})
-	timebytes, err = b14.UTF16be2utf8(b14.Encode(timebytes[1:]))
+	tok = b14.EncodeString(binutils.BytesToString(timebytes[1:]))
 	cl()
-	if err == nil {
-		tok = binutils.BytesToString(timebytes)
-	}
 	return
 }
 
 func isValidToken(tok string) (yes bool) {
-	s, err := b14.UTF82utf16be(binutils.StringToBytes(tok))
-	if err == nil {
-		timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
-			w.WriteByte(0)
-			w.Write(b14.Decode(s))
-		})
-		yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < 10
-		cl()
-	}
+	s := b14.DecodeString(tok)
+	timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
+		w.WriteByte(0)
+		w.WriteString(s)
+	})
+	yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < 10
+	cl()
 	return
 }

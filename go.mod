@@ -1,6 +1,6 @@
 module github.com/FloatTech/zbputils
 
-go 1.17
+go 1.18
 
 require (
 	github.com/FloatTech/bot-manager v1.0.0
@@ -10,9 +10,10 @@ require (
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/go-base16384 v1.3.1
+	github.com/fumiama/go-base16384 v1.4.0
 	github.com/fumiama/go-registry v0.1.1
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.0
 	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220314043738-2ff63b4ac217

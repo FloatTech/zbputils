@@ -2,15 +2,7 @@
 package math
 
 // Max 返回两数最大值，该函数将被内联
-func Max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
-// Max64 返回两数最大值，该函数将被内联
-func Max64(a, b int64) int64 {
+func Max[T int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -18,15 +10,7 @@ func Max64(a, b int64) int64 {
 }
 
 // Min 返回两数最小值，该函数将被内联
-func Min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
-}
-
-// Min64 返回两数最小值，该函数将被内联
-func Min64(a, b int64) int64 {
+func Min[T int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64](a, b T) T {
 	if a > b {
 		return b
 	}

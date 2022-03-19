@@ -1,16 +1,15 @@
 package control
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/go-playground/assert/v2"
+)
 
 func TestGenToken(t *testing.T) {
-	tok, err := genToken()
-	if err == nil {
-		t.Log(tok)
-		t.Log(isValidToken(tok))
-		t.Fail()
-	} else {
-		t.Fatal(err)
-	}
+	tok := genToken()
+	t.Log(tok)
+	assert.Equal(t, true, isValidToken(tok))
 }
 
 func TestMaru(t *testing.T) {
