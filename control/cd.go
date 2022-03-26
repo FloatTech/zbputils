@@ -44,12 +44,11 @@ func init() {
 					return true
 				})
 				if w.Len() > 2 {
-					my := b14.EncodeFromString(w.String()[2:])
-					binutils.PutWriter(w)
-					my, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
-						w.WriteString("●cd●")
-						w.Write(my)
+					my, cl := binutils.OpenWriterF(func(wr *binutils.Writer) {
+						wr.WriteString("●cd●")
+						wr.WriteString(b14.EncodeString(w.String()[2:]))
 					})
+					binutils.PutWriter(w)
 					id := ctx.SendChain(message.Text(binutils.BytesToString(my)))
 					cl()
 					process.SleepAbout1sTo2s()
