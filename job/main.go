@@ -453,11 +453,11 @@ func parseArgs(ctx *zero.Ctx) bool {
 				if msg[0] != '?' {
 					return false
 				}
-			case e := <-zero.NewFutureEvent("message", 0, true, zero.CheckUser(ctx.Event.UserID)).Next():
-				args[arg] = e.Message.String()
+			case c := <-zero.NewFutureEvent("message", 0, true, zero.CheckUser(ctx.Event.UserID)).Next():
+				args[arg] = c.Event.Message.String()
 				arr = args[arg]
 				process.SleepAbout1sTo2s()
-				ctx.SendChain(message.Reply(e.MessageID), message.Text("已记录"))
+				ctx.SendChain(message.Reply(c.Event.MessageID), message.Text("已记录"))
 				process.SleepAbout1sTo2s()
 			}
 		}
@@ -532,9 +532,9 @@ func logevent(ctx *zero.Ctx) bool {
 	case <-time.After(time.Second * 120):
 		ctx.SendChain(message.Text("指令记录超时"))
 		return false
-	case e := <-zero.NewFutureEvent("message", 0, true, zero.CheckUser(ctx.Event.UserID)).Next():
-		ctx.State["job_raw_event"] = e.RawEvent.Raw
-		ctx.State["job_new_event"] = e.RawEvent
+	case c := <-zero.NewFutureEvent("message", 0, true, zero.CheckUser(ctx.Event.UserID)).Next():
+		ctx.State["job_raw_event"] = c.Event.RawEvent.Raw
+		ctx.State["job_new_event"] = c.Event.RawEvent
 		return true
 	}
 }
