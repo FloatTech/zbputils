@@ -55,8 +55,8 @@ func NewPixivClient() *http.Client {
 				ips, ok := iptables[host]
 				iptmu.RUnlock()
 				if !ok {
-					ips, err = resolver.LookupHost(context.TODO(), host) // 通过自定义nameserver查询域名
-					if err != nil {
+					ips, err = resolver.LookupHost(context.TODO(), host)              // 通过自定义nameserver查询域名
+					if err != nil || (len(ips) > 0 && ips[0][:11] != "210.140.92.") { // 被污染
 						ip, ok := defaultpixiviptables[host]
 						if !ok {
 							return nil, err
