@@ -11,7 +11,7 @@ require (
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-base16384 v1.4.0
-	github.com/fumiama/go-registry v0.1.2
+	github.com/fumiama/go-registry v0.1.3
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
