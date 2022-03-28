@@ -50,8 +50,8 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 			logrus.Infoln("[file]已连接md5验证服务器")
 			go func() {
 				process.GlobalInitMutex.Lock()
-				registry.Lock()
 				_ = registry.Close()
+				registry.Lock()
 				hasinit = false
 				connerr = nil
 				hasglobalinit = true
@@ -74,8 +74,8 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 			filemd5 = (*[16]byte)(*(*unsafe.Pointer)(unsafe.Pointer(&ms)))
 			logrus.Infoln("[file]从验证服务器获得文件", path, "md5:", hex.EncodeToString(filemd5[:]))
 			if hasglobalinit {
-				registry.Lock()
 				_ = registry.Close()
+				registry.Lock()
 				hasinit = false
 				connerr = nil
 				registry.Unlock()
