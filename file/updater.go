@@ -20,9 +20,10 @@ const (
 )
 
 var (
-	registry = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
-	connerr  error
-	hasinit  bool
+	registry      = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
+	connerr       error
+	hasinit       bool
+	hasglobalinit bool
 )
 
 // GetLazyData 获取懒加载数据
@@ -45,14 +46,18 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 		connerr = registry.ConnectIn(time.Second * 4)
 		if connerr != nil {
 			logrus.Warnln("[file]连接md5验证服务器失败:", connerr)
-		} else {
+		} else if !hasglobalinit {
 			logrus.Infoln("[file]已连接md5验证服务器")
 			go func() {
 				process.GlobalInitMutex.Lock()
+				registry.Lock()
 				_ = registry.Close()
 				hasinit = false
-				process.GlobalInitMutex.Unlock()
+				connerr = nil
+				hasglobalinit = true
+				registry.Unlock()
 				logrus.Infoln("[file]关闭到md5验证服务器的连接")
+				process.GlobalInitMutex.Unlock()
 			}()
 		}
 	} else {
@@ -68,6 +73,13 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 		} else {
 			filemd5 = (*[16]byte)(*(*unsafe.Pointer)(unsafe.Pointer(&ms)))
 			logrus.Infoln("[file]从验证服务器获得文件", path, "md5:", hex.EncodeToString(filemd5[:]))
+			if hasglobalinit {
+				registry.Lock()
+				_ = registry.Close()
+				hasinit = false
+				connerr = nil
+				registry.Unlock()
+			}
 		}
 	}
 
