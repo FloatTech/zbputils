@@ -16,7 +16,7 @@ require (
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.0
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220326160643-893d4e910785
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220330050111-d962c23b4f4d
 	golang.org/x/text v0.3.7
 )
 
@@ -42,7 +42,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220321153916-2c7772ba3064 // indirect
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a // indirect
-	golang.org/x/sys v0.0.0-20220327210214-530d0810a4d0 // indirect
+	golang.org/x/sys v0.0.0-20220330033206-e17cdc41300f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	modernc.org/libc v1.14.12 // indirect
