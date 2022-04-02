@@ -22,4 +22,6 @@ type Options struct {
 	Help              string // 帮助文本信息
 	PrivateDataFolder string // 全部小写的数据文件夹名，不出现在 zbpdata
 	PublicDataFolder  string // 驼峰的数据文件夹名，出现在 zbpdata
+	OnEnable          func() // 启用插件后执行的命令，为空则打印 “已启用服务: xxx”
+	OnDisable         func() // 禁用插件后执行的命令，为空则打印 “已禁用服务: xxx”
 }
