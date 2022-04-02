@@ -11,7 +11,6 @@ import (
 
 	"github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/control/order"
 	"github.com/FloatTech/zbputils/process"
 	"github.com/FloatTech/zbputils/vevent"
 	"github.com/FloatTech/zbputils/web"
@@ -29,7 +28,7 @@ var (
 	matchers = map[int64]*zero.Matcher{}
 	mu       sync.Mutex
 	limit    = rate.NewLimiter(time.Second*2, 1)
-	en       = control.Register("job", order.AcquirePrio(), &control.Options{
+	en       = control.Register("job", &control.Options{
 		DisableOnDefault:  false,
 		Help:              "定时指令触发器\n- 记录以\"完全匹配关键词\"触发的指令\n- 取消以\"完全匹配关键词\"触发的指令\n- 记录在\"cron\"触发的指令\n- 取消在\"cron\"触发的指令\n- 查看所有触发指令\n- 查看在\"cron\"触发的指令\n- 查看以\"完全匹配关键词\"触发的指令\n- 注入指令结果：任意指令\n- 执行指令：任意指令",
 		PrivateDataFolder: "job",
