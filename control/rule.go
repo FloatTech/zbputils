@@ -384,14 +384,14 @@ func init() {
 				if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
 					service.Enable(grp)
 					if service.options.OnEnable != nil {
-						service.options.OnEnable()
+						service.options.OnEnable(ctx)
 					} else {
 						ctx.SendChain(message.Text("已启用服务: " + model.Args))
 					}
 				} else {
 					service.Disable(grp)
 					if service.options.OnDisable != nil {
-						service.options.OnDisable()
+						service.options.OnDisable(ctx)
 					} else {
 						ctx.SendChain(message.Text("已禁用服务: " + model.Args))
 					}
