@@ -53,11 +53,14 @@ type Engine interface {
 	ApplySingle(*single.Single) Engine
 	// DataFolder 本插件数据目录，默认 data/zbp/
 	DataFolder() string
+	// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
+	IsEnabledIn(id int64) bool
 }
 
 type engineinstance struct {
 	en           *zero.Engine
 	prio         int
+	service      string
 	datafolder   string
 	datafoldermu sync.Mutex
 }
@@ -84,6 +87,7 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 		newctrl(service, o).Handler,
 	)
 	e.prio = prio
+	e.service = service
 	if o.PublicDataFolder != "" {
 		if unicode.IsLower([]rune(o.PublicDataFolder)[0]) {
 			panic("public data folder " + o.PublicDataFolder + " must start with an upper case letter")
@@ -119,6 +123,15 @@ func (e *engineinstance) DataFolder() string {
 	e.datafoldermu.Lock()
 	defer e.datafoldermu.Unlock()
 	return e.datafolder
+}
+
+// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
+func (e *engineinstance) IsEnabledIn(id int64) bool {
+	c, ok := Lookup(e.service)
+	if !ok {
+		return false
+	}
+	return c.IsEnabledIn(id)
 }
 
 // Delete 移除该 Engine 注册的所有 Matchers
