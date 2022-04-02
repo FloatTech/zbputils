@@ -1,10 +1,15 @@
 package control
 
+import (
+	"sync/atomic"
+)
+
 var enmap = make(map[string]*engineinstance)
+var prio uint64
 
 // Register 注册插件控制器
-func Register(service string, prio int, o *Options) Engine {
-	engine := newengine(service, prio, o)
+func Register(service string, o *Options) Engine {
+	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
 	enmap[service] = engine
 	return engine
 }
