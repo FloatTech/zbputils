@@ -322,8 +322,9 @@ func registercmd(bot int64, c *cmd) error {
 }
 
 func generalhandler(c *cmd) zero.Handler {
+	cmdraw := json.RawMessage(c.Cmd) // c.Cmd only have message
 	return func(ctx *zero.Ctx) {
-		ctx.Event.NativeMessage = json.RawMessage("\"" + c.Cmd + "\"") // c.Cmd only have message
+		ctx.Event.NativeMessage = cmdraw
 		ctx.Event.Time = time.Now().Unix()
 		var err error
 		vev, cl := binary.OpenWriterF(func(w *binary.Writer) {
