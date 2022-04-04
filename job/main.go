@@ -65,8 +65,12 @@ func init() {
 					return nil
 				}
 				if strings.HasPrefix(c.Cron, "sm:") {
-					m := en.OnFullMatch(c.Cron[3:] /* skip fm: */).SetBlock(true)
-					m.Handle(superuserhandler(c))
+					m := en.OnFullMatch(c.Cron[3:] /* skip sm: */).SetBlock(true)
+					h, err := superuserhandler(c)
+					if err != nil {
+						return nil
+					}
+					m.Handle(h)
 					matchers[c.ID] = getmatcher(m)
 					return nil
 				}
@@ -259,8 +263,11 @@ func init() {
 					return
 				}
 				logrus.Debugln("[job] inject:", binary.BytesToString(vev))
+				defer func() {
+					_ = recover()
+					cl()
+				}()
 				inject(ctx.Event.SelfID, vev)()
-				cl()
 			}
 		})).Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
 	})
@@ -302,7 +309,11 @@ func registercmd(bot int64, c *cmd) error {
 	defer mu.Unlock()
 	m := en.OnFullMatch(c.Cron[3:] /* skip fm: or sm: */).SetBlock(true)
 	if strings.HasPrefix(c.Cron, "sm:") {
-		m.Handle(superuserhandler(c))
+		h, err := superuserhandler(c)
+		if err != nil {
+			return err
+		}
+		m.Handle(h)
 	} else {
 		m.Handle(generalhandler(c))
 	}
@@ -312,7 +323,7 @@ func registercmd(bot int64, c *cmd) error {
 
 func generalhandler(c *cmd) zero.Handler {
 	return func(ctx *zero.Ctx) {
-		ctx.Event.NativeMessage = json.RawMessage(c.Cmd) // c.Cmd only have message
+		ctx.Event.NativeMessage = json.RawMessage("\"" + c.Cmd + "\"") // c.Cmd only have message
 		ctx.Event.Time = time.Now().Unix()
 		var err error
 		vev, cl := binary.OpenWriterF(func(w *binary.Writer) {
@@ -324,19 +335,21 @@ func generalhandler(c *cmd) zero.Handler {
 			return
 		}
 		logrus.Debugln("[job] inject:", binary.BytesToString(vev))
+		defer func() {
+			_ = recover()
+			cl()
+		}()
 		inject(ctx.Event.SelfID, vev)()
-		cl()
 	}
 }
 
-func superuserhandler(c *cmd) zero.Handler {
+func superuserhandler(c *cmd) (zero.Handler, error) {
 	e := &zero.Event{Sender: new(zero.User)}
 	err := json.Unmarshal(binary.StringToBytes(c.Cmd), e)
+	if err != nil {
+		return nil, err
+	}
 	return func(ctx *zero.Ctx) {
-		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
-			return
-		}
 		ctx.Event.UserID = e.UserID
 		ctx.Event.RawMessage = e.RawMessage
 		ctx.Event.Sender = e.Sender
@@ -350,9 +363,12 @@ func superuserhandler(c *cmd) zero.Handler {
 			return
 		}
 		logrus.Debugln("[job] inject:", binary.BytesToString(vev))
+		defer func() {
+			_ = recover()
+			cl()
+		}()
 		inject(ctx.Event.SelfID, vev)()
-		cl()
-	}
+	}, nil
 }
 
 func rmcmd(bot, caller int64, cron string) error {
