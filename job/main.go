@@ -60,13 +60,13 @@ func init() {
 				defer mu.Unlock()
 				if strings.HasPrefix(c.Cron, "fm:") {
 					m := en.OnFullMatch(c.Cron[3:] /* skip fm: */).SetBlock(true)
-					m.Handle(generalhandler(c))
+					m.Handle(generalhandler(c.Cmd))
 					matchers[c.ID] = getmatcher(m)
 					return nil
 				}
 				if strings.HasPrefix(c.Cron, "sm:") {
 					m := en.OnFullMatch(c.Cron[3:] /* skip sm: */).SetBlock(true)
-					h, err := superuserhandler(c)
+					h, err := superuserhandler(binary.StringToBytes(c.Cmd))
 					if err != nil {
 						return nil
 					}
@@ -309,20 +309,21 @@ func registercmd(bot int64, c *cmd) error {
 	defer mu.Unlock()
 	m := en.OnFullMatch(c.Cron[3:] /* skip fm: or sm: */).SetBlock(true)
 	if strings.HasPrefix(c.Cron, "sm:") {
-		h, err := superuserhandler(c)
+		h, err := superuserhandler(binary.StringToBytes(c.Cmd))
 		if err != nil {
 			return err
 		}
 		m.Handle(h)
 	} else {
-		m.Handle(generalhandler(c))
+		m.Handle(generalhandler(c.Cmd))
 	}
 	matchers[c.ID] = getmatcher(m)
 	return db.Insert(strconv.FormatInt(bot, 36), c)
 }
 
-func generalhandler(c *cmd) zero.Handler {
-	cmdraw := json.RawMessage(c.Cmd) // c.Cmd only have message
+func generalhandler(command string) zero.Handler {
+	cmdraw := make(json.RawMessage, len(command))
+	copy(cmdraw, command)
 	return func(ctx *zero.Ctx) {
 		ctx.Event.NativeMessage = cmdraw
 		ctx.Event.Time = time.Now().Unix()
@@ -344,9 +345,9 @@ func generalhandler(c *cmd) zero.Handler {
 	}
 }
 
-func superuserhandler(c *cmd) (zero.Handler, error) {
+func superuserhandler(rsp []byte) (zero.Handler, error) {
 	e := &zero.Event{Sender: new(zero.User)}
-	err := json.Unmarshal(binary.StringToBytes(c.Cmd), e)
+	err := json.Unmarshal(rsp, e)
 	if err != nil {
 		return nil, err
 	}
