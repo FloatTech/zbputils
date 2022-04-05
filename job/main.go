@@ -51,7 +51,7 @@ func init() {
 			c := &cmd{}
 			lo[id] = vevent.NewLoop(id)
 			err := db.Create(ids, c)
-			logrus.Infoln("[job]创建表", ids)
+			logrus.Debugln("[job]创建表", ids)
 			if err != nil {
 				panic(err)
 			}

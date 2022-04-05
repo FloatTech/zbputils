@@ -77,7 +77,7 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 		panic(fmt.Sprint("prio", prio, "is used by", s))
 	}
 	priomap[prio] = service
-	logrus.Infoln("[control]插件", service, "已设置优先级", prio)
+	logrus.Debugln("[control]插件", service, "已设置优先级", prio)
 	e.en = zero.New()
 	e.en.UsePreHandler(
 		func(ctx *zero.Ctx) bool {
@@ -114,7 +114,7 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 			panic(err)
 		}
 	}
-	logrus.Infoln("[control]插件", service, "已设置数据目录", e.datafolder)
+	logrus.Debugln("[control]插件", service, "已设置数据目录", e.datafolder)
 	return
 }
 

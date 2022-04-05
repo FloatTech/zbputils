@@ -127,7 +127,6 @@ func controller(addr string) {
 	engine.POST("/send_msg", sendMsg)
 	engine.GET("/data", upgrade)
 	log.Infoln("[gui] the webui is running on", addr)
-	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
 	if err := engine.Run(addr); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}

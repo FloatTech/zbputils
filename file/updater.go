@@ -73,7 +73,7 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 			logrus.Warnln("[file]获取md5失败，请自行确保下载文件", path, "的正确性:", err)
 		} else {
 			filemd5 = (*[16]byte)(*(*unsafe.Pointer)(unsafe.Pointer(&ms)))
-			logrus.Infoln("[file]从验证服务器获得文件", path, "md5:", hex.EncodeToString(filemd5[:]))
+			logrus.Debugln("[file]从验证服务器获得文件", path, "md5:", hex.EncodeToString(filemd5[:]))
 			if hasglobalinit {
 				_ = registry.Close()
 				registry.Lock()
@@ -91,13 +91,13 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 		}
 		if filemd5 != nil {
 			if md5.Sum(data) == *filemd5 {
-				logrus.Infoln("[file]文件md5匹配，文件已存在且为最新")
+				logrus.Debugln("[file]文件", path, "md5匹配，文件已存在且为最新")
 				goto ret
 			} else if !isDataMustEqual {
 				logrus.Warnln("[file]文件", path, "md5不匹配，但不主动更新")
 				goto ret
 			}
-			logrus.Infoln("[file]文件md5不匹配，开始更新文件")
+			logrus.Debugln("[file]文件", path, "md5不匹配，开始更新文件")
 		} else {
 			logrus.Warnln("[file]文件", path, "存在，已跳过md5检查")
 			goto ret
@@ -124,7 +124,7 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 	}
 	if filemd5 != nil {
 		if md5.Sum(data) == *filemd5 {
-			logrus.Infoln("[file]文件下载完成，md5匹配，开始保存")
+			logrus.Debugln("[file]文件", path, "下载完成，md5匹配，开始保存")
 		} else {
 			logrus.Errorln("[file]文件", path, "md5不匹配，下载失败")
 			return nil, errors.New("file md5 mismatch")
