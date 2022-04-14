@@ -16,11 +16,12 @@ require (
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.0
-	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220330050111-d962c23b4f4d
+	github.com/wdvxdr1123/ZeroBot v1.4.2-0.20220414063422-1ca81bc47496
 	golang.org/x/text v0.3.7
 )
 
 require (
+	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/sqlite3 v1.14.6 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect

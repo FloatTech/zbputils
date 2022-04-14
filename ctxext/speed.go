@@ -12,17 +12,17 @@ import (
 //    按 qq 号反并发
 //    并发时返回 "您有操作正在执行，请稍后再试!"
 var DefaultSingle = single.New(
-	single.WithKeyFn(func(ctx *zero.Ctx) interface{} {
+	single.WithKeyFn(func(ctx *zero.Ctx) int64 {
 		return ctx.Event.UserID
 	}),
-	single.WithPostFn(func(ctx *zero.Ctx) {
+	single.WithPostFn[int64](func(ctx *zero.Ctx) {
 		ctx.Send("您有操作正在执行，请稍后再试!")
 	}),
 )
 
 // defaultLimiterManager 默认限速器管理
 //    每 10s 5次触发
-var defaultLimiterManager = rate.NewManager(time.Second*10, 5)
+var defaultLimiterManager = rate.NewManager[int64](time.Second*10, 5)
 
 // LimitByUser 默认限速器 每 10s 5次触发
 //    按 qq 号限制
@@ -38,12 +38,12 @@ func LimitByGroup(ctx *zero.Ctx) *rate.Limiter {
 
 // LimiterManager 自定义限速器管理
 type LimiterManager struct {
-	m *rate.LimiterManager
+	m *rate.LimiterManager[int64]
 }
 
 // NewLimiterManager 新限速器管理
 func NewLimiterManager(interval time.Duration, burst int) (m LimiterManager) {
-	m.m = rate.NewManager(interval, burst)
+	m.m = rate.NewManager[int64](interval, burst)
 	return
 }
 

@@ -2,7 +2,6 @@ package ctxext
 
 import (
 	"encoding/json"
-	"strconv"
 
 	"github.com/FloatTech/zbputils/binary"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -16,7 +15,7 @@ type (
 
 func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
 	return func(id int64) zero.Message {
-		return ctx.GetMessage(message.NewMessageID(strconv.FormatInt(id, 10)))
+		return ctx.GetMessage(message.NewMessageIDFromInteger(id))
 	}
 }
 

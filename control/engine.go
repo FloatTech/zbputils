@@ -50,7 +50,7 @@ type Engine interface {
 	// OnShell shell命令触发器
 	OnShell(command string, model interface{}, rules ...zero.Rule) Matcher
 	// ApplySingle 应用反并发
-	ApplySingle(*single.Single) Engine
+	ApplySingle(*single.Single[int64]) Engine
 	// DataFolder 本插件数据目录，默认 data/zbp/
 	DataFolder() string
 	// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用

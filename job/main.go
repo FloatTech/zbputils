@@ -242,7 +242,7 @@ func init() {
 		vevent.NewLoopOf(vevent.NewAPICallerHook(ctx, func(rsp zero.APIResponse, err error) {
 			if err == nil {
 				logrus.Debugln("[job] CallerHook returned")
-				id := message.NewMessageID(rsp.Data.Get("message_id").String())
+				id := message.NewMessageIDFromInteger(rsp.Data.Get("message_id").Int())
 				if id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR:未获取到返回结果"))
 					return

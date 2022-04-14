@@ -41,7 +41,7 @@ func NewPixivClient() *http.Client {
 		// 解决中国大陆无法访问的问题
 		Transport: &http.Transport{
 			// 更改 dns
-			Dial: func(network, addr string) (net.Conn, error) {
+			DialTLS: func(network, addr string) (net.Conn, error) {
 				host, port, err := net.SplitHostPort(addr)
 				if err != nil {
 					return nil, err
@@ -61,8 +61,9 @@ func NewPixivClient() *http.Client {
 						if !ok {
 							return nil, err
 						}
-						ips = []string{ip}
+						ips = append(ips, ip)
 					}
+					logrus.Debugln("[web]google DNS get hosts", ips, "for", host)
 					iptmu.Lock()
 					iptables[host] = ips
 					iptmu.Unlock()
@@ -70,23 +71,22 @@ func NewPixivClient() *http.Client {
 
 				for _, ip := range ips {
 					// 创建链接
-					conn, err := net.Dial(network, ip+":"+port)
+					conn, err := tls.DialWithDialer(&net.Dialer{
+						Timeout: 2 * time.Second,
+					}, network, ip+":"+port, &tls.Config{
+						ServerName:         "-",
+						InsecureSkipVerify: true,
+						MaxVersion:         tls.VersionTLS12,
+					})
 					if err == nil {
-						logrus.Debugln("[web]google DNS get host", host, ip+":"+port)
+						logrus.Debugln("[web]dial host", host, ip+":"+port)
 						return conn, nil
 					}
 				}
 
-				return net.Dial(network, addr)
+				return tls.Dial(network, addr, nil)
 			},
-			// 隐藏 sni 标志
-			TLSClientConfig: &tls.Config{
-				ServerName:         "-",
-				InsecureSkipVerify: true,
-				MaxVersion:         tls.VersionTLS12,
-			},
-			DisableKeepAlives:   true,
-			TLSHandshakeTimeout: 10 * time.Second,
+			DisableKeepAlives: true,
 		},
 	}
 }
