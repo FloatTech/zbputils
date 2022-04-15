@@ -4,8 +4,10 @@ import (
 	"sync/atomic"
 )
 
-var enmap = make(map[string]*engineinstance)
-var prio uint64
+var (
+	enmap = make(map[string]*engineinstance)
+	prio  uint64
+)
 
 // Register 注册插件控制器
 func Register(service string, o *Options) Engine {

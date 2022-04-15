@@ -1,8 +1,12 @@
 // Package math 计算实用工具
 package math
 
+type num interface {
+	int | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64
+}
+
 // Max 返回两数最大值，该函数将被内联
-func Max[T int | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64](a, b T) T {
+func Max[T num](a, b T) T {
 	if a > b {
 		return a
 	}
@@ -10,7 +14,7 @@ func Max[T int | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64
 }
 
 // Min 返回两数最小值，该函数将被内联
-func Min[T int | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64](a, b T) T {
+func Min[T num](a, b T) T {
 	if a > b {
 		return b
 	}

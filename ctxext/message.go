@@ -68,8 +68,8 @@ func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) messag
 
 func SendFakeForwardToGroup(ctx *zero.Ctx) NoCtxSendMsg {
 	return func(msg interface{}) int64 {
-		return int64(ctx.SendGroupForwardMessage(ctx.Event.GroupID, message.Message{
+		return ctx.SendGroupForwardMessage(ctx.Event.GroupID, message.Message{
 			FakeSenderForwardNode(ctx, msg.(message.Message)...),
-		}).Get("message_id").Int())
+		}).Get("message_id").Int()
 	}
 }
