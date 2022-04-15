@@ -9,13 +9,13 @@ import (
 func DoOnceOnSuccess(f zero.Rule) zero.Rule {
 	init := process.NewOnce()
 	return func(ctx *zero.Ctx) (success bool) {
+		success = true
 		init.Do(func() {
 			success = f(ctx)
 		})
 		if !success {
 			init.Reset()
-			return false
 		}
-		return true
+		return
 	}
 }
