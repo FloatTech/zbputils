@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/FloatTech/zbputils/process"
 	"github.com/fumiama/go-registry"
 )
 
@@ -45,7 +46,13 @@ func (t *item) push(key string) (err error) {
 	if err != nil {
 		return
 	}
-	err = r.Set(t.name, t.u)
+	for i := 0; i < 8; i++ {
+		err = r.Set(t.name, t.u)
+		if err == nil {
+			break
+		}
+		process.SleepAbout1sTo2s() // 随机退避
+	}
 	_ = r.Close()
 	return
 }
