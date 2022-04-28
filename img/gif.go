@@ -27,7 +27,7 @@ func MergeGif(delay int, im []*image.NRGBA) *gif.GIF {
 	}
 	for i, stc := range im {
 		g.Image[i] = GetPaletted(stc)          // 每帧图片
-		g.Delay[i] = delay                     // 每帧间隔，1=10毫秒
+		g.Delay[i] = delay                     // 每帧间隔, 1=10毫秒
 		g.Disposal[i] = gif.DisposalBackground // 透明图片需要设置
 	}
 	return g

@@ -51,7 +51,7 @@ type Engine interface {
 	OnShell(command string, model interface{}, rules ...zero.Rule) Matcher
 	// ApplySingle 应用反并发
 	ApplySingle(*single.Single[int64]) Engine
-	// DataFolder 本插件数据目录，默认 data/zbp/
+	// DataFolder 本插件数据目录, 默认 data/zbp/
 	DataFolder() string
 	// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
 	IsEnabledIn(id int64) bool
@@ -118,7 +118,7 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 	return
 }
 
-// DataFolder 本插件数据目录，默认 data/zbp/
+// DataFolder 本插件数据目录, 默认 data/zbp/
 func (e *engineinstance) DataFolder() string {
 	e.datafoldermu.Lock()
 	defer e.datafoldermu.Unlock()

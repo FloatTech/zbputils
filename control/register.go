@@ -16,7 +16,7 @@ func Register(service string, o *Options) Engine {
 	return engine
 }
 
-// Delete 删除插件控制器，不会删除数据
+// Delete 删除插件控制器, 不会删除数据
 func Delete(service string) {
 	engine, ok := enmap[service]
 	if ok {

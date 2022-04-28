@@ -174,7 +174,7 @@ func MergeH(im []*image.NRGBA) *ImgFactory {
 	return ds
 }
 
-// 文本框 字体，大小，颜色 ，背景色，文本
+// 文本框 字体, 大小, 颜色 , 背景色, 文本
 func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFactory {
 	var dst ImgFactory
 	dc := gg.NewContext(10, 10)
@@ -210,7 +210,7 @@ func floatUint8(a float64) uint8 {
 
 // Limit 限制图片在 xmax*ymax 之内
 func Limit(img image.Image, xmax, ymax int) image.Image {
-	// 避免图片过大，最大 xmax*ymax
+	// 避免图片过大, 最大 xmax*ymax
 	x := img.Bounds().Size().X
 	y := img.Bounds().Size().Y
 	hasChanged := false

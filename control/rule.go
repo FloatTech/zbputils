@@ -121,8 +121,8 @@ func (m *Control) Reset(groupID int64) {
 }
 
 // IsEnabledIn 查询开启群
-// 当全局未配置或与默认相同时，状态取决于单独配置，后备为默认配置；
-// 当全局与默认不同时，状态取决于全局配置，单独配置失效。
+// 当全局未配置或与默认相同时, 状态取决于单独配置, 后备为默认配置；
+// 当全局与默认不同时, 状态取决于全局配置, 单独配置失效。
 func (m *Control) IsEnabledIn(gid int64) bool {
 	var c grpcfg
 	var err error

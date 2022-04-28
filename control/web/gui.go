@@ -30,7 +30,7 @@ var (
 	logConn *websocket.Conn
 
 	l logWriter
-	// 存储请求事件，flag作为键，一个request对象作为值
+	// 存储请求事件, flag作为键, 一个request对象作为值
 	requestData sync.Map
 )
 
@@ -89,7 +89,7 @@ func controller(addr string) {
 	engine.POST("/get_bots", getBots)
 	engine.POST("/get_group_list", getGroupList)
 	engine.POST("/get_friend_list", getFriendList)
-	// 注册主路径路由，使其跳转到主页面
+	// 注册主路径路由, 使其跳转到主页面
 	engine.GET("/", func(context *gin.Context) {
 		context.Redirect(http.StatusMovedPermanently, "/dist/dist/default.html")
 	})
@@ -421,7 +421,7 @@ func messageHandle() {
 			}
 		}
 	})
-	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
+	// 直接注册一个request请求监听器, 优先级设置为最高, 设置不阻断事件传播
 	zero.OnRequest(func(ctx *zero.Ctx) bool {
 		if ctx.Event.RequestType == "friend" {
 			ctx.State["type_name"] = "好友添加"
@@ -450,7 +450,7 @@ func messageHandle() {
 
 // upgrade
 /**
- * @Description: 连接ws，向前端推送message
+ * @Description: 连接ws, 向前端推送message
  * @param context
  * example
  */
@@ -505,7 +505,7 @@ func cors() gin.HandlerFunc {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 			// 服务器支持的所有跨域请求的方法
 			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE,UPDATE")
-			// 允许跨域设置可以返回其他子段，可以自定义字段
+			// 允许跨域设置可以返回其他子段, 可以自定义字段
 			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token,session, Content-Type")
 			// 允许浏览器（客户端）可以解析的头部 （重要）
 			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")

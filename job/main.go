@@ -544,7 +544,7 @@ func parseArgs(ctx *zero.Ctx) bool {
 }
 
 func logevent(ctx *zero.Ctx) bool {
-	ctx.SendChain(message.Text("您的下一条指令将被记录，在", ctx.State["regex_matched"].([]string)[1], "时触发"))
+	ctx.SendChain(message.Text("您的下一条指令将被记录, 在", ctx.State["regex_matched"].([]string)[1], "时触发"))
 	select {
 	case <-time.After(time.Second * 120):
 		ctx.SendChain(message.Text("指令记录超时"))

@@ -5,7 +5,7 @@ type num interface {
 	int | int8 | uint8 | int16 | uint16 | int32 | uint32 | int64 | uint64
 }
 
-// Max 返回两数最大值，该函数将被内联
+// Max 返回两数最大值, 该函数将被内联
 func Max[T num](a, b T) T {
 	if a > b {
 		return a
@@ -13,7 +13,7 @@ func Max[T num](a, b T) T {
 	return b
 }
 
-// Min 返回两数最小值，该函数将被内联
+// Min 返回两数最小值, 该函数将被内联
 func Min[T num](a, b T) T {
 	if a > b {
 		return b
@@ -24,7 +24,7 @@ func Min[T num](a, b T) T {
 // intSize is either 32 or 64.
 const intSize = 32 << (^uint(0) >> 63)
 
-// Abs 返回绝对值，该函数将被内联
+// Abs 返回绝对值, 该函数将被内联
 func Abs(x int) int {
 	// m := -1 if x < 0. m := 0 otherwise.
 	m := x >> (intSize - 1)
@@ -37,7 +37,7 @@ func Abs(x int) int {
 	return (x ^ m) - m
 }
 
-// Abs64 返回绝对值，该函数将被内联
+// Abs64 返回绝对值, 该函数将被内联
 func Abs64(x int64) int64 {
 	// m := -1 if x < 0. m := 0 otherwise.
 	m := x >> (64 - 1)

@@ -15,8 +15,8 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/tidwall/gjson v1.14.0
-	github.com/wdvxdr1123/ZeroBot v1.5.0-mid.0.20220415071800-9e52436ab5c0
+	github.com/tidwall/gjson v1.14.1
+	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220428145048-a63af3145952
 	golang.org/x/text v0.3.7
 )
 

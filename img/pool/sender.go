@@ -38,7 +38,7 @@ func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext
 	if id == 0 {
 		id = send(message.Message{img.Add("cache", "0")})
 		if id == 0 {
-			return errors.New("图片发送失败，可能被风控了~")
+			return errors.New("图片发送失败, 可能被风控了~")
 		}
 	}
 	return nil
@@ -69,7 +69,7 @@ func SendRemoteImageFromPool(imgname, imgurl string, send ctxext.NoCtxSendMsg, g
 		if id == 0 {
 			id = send(message.Message{message.Image(imgurl)})
 			if id == 0 {
-				return errors.New("图片发送失败，可能被风控了~")
+				return errors.New("图片发送失败, 可能被风控了~")
 			}
 		}
 	}

@@ -10,13 +10,13 @@ import (
 
 // DefaultSingle 默认反并发处理
 //    按 qq 号反并发
-//    并发时返回 "您有操作正在执行，请稍后再试!"
+//    并发时返回 "您有操作正在执行, 请稍后再试!"
 var DefaultSingle = single.New(
 	single.WithKeyFn(func(ctx *zero.Ctx) int64 {
 		return ctx.Event.UserID
 	}),
 	single.WithPostFn[int64](func(ctx *zero.Ctx) {
-		ctx.Send("您有操作正在执行，请稍后再试!")
+		ctx.Send("您有操作正在执行, 请稍后再试!")
 	}),
 )
 
