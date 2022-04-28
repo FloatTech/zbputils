@@ -105,9 +105,9 @@ func controller(addr string) {
 	engine.POST("/get_plugin_status", getPluginStatus)
 	// 获取插件列表
 	engine.POST("/get_plugins", func(context *gin.Context) {
-		var datas []map[string]interface{}
+		var datas []map[string]any
 		ctrl.ForEach(func(key string, manager *ctrl.Control) bool {
-			datas = append(datas, map[string]interface{}{"id": 1, "handle_type": "", "name": key, "enable": manager.IsEnabledIn(0)})
+			datas = append(datas, map[string]any{"id": 1, "handle_type": "", "name": key, "enable": manager.IsEnabledIn(0)})
 			return true
 		})
 		context.JSON(200, datas)
@@ -138,7 +138,7 @@ func controller(addr string) {
  * @param context
  */
 func handelRequest(context *gin.Context) {
-	var data map[string]interface{}
+	var data map[string]any
 	err := context.BindJSON(&data)
 	if err != nil {
 		context.JSON(404, nil)
@@ -159,8 +159,8 @@ func handelRequest(context *gin.Context) {
  * @param context
  */
 func getRequests(context *gin.Context) {
-	var data []interface{}
-	requestData.Range(func(key, value interface{}) bool {
+	var data []any
+	requestData.Range(func(key, value any) bool {
 		data = append(data, value)
 		return true
 	})
@@ -176,7 +176,7 @@ func getRequests(context *gin.Context) {
 func updateAllPluginStatus(context *gin.Context) {
 	enable, err := strconv.ParseBool(context.PostForm("enable"))
 	if err != nil {
-		var parse map[string]interface{}
+		var parse map[string]any
 		err := context.BindJSON(&parse)
 		if err != nil {
 			log.Errorln("[gui] " + err.Error())
@@ -205,7 +205,7 @@ func updatePluginAllGroupStatus(context *gin.Context) {
 	name := context.PostForm("name")
 	enable, err := strconv.ParseBool(context.PostForm("enable"))
 	if err != nil {
-		var parse map[string]interface{}
+		var parse map[string]any
 		err := context.BindJSON(&parse)
 		if err != nil {
 			log.Errorln("[gui]" + err.Error())
@@ -234,7 +234,7 @@ func updatePluginAllGroupStatus(context *gin.Context) {
  * example
  */
 func updatePluginStatus(context *gin.Context) {
-	var parse map[string]interface{}
+	var parse map[string]any
 	err := context.BindJSON(&parse)
 	if err != nil {
 		log.Errorln("[gui] ", err)
@@ -267,7 +267,7 @@ func getPluginStatus(context *gin.Context) {
 	groupID, err := strconv.ParseInt(context.PostForm("group_id"), 10, 64)
 	name := context.PostForm("name")
 	if err != nil {
-		var parse map[string]interface{}
+		var parse map[string]any
 		err := context.BindJSON(&parse)
 		if err != nil {
 			log.Errorln("[gui]" + err.Error())
@@ -293,7 +293,7 @@ func getPluginStatus(context *gin.Context) {
 func getPluginsStatus(context *gin.Context) {
 	groupID, err := strconv.ParseInt(context.PostForm("group_id"), 10, 64)
 	if err != nil {
-		var parse map[string]interface{}
+		var parse map[string]any
 		err := context.BindJSON(&parse)
 		if err != nil {
 			log.Errorln("[gui]" + err.Error())
@@ -301,10 +301,10 @@ func getPluginsStatus(context *gin.Context) {
 		}
 		groupID = int64(parse["group_id"].(float64))
 	}
-	var datas []map[string]interface{}
+	var datas []map[string]any
 	ctrl.ForEach(func(key string, manager *ctrl.Control) bool {
 		enable := manager.IsEnabledIn(groupID)
-		datas = append(datas, map[string]interface{}{"name": key, "enable": enable})
+		datas = append(datas, map[string]any{"name": key, "enable": enable})
 		return true
 	})
 	context.JSON(200, datas)
@@ -334,7 +334,7 @@ func getFriendList(context *gin.Context) {
 	selfID, err := strconv.Atoi(context.PostForm("self_id"))
 	if err != nil {
 		log.Errorln("[gui]" + err.Error())
-		var data map[string]interface{}
+		var data map[string]any
 		err := context.BindJSON(&data)
 		if err != nil {
 			log.Errorln("[gui]" + err.Error())
@@ -344,7 +344,7 @@ func getFriendList(context *gin.Context) {
 		selfID = int(data["self_id"].(float64))
 	}
 	bot := zero.GetBot(int64(selfID))
-	var resp []interface{}
+	var resp []any
 	list := bot.GetFriendList().String()
 	err = json.Unmarshal([]byte(list), &resp)
 	if err != nil {
@@ -363,7 +363,7 @@ func getFriendList(context *gin.Context) {
 func getGroupList(context *gin.Context) {
 	selfID, err := strconv.Atoi(context.PostForm("self_id"))
 	if err != nil {
-		var data map[string]interface{}
+		var data map[string]any
 		err := context.BindJSON(&data)
 		if err != nil {
 			log.Errorln("[gui]" + err.Error())
@@ -373,7 +373,7 @@ func getGroupList(context *gin.Context) {
 	}
 
 	bot := zero.GetBot(int64(selfID))
-	var resp []interface{}
+	var resp []any
 	list := bot.GetGroupList().String()
 	err = json.Unmarshal([]byte(list), &resp)
 	if err != nil {
@@ -469,7 +469,7 @@ func upgrade(context *gin.Context) {
  * example
  */
 func sendMsg(context *gin.Context) {
-	var data map[string]interface{}
+	var data map[string]any
 	err := context.BindJSON(&data)
 	if err != nil {
 		context.JSON(404, nil)

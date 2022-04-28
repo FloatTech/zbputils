@@ -8,7 +8,7 @@ import (
 // https://github.com/Mrs4s/MiraiGo/blob/master/binary/pool.go
 
 var bufferPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return new(Writer)
 	},
 }

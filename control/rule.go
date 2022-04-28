@@ -29,7 +29,6 @@ var (
 	managers  = map[string]*Control{}
 	manmu     sync.RWMutex
 	ctxbanmap = ttl.NewCache[*zero.Ctx, bool](10 * time.Second)
-	hasinit   bool
 )
 
 // Control is to control the plugins.
@@ -302,6 +301,27 @@ func (m *Control) Handler(ctx *zero.Ctx) bool {
 	return false
 }
 
+// String 打印帮助
+func (m *Control) String() string {
+	return m.options.Help
+}
+
+// EnableMark 启用：●，禁用：○
+type EnableMark bool
+
+// String 打印启用状态
+func (em EnableMark) String() string {
+	if bool(em) {
+		return "●"
+	}
+	return "○"
+}
+
+// EnableMarkIn 打印 ● 或 ○
+func (m *Control) EnableMarkIn(grp int64) EnableMark {
+	return EnableMark(m.IsEnabledIn(grp))
+}
+
 // Lookup returns a Manager by the service name, if
 // not exist, it will return nil.
 func Lookup(service string) (*Control, bool) {
@@ -528,7 +548,11 @@ func init() {
 					return
 				}
 				if service.options.Help != "" {
-					ctx.SendChain(message.Text(service.options.Help))
+					gid := ctx.Event.GroupID
+					if gid == 0 {
+						gid = -ctx.Event.UserID
+					}
+					ctx.SendChain(message.Text(service.EnableMarkIn(gid), " ", service))
 				} else {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 				}
@@ -536,41 +560,40 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				msg := "--------服务列表--------\n发送\"/用法 name\"查看详情"
 				i := 0
 				gid := ctx.Event.GroupID
+				if gid == 0 {
+					gid = -ctx.Event.UserID
+				}
+				manmu.RLock()
+				msg := make([]any, 1, len(managers)*4+1)
+				manmu.RUnlock()
+				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情"
 				ForEach(func(key string, manager *Control) bool {
 					i++
-					msg += "\n" + strconv.Itoa(i) + `: `
-					if manager.IsEnabledIn(gid) {
-						msg += "●" + key
-					} else {
-						msg += "○" + key
-					}
+					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid))
 					return true
 				})
-				ctx.SendChain(message.Text(msg))
+				ctx.Send(message.Text(msg...))
 			})
 
 		zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				t := "---服务详情---\n"
 				i := 0
-				ForEach(func(key string, manager *Control) bool {
-					service, _ := Lookup(key)
-					help := service.options.Help
+				gid := ctx.Event.GroupID
+				if gid == 0 {
+					gid = -ctx.Event.UserID
+				}
+				manmu.RLock()
+				msgs := make([]any, 1, len(managers)*6+1)
+				manmu.RUnlock()
+				msgs[0] = "---服务详情---\n"
+				ForEach(func(key string, service *Control) bool {
 					i++
-					msg := strconv.Itoa(i) + `: `
-					if manager.IsEnabledIn(ctx.Event.GroupID) {
-						msg += "●" + key
-					} else {
-						msg += "○" + key
-					}
-					msg += "\n" + help
-					t += msg + "\n\n"
+					msgs = append(msgs, i, ": ", service.EnableMarkIn(gid), key, service, "\n\n")
 					return true
 				})
-				data, err := text.RenderToBase64(t, text.FontFile, 400, 20)
+				data, err := text.RenderToBase64(fmt.Sprint(msgs...), text.FontFile, 400, 20)
 				if err != nil {
 					log.Errorf("[control] %v", err)
 				}
