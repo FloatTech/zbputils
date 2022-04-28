@@ -10,13 +10,13 @@ require (
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fogleman/gg v1.3.0
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/go-base16384 v1.4.0
-	github.com/fumiama/go-registry v0.1.5
+	github.com/fumiama/go-base16384 v1.5.2
+	github.com/fumiama/go-registry v0.1.6
 	github.com/gin-gonic/gin v1.7.7
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/tidwall/gjson v1.14.0
-	github.com/wdvxdr1123/ZeroBot v1.5.0-mid.0.20220415071800-9e52436ab5c0
+	github.com/tidwall/gjson v1.14.1
+	github.com/wdvxdr1123/ZeroBot v1.5.1-mid
 	golang.org/x/text v0.3.7
 )
 
@@ -30,7 +30,7 @@ require (
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.7 // indirect
+	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
@@ -41,12 +41,12 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect
-	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
+	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f // indirect
 	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	modernc.org/libc v1.15.0 // indirect
+	modernc.org/libc v1.15.1 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
-	modernc.org/memory v1.0.7 // indirect
+	modernc.org/memory v1.1.1 // indirect
 )
