@@ -14,8 +14,8 @@ func (e *engineinstance) ApplySingle(s *single.Single[int64]) Engine {
 
 // Limit 限速器
 //    postfn 当请求被拒绝时的操作
-func (m matcherinstance) Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher {
-	m.m.Rules = append(m.m.Rules, func(ctx *zero.Ctx) bool {
+func (m *matcherinstance) Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher {
+	m.Rules = append(m.Rules, func(ctx *zero.Ctx) bool {
 		if limiterfn(ctx).Acquire() {
 			return true
 		}

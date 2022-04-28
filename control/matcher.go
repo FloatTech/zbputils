@@ -15,15 +15,13 @@ type Matcher interface {
 	Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher
 }
 
-type matcherinstance struct {
-	m *zero.Matcher
-}
+type matcherinstance zero.Matcher
 
-func (m matcherinstance) SetBlock(block bool) Matcher {
-	_ = m.m.SetBlock(block)
+func (m *matcherinstance) SetBlock(block bool) Matcher {
+	_ = (*zero.Matcher)(m).SetBlock(block)
 	return m
 }
 
-func (m matcherinstance) Handle(handler zero.Handler) {
-	_ = m.m.Handle(handler)
+func (m *matcherinstance) Handle(handler zero.Handler) {
+	_ = (*zero.Matcher)(m).Handle(handler)
 }

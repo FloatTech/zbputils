@@ -48,7 +48,7 @@ type Engine interface {
 	// OnSuffixGroup 后缀触发器组
 	OnSuffixGroup(suffix []string, rules ...zero.Rule) Matcher
 	// OnShell shell命令触发器
-	OnShell(command string, model interface{}, rules ...zero.Rule) Matcher
+	OnShell(command string, model any, rules ...zero.Rule) Matcher
 	// ApplySingle 应用反并发
 	ApplySingle(*single.Single[int64]) Engine
 	// DataFolder 本插件数据目录, 默认 data/zbp/
@@ -141,12 +141,12 @@ func (e *engineinstance) Delete() {
 
 // On 添加新的指定消息类型的匹配器
 func (e *engineinstance) On(typ string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.On(typ, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.On(typ, rules...).SetPriority(e.prio))
 }
 
 // On 添加新的指定消息类型的匹配器(默认Engine)
 func On(typ string, rules ...zero.Rule) Matcher {
-	return matcherinstance{zero.On(typ, rules...)}
+	return (*matcherinstance)(zero.On(typ, rules...))
 }
 
 // OnMessage 消息触发器
@@ -163,60 +163,60 @@ func (e *engineinstance) OnMetaEvent(rules ...zero.Rule) Matcher { return On("me
 
 // OnPrefix 前缀触发器
 func (e *engineinstance) OnPrefix(prefix string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnPrefix(prefix, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnPrefix(prefix, rules...).SetPriority(e.prio))
 }
 
 // OnSuffix 后缀触发器
 func (e *engineinstance) OnSuffix(suffix string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnSuffix(suffix, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnSuffix(suffix, rules...).SetPriority(e.prio))
 }
 
 // OnCommand 命令触发器
 func (e *engineinstance) OnCommand(commands string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnCommand(commands, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnCommand(commands, rules...).SetPriority(e.prio))
 }
 
 // OnRegex 正则触发器
 func (e *engineinstance) OnRegex(regexPattern string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnRegex(regexPattern, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnRegex(regexPattern, rules...).SetPriority(e.prio))
 }
 
 // OnKeyword 关键词触发器
 func (e *engineinstance) OnKeyword(keyword string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnKeyword(keyword, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnKeyword(keyword, rules...).SetPriority(e.prio))
 }
 
 // OnFullMatch 完全匹配触发器
 func (e *engineinstance) OnFullMatch(src string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnFullMatch(src, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnFullMatch(src, rules...).SetPriority(e.prio))
 }
 
 // OnFullMatchGroup 完全匹配触发器组
 func (e *engineinstance) OnFullMatchGroup(src []string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnFullMatchGroup(src, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnFullMatchGroup(src, rules...).SetPriority(e.prio))
 }
 
 // OnKeywordGroup 关键词触发器组
 func (e *engineinstance) OnKeywordGroup(keywords []string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnKeywordGroup(keywords, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnKeywordGroup(keywords, rules...).SetPriority(e.prio))
 }
 
 // OnCommandGroup 命令触发器组
 func (e *engineinstance) OnCommandGroup(commands []string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnCommandGroup(commands, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnCommandGroup(commands, rules...).SetPriority(e.prio))
 }
 
 // OnPrefixGroup 前缀触发器组
 func (e *engineinstance) OnPrefixGroup(prefix []string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnPrefixGroup(prefix, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnPrefixGroup(prefix, rules...).SetPriority(e.prio))
 }
 
 // OnSuffixGroup 后缀触发器组
 func (e *engineinstance) OnSuffixGroup(suffix []string, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnSuffixGroup(suffix, rules...).SetPriority(e.prio)}
+	return (*matcherinstance)(e.en.OnSuffixGroup(suffix, rules...).SetPriority(e.prio))
 }
 
 // OnShell shell命令触发器
-func (e *engineinstance) OnShell(command string, model interface{}, rules ...zero.Rule) Matcher {
-	return matcherinstance{e.en.OnShell(command, model, rules...).SetPriority(e.prio)}
+func (e *engineinstance) OnShell(command string, model any, rules ...zero.Rule) Matcher {
+	return (*matcherinstance)(e.en.OnShell(command, model, rules...).SetPriority(e.prio))
 }

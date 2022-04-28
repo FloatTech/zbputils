@@ -7,10 +7,6 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
-type matcherinstance struct {
-	m *zero.Matcher
-}
-
 func getmatcher(m control.Matcher) *zero.Matcher {
-	return (*matcherinstance)(unsafe.Pointer(&m)).m
+	return (*zero.Matcher)(unsafe.Add(unsafe.Pointer(&m), unsafe.Sizeof(uintptr(1))))
 }

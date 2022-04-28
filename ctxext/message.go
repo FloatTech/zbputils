@@ -10,7 +10,7 @@ import (
 
 type (
 	NoCtxGetMsg  func(int64) zero.Message
-	NoCtxSendMsg func(interface{}) int64
+	NoCtxSendMsg func(any) int64
 )
 
 func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
@@ -42,19 +42,19 @@ func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
 }
 
 func SendTo(ctx *zero.Ctx, user int64) NoCtxSendMsg {
-	return func(msg interface{}) int64 {
+	return func(msg any) int64 {
 		return ctx.SendPrivateMessage(user, msg)
 	}
 }
 
 func Send(ctx *zero.Ctx) NoCtxSendMsg {
-	return func(msg interface{}) int64 {
+	return func(msg any) int64 {
 		return ctx.Send(msg).ID()
 	}
 }
 
 func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
-	return func(msg interface{}) int64 {
+	return func(msg any) int64 {
 		return ctx.SendPrivateMessage(ctx.Event.SelfID, msg)
 	}
 }
@@ -67,7 +67,7 @@ func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) messag
 }
 
 func SendFakeForwardToGroup(ctx *zero.Ctx) NoCtxSendMsg {
-	return func(msg interface{}) int64 {
+	return func(msg any) int64 {
 		return ctx.SendGroupForwardMessage(ctx.Event.GroupID, message.Message{
 			FakeSenderForwardNode(ctx, msg.(message.Message)...),
 		}).Get("message_id").Int()
