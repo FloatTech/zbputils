@@ -8,5 +8,5 @@ import (
 )
 
 func getmatcher(m control.Matcher) *zero.Matcher {
-	return (*zero.Matcher)(unsafe.Add(unsafe.Pointer(&m), unsafe.Sizeof(uintptr(1))))
+	return (*zero.Matcher)(*(*unsafe.Pointer)(unsafe.Add(unsafe.Pointer(&m), unsafe.Sizeof(uintptr(1)))))
 }
