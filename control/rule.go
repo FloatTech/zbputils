@@ -571,7 +571,7 @@ func init() {
 				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情"
 				ForEach(func(key string, manager *Control) bool {
 					i++
-					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid))
+					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid), key)
 					return true
 				})
 				ctx.Send(message.Text(msg...))
