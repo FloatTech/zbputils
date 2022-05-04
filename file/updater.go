@@ -47,7 +47,7 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 		logrus.Infoln("[file]已连接md5验证服务器")
 		go func() {
 			process.GlobalInitMutex.Lock()
-			time.Sleep(time.Second * 5)
+			time.Sleep(time.Second * 3)
 			_ = registry.Close()
 			registry.Lock()
 			connerr = nil
