@@ -3,7 +3,6 @@ package control
 import (
 	"fmt"
 	"os"
-	"sync"
 	"unicode"
 
 	"github.com/FloatTech/zbputils/file"
@@ -55,14 +54,15 @@ type Engine interface {
 	DataFolder() string
 	// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
 	IsEnabledIn(id int64) bool
+	// 下载并获取本 engine 文件夹下的懒加载数据
+	GetLazyData(filename string, isDataMustEqual bool) ([]byte, error)
 }
 
 type engineinstance struct {
-	en           *zero.Engine
-	prio         int
-	service      string
-	datafolder   string
-	datafoldermu sync.Mutex
+	en         *zero.Engine
+	prio       int
+	service    string
+	datafolder string
 }
 
 var priomap = make(map[int]string)      // priomap is map[prio]service
@@ -70,8 +70,6 @@ var foldermap = make(map[string]string) // foldermap is map[folder]service
 
 func newengine(service string, prio int, o *Options) (e *engineinstance) {
 	e = new(engineinstance)
-	e.datafoldermu.Lock()
-	defer e.datafoldermu.Unlock()
 	s, ok := priomap[prio]
 	if ok {
 		panic(fmt.Sprint("prio", prio, "is used by", s))
@@ -120,8 +118,6 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 
 // DataFolder 本插件数据目录, 默认 data/zbp/
 func (e *engineinstance) DataFolder() string {
-	e.datafoldermu.Lock()
-	defer e.datafoldermu.Unlock()
 	return e.datafolder
 }
 

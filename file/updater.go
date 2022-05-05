@@ -29,7 +29,7 @@ var (
 // 传入的 path 的前缀 data/
 // 在验证完 md5 后将被删去
 // 以便进行下载
-func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, error) {
+func GetLazyData(path string, isDataMustEqual bool) ([]byte, error) {
 	var data []byte
 	var resp *http.Response
 	var filemd5 *[16]byte
@@ -122,8 +122,5 @@ func GetLazyData(path string, isReturnDataBytes, isDataMustEqual bool) ([]byte, 
 	// 写入数据
 	err = os.WriteFile(path, data, 0644)
 ret:
-	if isReturnDataBytes {
-		return data, err
-	}
-	return nil, err
+	return data, err
 }
