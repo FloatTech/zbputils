@@ -13,7 +13,7 @@ func (e *engineinstance) GetLazyData(filename string, isDataMustEqual bool) ([]b
 	if e.datafolder == "" {
 		return nil, errors.New("datafolder is empty")
 	}
-	if !strings.HasSuffix(e.datafolder, "/") || !strings.HasPrefix(e.datafolder, "data/") || unicode.IsUpper(rune(e.datafolder[5])) {
+	if !strings.HasSuffix(e.datafolder, "/") || !strings.HasPrefix(e.datafolder, "data/") || !unicode.IsUpper(rune(e.datafolder[5])) {
 		return nil, errors.New("invalid datafolder")
 	}
 	return file.GetLazyData(e.datafolder+filename, isDataMustEqual)
