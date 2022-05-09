@@ -2,6 +2,7 @@ package vevent
 
 import (
 	"sync"
+	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
@@ -17,4 +18,8 @@ type Ctx struct {
 	// lazy message
 	once    sync.Once
 	message string
+}
+
+func HookCtxCaller(ctx *zero.Ctx, hook zero.APICaller) {
+	(*(**Ctx)(unsafe.Pointer(&ctx))).caller = hook
 }

@@ -23,7 +23,6 @@ import (
 )
 
 var (
-	lo       map[int64]vevent.Loop
 	entries  = map[int64]cron.EntryID{} // id entryid
 	matchers = map[int64]*zero.Matcher{}
 	mu       sync.Mutex
@@ -44,12 +43,10 @@ func init() {
 	go func() {
 		process.GlobalInitMutex.Lock()
 		process.SleepAbout1sTo2s()
-		lo = make(map[int64]vevent.Loop, len(zero.BotConfig.Driver))
 		for _, drv := range zero.BotConfig.Driver {
 			id := drv.SelfID()
 			ids := strconv.FormatInt(id, 36)
 			c := &cmd{}
-			lo[id] = vevent.NewLoop(id)
 			err := db.Create(ids, c)
 			logrus.Debugln("[job]创建表", ids)
 			if err != nil {
@@ -74,7 +71,7 @@ func init() {
 					matchers[c.ID] = getmatcher(m)
 					return nil
 				}
-				eid, err := process.CronTab.AddFunc(c.Cron, inject(id, []byte(c.Cmd)))
+				eid, err := process.CronTab.AddFunc(c.Cron, inject(zero.GetBot(id), []byte(c.Cmd)))
 				if err != nil {
 					return err
 				}
@@ -85,7 +82,7 @@ func init() {
 		logrus.Infoln("[job]本地环回初始化完成")
 		process.GlobalInitMutex.Unlock()
 	}()
-	en.OnRegex(`^记录在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^记录在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
 		command := ctx.State["job_raw_event"].(string)
 		c := &cmd{
@@ -93,14 +90,14 @@ func init() {
 			Cron: cron,
 			Cmd:  command,
 		}
-		err := addcmd(ctx.Event.SelfID, c)
+		err := addcmd(ctx, c)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnRegex(`^记录以"(.*)"触发的指令$`, zero.SuperUserPermission, islonotnil, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^记录以"(.*)"触发的指令$`, zero.SuperUserPermission, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := "fm:" + ctx.State["regex_matched"].([]string)[1]
 		command := ctx.State["job_new_event"].(gjson.Result).Get("message").Raw
 		logrus.Debugln("[job] get cmd:", command)
@@ -116,7 +113,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnRegex(`^记录以"(.*)"触发的代表我执行的指令$`, zero.SuperUserPermission, islonotnil, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^记录以"(.*)"触发的代表我执行的指令$`, zero.SuperUserPermission, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := "sm:" + ctx.State["regex_matched"].([]string)[1]
 		command := ctx.State["job_raw_event"].(string)
 		logrus.Debugln("[job] get cmd:", command)
@@ -132,7 +129,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnRegex(`^取消在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^取消在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
 		err := rmcmd(ctx.Event.SelfID, ctx.Event.UserID, cron)
 		if err != nil {
@@ -141,7 +138,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnRegex(`^取消以"(.*)"触发的(代表我执行的)?指令$`, zero.SuperUserPermission, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^取消以"(.*)"触发的(代表我执行的)?指令$`, zero.SuperUserPermission, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		issu := ctx.State["regex_matched"].([]string)[2] != ""
 		cron := ""
 		if issu {
@@ -157,7 +154,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text("成功!"))
 	})
-	en.OnFullMatch("查看所有触发指令", zero.SuperUserPermission, islonotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnFullMatch("查看所有触发指令", zero.SuperUserPermission).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		c := &cmd{}
 		ids := strconv.FormatInt(ctx.Event.SelfID, 36)
 		mu.Lock()
@@ -178,7 +175,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text(lst))
 	})
-	en.OnRegex(`^查看在"(.*)"触发的指令$`, zero.SuperUserPermission, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^查看在"(.*)"触发的指令$`, zero.SuperUserPermission, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		c := &cmd{}
 		ids := strconv.FormatInt(ctx.Event.SelfID, 36)
 		cron := ctx.State["regex_matched"].([]string)[1]
@@ -200,7 +197,7 @@ func init() {
 		}
 		ctx.SendChain(message.Text(lst))
 	})
-	en.OnRegex(`^查看以"(.*)"触发的(代表我执行的)?指令$`, zero.SuperUserPermission, islonotnil, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^查看以"(.*)"触发的(代表我执行的)?指令$`, zero.SuperUserPermission, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		c := &cmd{}
 		ids := strconv.FormatInt(ctx.Event.SelfID, 36)
 		issu := ctx.State["regex_matched"].([]string)[2] != ""
@@ -229,17 +226,17 @@ func init() {
 		}
 		ctx.SendChain(message.Text(lst))
 	})
-	en.OnPrefix("执行指令：", zero.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
+	en.OnPrefix("执行指令：", zero.UserOrGrpAdmin, func(ctx *zero.Ctx) bool {
 		return ctx.State["args"].(string) != ""
 	}, parseArgs).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		ev := strings.ReplaceAll(ctx.Event.RawEvent.Raw, "执行指令：", "")
 		logrus.Debugln("[job] inject:", ev)
-		inject(ctx.Event.SelfID, binary.StringToBytes(ev))()
+		inject(ctx, binary.StringToBytes(ev))()
 	})
-	en.OnPrefix("注入指令结果：", zero.UserOrGrpAdmin, islonotnil, func(ctx *zero.Ctx) bool {
+	en.OnPrefix("注入指令结果：", zero.UserOrGrpAdmin, func(ctx *zero.Ctx) bool {
 		return ctx.State["args"].(string) != ""
 	}, parseArgs).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		vevent.NewLoopOf(vevent.NewAPICallerHook(ctx, func(rsp zero.APIResponse, err error) {
+		hook := vevent.NewAPICallerHook(ctx, func(rsp zero.APIResponse, err error) {
 			if err == nil {
 				logrus.Debugln("[job] CallerHook returned")
 				id := message.NewMessageIDFromInteger(rsp.Data.Get("message_id").Int())
@@ -267,24 +264,22 @@ func init() {
 					_ = recover()
 					cl()
 				}()
-				inject(ctx.Event.SelfID, vev)()
+				ctx.Echo(vev)
 			}
-		})).Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
+		})
+		vevent.HookCtxCaller(ctx, hook)
+		ctx.Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
 	})
-}
-
-func islonotnil(ctx *zero.Ctx) bool {
-	return len(lo) > 0
 }
 
 func isfirstregmatchnotnil(ctx *zero.Ctx) bool {
 	return ctx.State["regex_matched"].([]string)[1] != ""
 }
 
-func inject(bot int64, response []byte) func() {
+func inject(ctx *zero.Ctx, response []byte) func() {
 	return func() {
 		if limit.Acquire() {
-			lo[bot].Echo(response)
+			ctx.Echo(response)
 		}
 	}
 }
@@ -293,15 +288,15 @@ func idof(cron, cmd string) int64 {
 	return int64(crc64.Checksum(binary.StringToBytes(cron+cmd), crc64.MakeTable(crc64.ISO)))
 }
 
-func addcmd(bot int64, c *cmd) error {
+func addcmd(ctx *zero.Ctx, c *cmd) error {
 	mu.Lock()
 	defer mu.Unlock()
-	eid, err := process.CronTab.AddFunc(c.Cron, inject(bot, []byte(c.Cmd)))
+	eid, err := process.CronTab.AddFunc(c.Cron, inject(ctx, []byte(c.Cmd)))
 	if err != nil {
 		return err
 	}
 	entries[c.ID] = eid
-	return db.Insert(strconv.FormatInt(bot, 36), c)
+	return db.Insert(strconv.FormatInt(ctx.Event.SelfID, 36), c)
 }
 
 func registercmd(bot int64, c *cmd) error {
@@ -341,7 +336,7 @@ func generalhandler(command string) zero.Handler {
 			_ = recover()
 			cl()
 		}()
-		inject(ctx.Event.SelfID, vev)()
+		ctx.Echo(vev)
 	}
 }
 
@@ -369,7 +364,7 @@ func superuserhandler(rsp []byte) (zero.Handler, error) {
 			_ = recover()
 			cl()
 		}()
-		inject(ctx.Event.SelfID, vev)()
+		ctx.Echo(vev)
 	}, nil
 }
 
