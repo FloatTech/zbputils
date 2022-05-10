@@ -41,18 +41,18 @@ func getItem(name string) (*item, error) {
 
 // push 推送 item
 func (t *item) push(key string) (err error) {
-	r := registry.NewRegedit("reilia.westeurope.cloudapp.azure.com:35354", "fumiama", key)
-	err = r.ConnectIn(time.Second * 4)
-	if err != nil {
-		return
-	}
 	for i := 0; i < 8; i++ {
+		r := registry.NewRegedit("reilia.westeurope.cloudapp.azure.com:35354", "fumiama", key)
+		err = r.ConnectIn(time.Second * 8)
+		if err != nil {
+			return
+		}
 		err = r.Set(t.name, t.u)
+		_ = r.Close()
 		if err == nil {
 			break
 		}
 		process.SleepAbout1sTo2s() // 随机退避
 	}
-	_ = r.Close()
 	return
 }
