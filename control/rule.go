@@ -585,12 +585,12 @@ func init() {
 					gid = -ctx.Event.UserID
 				}
 				manmu.RLock()
-				msgs := make([]any, 1, len(managers)*6+1)
+				msgs := make([]any, 1, len(managers)*7+1)
 				manmu.RUnlock()
 				msgs[0] = "---服务详情---\n"
 				ForEach(func(key string, service *Control) bool {
 					i++
-					msgs = append(msgs, i, ": ", service.EnableMarkIn(gid), key, service, "\n\n")
+					msgs = append(msgs, i, ": ", service.EnableMarkIn(gid), key, "\n", service, "\n\n")
 					return true
 				})
 				data, err := text.RenderToBase64(fmt.Sprint(msgs...), text.FontFile, 400, 20)
