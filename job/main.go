@@ -267,8 +267,9 @@ func init() {
 				ctx.Echo(vev)
 			}
 		})
-		vevent.HookCtxCaller(ctx, hook)
-		ctx.Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
+		hookedctx := *ctx
+		vevent.HookCtxCaller(&hookedctx, hook)
+		hookedctx.Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
 	})
 }
 
