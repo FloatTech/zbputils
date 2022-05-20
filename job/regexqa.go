@@ -143,6 +143,9 @@ func init() {
 				Private: make(map[int64][]inst),
 			}
 		}
+		if global.group[gid].Private == nil {
+			global.group[gid].Private = make(map[int64][]inst)
+		}
 		compiled, err := regexp.Compile(transformPattern(pattern))
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR:无法编译正则表达式:", err))
@@ -156,12 +159,20 @@ func init() {
 		}
 		rg := global.group[gid]
 		if all {
-			err = saveRegex(gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			if isInject {
+				err = saveInjectRegex(gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			} else {
+				err = saveRegex(gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			}
 			if err == nil {
 				rg.All = append(rg.All, regexInst)
 			}
 		} else {
-			err = saveRegex(gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			if isInject {
+				err = saveInjectRegex(gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			} else {
+				err = saveRegex(gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern, template)
+			}
 			if err == nil {
 				rg.Private[uid] = append(rg.Private[uid], regexInst)
 			}
@@ -170,6 +181,7 @@ func init() {
 			ctx.SendChain(message.Text("ERROR:无法保存正则表达式:", err))
 			return
 		}
+		ctx.SendChain(message.Text("成功"))
 	})
 
 	en.OnRegex(`^(查看|看看)(我|大家|有人)(说|问)`, zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
@@ -319,7 +331,7 @@ func init() {
 			}()
 			ctx.Echo(vev)
 		} else {
-			ctx.SendChain(message.Text(template))
+			ctx.Send(template)
 		}
 	})
 }
