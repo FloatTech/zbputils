@@ -3,7 +3,9 @@ package job
 
 import (
 	"encoding/json"
+	"errors"
 	"hash/crc64"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -25,11 +27,11 @@ import (
 var (
 	entries  = map[int64]cron.EntryID{} // id entryid
 	matchers = map[int64]*zero.Matcher{}
-	mu       sync.Mutex
+	mu       sync.RWMutex
 	limit    = rate.NewLimiter(time.Second*2, 1)
 	en       = control.Register("job", &control.Options{
 		DisableOnDefault:  false,
-		Help:              "定时指令触发器\n- 记录以\"完全匹配关键词\"触发的指令\n- 取消以\"完全匹配关键词\"触发的指令\n- 记录在\"cron\"触发的指令\n- 取消在\"cron\"触发的指令\n- 查看所有触发指令\n- 查看在\"cron\"触发的指令\n- 查看以\"完全匹配关键词\"触发的指令\n- 注入指令结果：任意指令\n- 执行指令：任意指令",
+		Help:              "定时指令触发器\n- 记录以\"完全匹配关键词\"触发的指令\n- 取消以\"完全匹配关键词\"触发的指令\n- 记录在\"cron\"触发的指令\n- 取消在\"cron\"触发的指令\n- 查看所有触发指令\n- 查看在\"cron\"触发的指令\n- 查看以\"完全匹配关键词\"触发的指令\n- 注入指令结果：任意指令\n- 执行指令：任意指令\n-[我|大家|有人][说|问][正则表达式]你[答|说|做|执行][模版]\n-[查看|看看][我|大家|有人][说|问][正则表达式]\n-删除[大家|有人|我][说|问|让你做|让你执行][正则表达式]",
 		PrivateDataFolder: "job",
 	})
 )
@@ -52,7 +54,7 @@ func init() {
 			if err != nil {
 				panic(err)
 			}
-			_ = db.FindFor(ids, c, "", func() error {
+			err = db.FindFor(ids, c, "", func() error {
 				mu.Lock()
 				defer mu.Unlock()
 				if strings.HasPrefix(c.Cron, "fm:") {
@@ -71,6 +73,54 @@ func init() {
 					matchers[c.ID] = getmatcher(m)
 					return nil
 				}
+				if strings.HasPrefix(c.Cron, "rm:") || strings.HasPrefix(c.Cron, "im:") {
+					patttens := strings.SplitN(c.Cron, ":", 3)
+					if len(patttens) != 3 {
+						return errors.New("error regex match global pattern")
+					}
+					grp, err := strconv.ParseInt(patttens[1], 36, 64)
+					if err != nil {
+						return err
+					}
+					if global.group[grp] == nil {
+						global.group[grp] = new(regexGroup)
+					}
+					tmpl := make([]byte, len(c.Cmd))
+					copy(tmpl, c.Cmd)
+					global.group[grp].All = append(global.group[grp].All, inst{
+						regex:    regexp.MustCompile(transformPattern(patttens[2])),
+						Pattern:  patttens[2],
+						Template: binary.BytesToString(tmpl),
+						IsInject: patttens[0][0] == 'i',
+					})
+					return nil
+				}
+				if strings.HasPrefix(c.Cron, "rp:") || strings.HasPrefix(c.Cron, "ip:") {
+					patttens := strings.SplitN(c.Cron, ":", 4)
+					if len(patttens) != 4 {
+						return errors.New("error regex match private pattern")
+					}
+					uid, err := strconv.ParseInt(patttens[1], 36, 64)
+					if err != nil {
+						return err
+					}
+					gid, err := strconv.ParseInt(patttens[2], 36, 64)
+					if err != nil {
+						return err
+					}
+					if global.group[gid] == nil {
+						global.group[gid] = new(regexGroup)
+					}
+					tmpl := make([]byte, len(c.Cmd))
+					copy(tmpl, c.Cmd)
+					global.group[gid].Private[uid] = append(global.group[gid].Private[uid], inst{
+						regex:    regexp.MustCompile(transformPattern(patttens[3])),
+						Pattern:  patttens[3],
+						Template: binary.BytesToString(tmpl),
+						IsInject: patttens[0][0] == 'i',
+					})
+					return nil
+				}
 				eid, err := process.CronTab.AddFunc(c.Cron, inject(zero.GetBot(id), []byte(c.Cmd)))
 				if err != nil {
 					return err
@@ -78,6 +128,9 @@ func init() {
 				entries[c.ID] = eid
 				return nil
 			})
+			if err != nil {
+				panic(err)
+			}
 		}
 		logrus.Infoln("[job]本地环回初始化完成")
 		process.GlobalInitMutex.Unlock()
@@ -248,7 +301,7 @@ func init() {
 				ctx.Event.NativeMessage = json.RawMessage("\"" + msg.Elements.String() + "\"")
 				ctx.Event.RawMessageID = json.RawMessage(msg.MessageId.String())
 				ctx.Event.RawMessage = msg.Elements.String()
-				time.Sleep(time.Second * 5) // 防止风控
+				process.SleepAbout1sTo2s() // 防止风控
 				ctx.Event.Time = time.Now().Unix()
 				ctx.DeleteMessage(id)
 				vev, cl := binary.OpenWriterF(func(w *binary.Writer) {
