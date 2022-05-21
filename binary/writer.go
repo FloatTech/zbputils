@@ -23,7 +23,7 @@ func NewWriterF(f func(writer *Writer)) []byte {
 }
 
 // OpenWriterF must call func cl to close
-//nolint: revive
+
 func OpenWriterF(f func(*Writer)) (b []byte, cl func()) {
 	w := SelectWriter()
 	f(w)
@@ -56,7 +56,7 @@ func (w *Writer) WriteUInt32At(pos int, v uint32) {
 	binary.BigEndian.PutUint32(newdata, v)
 }
 
-//nolint: revive
+
 func (w *Writer) Write(b []byte) (n int, err error) {
 	return (*bytes.Buffer)(w).Write(b)
 }
@@ -155,7 +155,7 @@ func (w *Writer) Bytes() []byte {
 	return (*bytes.Buffer)(w).Bytes()
 }
 
-//nolint: revive
+
 func (w *Writer) String() string {
 	return helper.BytesToString((*bytes.Buffer)(w).Bytes())
 }
