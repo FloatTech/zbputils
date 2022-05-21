@@ -9,8 +9,8 @@ import (
 func SaveGIF2Path(path string, g *gif.GIF) error {
 	f, err := os.Create(path) // 创建文件
 	if err == nil {
-		gif.EncodeAll(f, g) // 写入
-		f.Close()           // 关闭文件
+		_ = gif.EncodeAll(f, g) // 写入
+		_ = f.Close()           // 关闭文件
 	}
 	return err
 }

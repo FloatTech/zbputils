@@ -143,7 +143,10 @@ func (dst *ImgFactory) ClipCircle(x, y, r int) *ImgFactory {
 func (dst *ImgFactory) InsertText(font string, size float64, col []int, x, y float64, txt string) *ImgFactory {
 	dc := gg.NewContextForImage(dst.Im)
 	// 字体, 大小, 颜色, 位置
-	dc.LoadFontFace(font, size)
+	err := dc.LoadFontFace(font, size)
+	if err != nil {
+		return dst
+	}
 	dc.SetRGBA255(col[0], col[1], col[2], col[3])
 	dc.DrawString(txt, x, y)
 	ds := dc.Image()

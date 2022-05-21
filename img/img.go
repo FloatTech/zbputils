@@ -181,14 +181,20 @@ func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFact
 	dc.SetRGBA255(0, 0, 0, 0)
 	dc.Clear()
 	dc.SetRGBA255(col[0], col[1], col[2], col[3])
-	dc.LoadFontFace(font, size+size/2)
+	err := dc.LoadFontFace(font, size+size/2)
+	if err != nil {
+		return &dst
+	}
 	w, h := dc.MeasureString(txt)
 	w = w - size*2
 	dc1 := gg.NewContext(int(w), int(h))
 	dc1.SetRGBA255(col1[0], col1[1], col1[2], col1[3])
 	dc1.Clear()
 	dc1.SetRGBA255(col[0], col[1], col[2], col[3])
-	dc1.LoadFontFace(font, size)
+	err = dc1.LoadFontFace(font, size)
+	if err != nil {
+		return &dst
+	}
 	dc1.DrawStringAnchored(txt, w/2, h/2, 0.5, 0.5)
 	dst.Im = image.NewNRGBA(image.Rect(0, 0, int(w), int(h)))
 	draw.Over.Draw(dst.Im, dst.Im.Bounds(), dc1.Image(), dc1.Image().Bounds().Min)

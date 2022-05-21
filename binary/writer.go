@@ -56,7 +56,7 @@ func (w *Writer) Write(b []byte) (n int, err error) {
 
 func (w *Writer) WriteHex(h string) {
 	b, _ := hex.DecodeString(h)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteByte(b byte) error {
@@ -66,13 +66,13 @@ func (w *Writer) WriteByte(b byte) error {
 func (w *Writer) WriteUInt16(v uint16) {
 	b := make([]byte, 2)
 	binary.BigEndian.PutUint16(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteUInt32(v uint32) {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteUInt64(v uint64) {
@@ -84,19 +84,19 @@ func (w *Writer) WriteUInt64(v uint64) {
 func (w *Writer) WriteUInt16LE(v uint16) {
 	b := make([]byte, 2)
 	binary.LittleEndian.PutUint16(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteUInt32LE(v uint32) {
 	b := make([]byte, 4)
 	binary.LittleEndian.PutUint32(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteUInt64LE(v uint64) {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteString(v string) {
@@ -113,9 +113,9 @@ func (w *Writer) WriteStringShort(v string) {
 
 func (w *Writer) WriteBool(b bool) {
 	if b {
-		w.WriteByte(0x01)
+		_ = w.WriteByte(0x01)
 	} else {
-		w.WriteByte(0x00)
+		_ = w.WriteByte(0x00)
 	}
 }
 
