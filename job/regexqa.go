@@ -122,14 +122,14 @@ func init() {
 		if matched[1] == "我" {
 			all = false
 		}
-		if all && ctx.Event.Sender.Role == "member" {
-			ctx.SendChain(message.Text("非管理员无法设置全局问答"))
+		if all && !zero.AdminPermission(ctx) {
+			ctx.SendChain(message.Text("非管理员/主人无法设置全局问答"))
 			return
 		}
 		isInject := false
 		if matched[4] == "做" || matched[4] == "执行" {
 			if !zero.AdminPermission(ctx) {
-				ctx.SendChain(message.Text("非管理员无法设置注入"))
+				ctx.SendChain(message.Text("非管理员/主人无法设置注入"))
 				return
 			}
 			isInject = true
@@ -245,14 +245,14 @@ func init() {
 		if matched[1] == "我" {
 			all = false
 		}
-		if all && ctx.Event.Sender.Role == "member" {
-			ctx.SendChain(message.Text("非管理员无法删除全局问答"))
+		if all && !zero.AdminPermission(ctx) {
+			ctx.SendChain(message.Text("非管理员/主人无法删除全局问答"))
 			return
 		}
 		isInject := false
 		if matched[2] == "让你做" || matched[2] == "让你执行" {
 			if !zero.AdminPermission(ctx) {
-				ctx.SendChain(message.Text("非管理员无法删除注入"))
+				ctx.SendChain(message.Text("非管理员/主人无法删除注入"))
 				return
 			}
 			isInject = true
