@@ -71,6 +71,7 @@ func (o *Once) Do(f func()) {
 	}
 }
 
+// Reset the done status as new one
 func (o *Once) Reset() {
 	o.m.Lock()
 	defer o.m.Unlock()

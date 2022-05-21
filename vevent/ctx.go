@@ -21,6 +21,7 @@ type Ctx struct {
 	message string
 }
 
+// HookCtxCaller change ctx's caller to hook
 func HookCtxCaller(ctx *zero.Ctx, hook zero.APICaller) {
 	(*(**Ctx)(unsafe.Pointer(&ctx))).caller = hook
 }

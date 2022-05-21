@@ -22,11 +22,13 @@ var (
 // MSG 消息Map
 type MSG = map[string]interface{}
 
+// Caller ...
 type Caller interface {
 	// Call specific API
 	Call(action string, para string) MSG
 }
 
+// Event ...
 type Event interface {
 	// JSONBytes return bytes of json by lazy marshalling.
 	JSONBytes() []byte
@@ -34,11 +36,13 @@ type Event interface {
 	RawMSG() MSG
 }
 
+// CQBot ...
 type CQBot interface {
 	// OnEventPush 注册事件上报函数
 	OnEventPush(func(e Event))
 }
 
+// FCClient Funcall Client
 type FCClient struct {
 	seq       uint64
 	newcaller func(CQBot) Caller
@@ -92,6 +96,7 @@ func (f *FCClient) Listen(handler func([]byte, zero.APICaller)) {
 }
 
 // CallApi 发送请求
+//nolint: revive
 func (f *FCClient) CallApi(req zero.APIRequest) (zero.APIResponse, error) {
 	req.Echo = f.nextSeq()
 	rsp, err := f.handleRequest(&req)
