@@ -85,7 +85,7 @@ func genToken() (tok string) {
 func isValidToken(tok string) (yes bool) {
 	s := b14.DecodeString(tok)
 	timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
-		w.WriteByte(0)
+		_ = w.WriteByte(0)
 		w.WriteString(s)
 	})
 	yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < 10

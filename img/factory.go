@@ -156,10 +156,12 @@ func (dst *ImgFactory) InsertText(font string, size float64, col []int, x, y flo
 
 // InsertUpG gif 上部插入图片
 func (dst *ImgFactory) InsertUpG(im []*image.NRGBA, w, h, x, y int) []*image.NRGBA {
-	var ims []*image.NRGBA
-	for _, v := range im {
-		dc := dst.Clone().InsertUp(v, w, h, x, y).Im
-		ims = append(ims, dc)
+	if len(im) == 0 {
+		return nil
+	}
+	ims := make([]*image.NRGBA, len(im))
+	for i, v := range im {
+		ims[i] = dst.Clone().InsertUp(v, w, h, x, y).Im
 	}
 	return ims
 }

@@ -215,7 +215,7 @@ func init() {
 					if insts[i].IsInject {
 						w.WriteString("(做)")
 					}
-					w.WriteByte('\n')
+					_ = w.WriteByte('\n')
 				}
 			}
 			return insts

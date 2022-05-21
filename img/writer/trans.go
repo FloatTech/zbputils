@@ -1,3 +1,4 @@
+// Package writer 图片IO相关
 package writer
 
 import (

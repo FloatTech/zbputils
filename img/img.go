@@ -107,23 +107,24 @@ func LoadAllFrames(path string, w, h int) ([]*image.NRGBA, error) {
 func Size(im image.Image, w, h int) *ImgFactory {
 	var dc ImgFactory
 	// 修改尺寸
-	if w > 0 && h > 0 {
+	switch {
+	case w > 0 && h > 0:
 		dc.W = w
 		dc.H = h
 		dc.Im = imaging.Resize(im, w, h, imaging.Lanczos)
-	} else if w <= 0 && h <= 0 {
+	case w == 0 && h > 0:
+		dc.H = h
+		dc.W = h * im.Bounds().Size().X / im.Bounds().Size().Y
+		dc.Im = imaging.Resize(im, dc.W, h, imaging.Lanczos)
+	case h == 0 && w > 0:
+		dc.W = w
+		dc.H = w * im.Bounds().Size().Y / im.Bounds().Size().X
+		dc.Im = imaging.Resize(im, w, dc.H, imaging.Lanczos)
+	default:
 		dc.W = im.Bounds().Size().X
 		dc.H = im.Bounds().Size().Y
 		dc.Im = image.NewNRGBA(image.Rect(0, 0, dc.W, dc.H))
 		draw.Over.Draw(dc.Im, dc.Im.Bounds(), im, im.Bounds().Min)
-	} else if w == 0 {
-		dc.H = h
-		dc.W = h * im.Bounds().Size().X / im.Bounds().Size().Y
-		dc.Im = imaging.Resize(im, dc.W, h, imaging.Lanczos)
-	} else if h == 0 {
-		dc.W = w
-		dc.H = w * im.Bounds().Size().Y / im.Bounds().Size().X
-		dc.Im = imaging.Resize(im, w, dc.H, imaging.Lanczos)
 	}
 	return &dc
 }
@@ -186,7 +187,7 @@ func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFact
 		return &dst
 	}
 	w, h := dc.MeasureString(txt)
-	w = w - size*2
+	w -= size * 2
 	dc1 := gg.NewContext(int(w), int(h))
 	dc1.SetRGBA255(col1[0], col1[1], col1[2], col1[3])
 	dc1.Clear()

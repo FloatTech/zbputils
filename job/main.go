@@ -323,7 +323,7 @@ func init() {
 				ctx.Echo(vev)
 			}
 		})
-		hookedctx := *ctx
+		hookedctx := *ctx //nolint: govet
 		vevent.HookCtxCaller(&hookedctx, hook)
 		hookedctx.Echo(binary.StringToBytes(strings.ReplaceAll(ctx.Event.RawEvent.Raw, "注入指令结果：", "")))
 	})

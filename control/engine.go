@@ -86,17 +86,18 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 	)
 	e.prio = prio
 	e.service = service
-	if o.PublicDataFolder != "" {
+	switch {
+	case o.PublicDataFolder != "":
 		if unicode.IsLower([]rune(o.PublicDataFolder)[0]) {
 			panic("public data folder " + o.PublicDataFolder + " must start with an upper case letter")
 		}
 		e.datafolder = "data/" + o.PublicDataFolder + "/"
-	} else if o.PrivateDataFolder != "" {
+	case o.PrivateDataFolder != "":
 		if unicode.IsUpper([]rune(o.PrivateDataFolder)[0]) {
 			panic("private data folder " + o.PrivateDataFolder + " must start with an lower case letter")
 		}
 		e.datafolder = "data/" + o.PrivateDataFolder + "/"
-	} else {
+	default:
 		e.datafolder = "data/zbp/"
 	}
 	if e.datafolder != "data/zbp/" {
