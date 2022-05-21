@@ -78,7 +78,7 @@ func (w *Writer) WriteUInt32(v uint32) {
 func (w *Writer) WriteUInt64(v uint64) {
 	b := make([]byte, 8)
 	binary.BigEndian.PutUint64(b, v)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func (w *Writer) WriteUInt16LE(v uint16) {
