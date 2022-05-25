@@ -131,7 +131,7 @@ func init() {
 				entries[c.ID] = eid
 				return nil
 			})
-			if err.Error() != "sql.FindFor: null result" {
+			if err != nil && err.Error() != "sql.FindFor: null result" {
 				panic(err)
 			}
 		}
