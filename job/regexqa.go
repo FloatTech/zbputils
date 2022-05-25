@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/FloatTech/zbputils/binary"
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/process"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -113,7 +114,7 @@ func removeInjectRegex(gid, uid int64, bots, pattern string) error {
 }
 
 func init() {
-	en.OnRegex(`^(我|大家|有人)(说|问)(.*)你(答|说|做|执行)`, zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^(我|大家|有人)(说|问)(.*)你(答|说|做|执行)`, zero.OnlyGroup).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		mu.Lock()
 		defer mu.Unlock()
 
@@ -184,7 +185,7 @@ func init() {
 		ctx.SendChain(message.Text("成功"))
 	})
 
-	en.OnRegex(`^(查看|看看)(我|大家|有人)(说|问)`, zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^(查看|看看)(我|大家|有人)(说|问)`, zero.OnlyGroup).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		mu.RLock()
 		defer mu.RUnlock()
 
@@ -229,7 +230,7 @@ func init() {
 		ctx.SendChain(message.Text(w.String()))
 	})
 
-	en.OnRegex(`^删除(大家|有人|我)(说|问|让你做|让你执行)`, zero.OnlyGroup).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^删除(大家|有人|我)(说|问|让你做|让你执行)`, zero.OnlyGroup).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		mu.Lock()
 		defer mu.Unlock()
 
@@ -308,7 +309,7 @@ func init() {
 			return true
 		}
 		return runInsts(ctx, rg.Private[uid])
-	}).Handle(func(ctx *zero.Ctx) {
+	}).Limit(ctxext.LimitByGroup).Handle(func(ctx *zero.Ctx) {
 		template := ctx.State["regqa_template"].(string)
 		if ctx.State["regqa_isinject"].(bool) {
 			ctx.Event.NativeMessage = json.RawMessage("\"" + template + "\"")
