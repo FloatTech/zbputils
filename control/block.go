@@ -16,14 +16,32 @@ func initBlock() (err error) {
 	return
 }
 
+var blockCache = make(map[int64]bool)
+
 func doBlock(uid int64) error {
+	manmu.Lock()
+	defer manmu.Unlock()
+	blockCache[uid] = true
 	return db.Insert("__block", &block{UserID: uid})
 }
 
 func doUnblock(uid int64) error {
+	manmu.Lock()
+	defer manmu.Unlock()
+	blockCache[uid] = false
 	return db.Del("__block", "where uid = "+strconv.FormatInt(uid, 10))
 }
 
 func isBlocked(uid int64) bool {
-	return db.CanFind("__block", "where uid = "+strconv.FormatInt(uid, 10))
+	manmu.RLock()
+	isbl, ok := blockCache[uid]
+	manmu.RUnlock()
+	if ok {
+		return isbl
+	}
+	manmu.Lock()
+	defer manmu.Unlock()
+	isbl = db.CanFind("__block", "where uid = "+strconv.FormatInt(uid, 10))
+	blockCache[uid] = isbl
+	return isbl
 }

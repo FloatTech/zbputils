@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
+	"math/bits"
 	"os"
 	"strconv"
 	"strings"
@@ -33,7 +34,6 @@ var (
 
 // Control is to control the plugins.
 type Control struct {
-	sync.RWMutex
 	service string
 	cache   map[int64]bool
 	options Options
@@ -41,6 +41,7 @@ type Control struct {
 
 // newctrl returns Manager with settings.
 func newctrl(service string, o *Options) *Control {
+	var c grpcfg
 	m := &Control{
 		service: service,
 		cache:   make(map[int64]bool, 16),
@@ -52,15 +53,21 @@ func newctrl(service string, o *Options) *Control {
 		}(),
 	}
 	manmu.Lock()
+	defer manmu.Unlock()
 	managers[service] = m
-	manmu.Unlock()
-	err := db.Create(service, &grpcfg{})
+	err := db.Create(service, &c)
 	if err != nil {
 		panic(err)
 	}
 	err = db.Create(service+"ban", &ban{})
 	if err != nil {
 		panic(err)
+	}
+	err = db.Find(m.service, &c, "WHERE gid=0")
+	if err == nil {
+		if bits.RotateLeft64(uint64(c.Disable), 1)&1 == 1 {
+			m.options.DisableOnDefault = !m.options.DisableOnDefault
+		}
 	}
 	return m
 }
@@ -69,17 +76,17 @@ func newctrl(service string, o *Options) *Control {
 // groupID == 0 (ALL) will operate on all grps.
 func (m *Control) Enable(groupID int64) {
 	var c grpcfg
-	m.RLock()
+	manmu.RLock()
 	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
 	}
 	c.Disable = int64(uint64(c.Disable) & 0xffffffff_fffffffe)
-	m.Lock()
+	manmu.Lock()
 	m.cache[groupID] = true
 	err = db.Insert(m.service, &c)
-	m.Unlock()
+	manmu.Unlock()
 	if err != nil {
 		log.Errorf("[control] %v", err)
 	}
@@ -89,17 +96,17 @@ func (m *Control) Enable(groupID int64) {
 // groupID == 0 (ALL) will operate on all grps.
 func (m *Control) Disable(groupID int64) {
 	var c grpcfg
-	m.RLock()
+	manmu.RLock()
 	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
 	}
 	c.Disable |= 1
-	m.Lock()
+	manmu.Lock()
 	m.cache[groupID] = false
 	err = db.Insert(m.service, &c)
-	m.Unlock()
+	manmu.Unlock()
 	if err != nil {
 		log.Errorf("[control] %v", err)
 	}
@@ -109,10 +116,10 @@ func (m *Control) Disable(groupID int64) {
 // groupID == 0 (ALL) is not allowed.
 func (m *Control) Reset(groupID int64) {
 	if groupID != 0 {
-		m.Lock()
+		manmu.Lock()
 		delete(m.cache, groupID)
 		err := db.Del(m.service, "WHERE gid="+strconv.FormatInt(groupID, 10))
-		m.Unlock()
+		manmu.Unlock()
 		if err != nil {
 			log.Errorf("[control] %v", err)
 		}
@@ -126,20 +133,20 @@ func (m *Control) IsEnabledIn(gid int64) bool {
 	var c grpcfg
 	var err error
 
-	m.RLock()
+	manmu.RLock()
 	yes, ok := m.cache[0]
-	m.RUnlock()
+	manmu.RUnlock()
 	if !ok {
-		m.RLock()
+		manmu.RLock()
 		err = db.Find(m.service, &c, "WHERE gid=0")
-		m.RUnlock()
+		manmu.RUnlock()
 		if err == nil && c.GroupID == 0 {
 			log.Debugf("[control] plugin %s of all : %d", m.service, c.Disable&1)
 			yes = c.Disable&1 == 0
 			ok = true
-			m.Lock()
+			manmu.Lock()
 			m.cache[0] = yes
-			m.Unlock()
+			manmu.Unlock()
 			log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
 		}
 	}
@@ -148,22 +155,22 @@ func (m *Control) IsEnabledIn(gid int64) bool {
 		return yes
 	}
 
-	m.RLock()
+	manmu.RLock()
 	yes, ok = m.cache[gid]
-	m.RUnlock()
+	manmu.RUnlock()
 	if ok {
 		log.Debugf("[control] read cached %s of grp %d : %v", m.service, gid, yes)
 	} else {
-		m.RLock()
+		manmu.RLock()
 		err = db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(gid, 10))
-		m.RUnlock()
+		manmu.RUnlock()
 		if err == nil && gid == c.GroupID {
 			log.Debugf("[control] plugin %s of grp %d : %d", m.service, c.GroupID, c.Disable&1)
 			yes = c.Disable&1 == 0
 			ok = true
-			m.Lock()
+			manmu.Lock()
 			m.cache[gid] = yes
-			m.Unlock()
+			manmu.Unlock()
 			log.Debugf("[control] cache plugin %s of grp %d : %v", m.service, gid, yes)
 		}
 	}
@@ -180,9 +187,9 @@ func (m *Control) Ban(uid, gid int64) {
 	var digest [16]byte
 	if gid != 0 { // 特定群
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
-		m.RLock()
+		manmu.RLock()
 		err = db.Insert(m.service+"ban", &ban{ID: int64(binary.LittleEndian.Uint64(digest[:8])), UserID: uid, GroupID: gid})
-		m.RUnlock()
+		manmu.RUnlock()
 		if err == nil {
 			log.Debugf("[control] plugin %s is banned in grp %d for usr %d.", m.service, gid, uid)
 			return
@@ -190,9 +197,9 @@ func (m *Control) Ban(uid, gid int64) {
 	}
 	// 所有群
 	digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_all", uid)))
-	m.RLock()
+	manmu.RLock()
 	err = db.Insert(m.service+"ban", &ban{ID: int64(binary.LittleEndian.Uint64(digest[:8])), UserID: uid, GroupID: 0})
-	m.RUnlock()
+	manmu.RUnlock()
 	if err == nil {
 		log.Debugf("[control] plugin %s is banned in all grp for usr %d.", m.service, uid)
 	}
@@ -203,17 +210,17 @@ func (m *Control) Permit(uid, gid int64) {
 	var digest [16]byte
 	if gid != 0 { // 特定群
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
-		m.RLock()
+		manmu.RLock()
 		_ = db.Del(m.service+"ban", "WHERE id = "+strconv.FormatInt(int64(binary.LittleEndian.Uint64(digest[:8])), 10))
-		m.RUnlock()
+		manmu.RUnlock()
 		log.Debugf("[control] plugin %s is permitted in grp %d for usr %d.", m.service, gid, uid)
 		return
 	}
 	// 所有群
 	digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_all", uid)))
-	m.RLock()
+	manmu.RLock()
 	_ = db.Del(m.service+"ban", "WHERE id = "+strconv.FormatInt(int64(binary.LittleEndian.Uint64(digest[:8])), 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	log.Debugf("[control] plugin %s is permitted in all grp for usr %d.", m.service, uid)
 }
 
@@ -224,18 +231,18 @@ func (m *Control) IsBannedIn(uid, gid int64) bool {
 	var digest [16]byte
 	if gid != 0 {
 		digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_%d", uid, gid)))
-		m.RLock()
+		manmu.RLock()
 		err = db.Find(m.service+"ban", &b, "WHERE id = "+strconv.FormatInt(int64(binary.LittleEndian.Uint64(digest[:8])), 10))
-		m.RUnlock()
+		manmu.RUnlock()
 		if err == nil && gid == b.GroupID && uid == b.UserID {
 			log.Debugf("[control] plugin %s is banned in grp %d for usr %d.", m.service, b.GroupID, b.UserID)
 			return true
 		}
 	}
 	digest = md5.Sum(helper.StringToBytes(fmt.Sprintf("%d_all", uid)))
-	m.RLock()
+	manmu.RLock()
 	err = db.Find(m.service+"ban", &b, "WHERE id = "+strconv.FormatInt(int64(binary.LittleEndian.Uint64(digest[:8])), 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	if err == nil && b.GroupID == 0 && uid == b.UserID {
 		log.Debugf("[control] plugin %s is banned in all grp for usr %d.", m.service, b.UserID)
 		return true
@@ -243,38 +250,60 @@ func (m *Control) IsBannedIn(uid, gid int64) bool {
 	return false
 }
 
-// GetData 获取某个群的 63 字节配置信息
+// GetData 获取某个群的 62 位配置信息
 func (m *Control) GetData(gid int64) int64 {
 	var c grpcfg
 	var err error
-	m.RLock()
+	manmu.RLock()
 	err = db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(gid, 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	if err == nil && gid == c.GroupID {
 		log.Debugf("[control] plugin %s of grp %d : 0x%x", m.service, c.GroupID, c.Disable>>1)
-		return c.Disable >> 1
+		return (c.Disable >> 1) & 0x3fffffff_ffffffff
 	}
 	return 0
 }
 
-// SetData 为某个群设置低 63 位配置数据
+// SetData 为某个群设置低 62 位配置数据
 func (m *Control) SetData(groupID int64, data int64) error {
 	var c grpcfg
-	m.RLock()
+	manmu.RLock()
 	err := db.Find(m.service, &c, "WHERE gid="+strconv.FormatInt(groupID, 10))
-	m.RUnlock()
+	manmu.RUnlock()
 	if err != nil {
 		c.GroupID = groupID
 		if m.options.DisableOnDefault {
 			c.Disable = 1
 		}
 	}
-	c.Disable &= 1
-	c.Disable |= data << 1
+	x := bits.RotateLeft64(uint64(c.Disable), 1)
+	x &= 0x03
+	x |= uint64(data) << 2
+	c.Disable = int64(bits.RotateLeft64(x, -1))
 	log.Debugf("[control] set plugin %s of grp %d : 0x%x", m.service, c.GroupID, data)
-	m.Lock()
+	manmu.Lock()
 	err = db.Insert(m.service, &c)
-	m.Unlock()
+	manmu.Unlock()
+	if err != nil {
+		log.Errorf("[control] %v", err)
+	}
+	return err
+}
+
+// Flip 改变全局默认启用状态
+func (m *Control) Flip() error {
+	var c grpcfg
+	manmu.Lock()
+	defer manmu.Unlock()
+	m.options.DisableOnDefault = !m.options.DisableOnDefault
+	err := db.Find(m.service, &c, "WHERE gid=0")
+	if err != nil && m.options.DisableOnDefault {
+		c.Disable = 1
+	}
+	x := bits.RotateLeft64(uint64(c.Disable), 1) &^ 1
+	c.Disable = int64(bits.RotateLeft64(x, -1))
+	log.Debugf("[control] flip plugin %s of all : %d", m.service, c.GroupID, x&1)
+	err = db.Insert(m.service, &c)
 	if err != nil {
 		log.Errorf("[control] %v", err)
 	}
@@ -536,6 +565,24 @@ func init() {
 				return
 			}
 			ctx.SendChain(message.Text("参数错误!"))
+		})
+
+		zero.OnCommandGroup([]string{
+			"改变默认启用状态", "allflip",
+		}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			model := extension.CommandModel{}
+			_ = ctx.Parse(&model)
+			service, ok := Lookup(model.Args)
+			if !ok {
+				ctx.SendChain(message.Text("没有找到指定服务!"))
+				return
+			}
+			err := service.Flip()
+			if err != nil {
+				ctx.SendChain(message.Text("ERROR:", err))
+				return
+			}
+			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
 		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
