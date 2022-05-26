@@ -2,6 +2,7 @@ package ctxext
 
 import (
 	"time"
+	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
@@ -23,6 +24,20 @@ var DefaultSingle = single.New(
 // defaultLimiterManager 默认限速器管理
 //    每 10s 5次触发
 var defaultLimiterManager = rate.NewManager[int64](time.Second*10, 5)
+
+type fakeLM struct {
+	limiters unsafe.Pointer
+	interval time.Duration
+	burst    int
+}
+
+// SetDefaultLimiterManagerParam 设置默认限速器参数
+//    每 interval 时间 burst 次触发
+func SetDefaultLimiterManagerParam(interval time.Duration, burst int) {
+	f := (*fakeLM)(unsafe.Pointer(&defaultLimiterManager))
+	f.interval = interval
+	f.burst = burst
+}
 
 // LimitByUser 默认限速器 每 10s 5次触发
 //    按 qq 号限制
