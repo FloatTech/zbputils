@@ -4,8 +4,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/FloatTech/zbputils/process"
 	"github.com/fumiama/go-registry"
+
+	"github.com/FloatTech/zbputils/process"
 )
 
 type item struct {

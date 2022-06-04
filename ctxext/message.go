@@ -3,9 +3,10 @@ package ctxext
 import (
 	"encoding/json"
 
-	"github.com/FloatTech/zbputils/binary"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+
+	"github.com/FloatTech/zbputils/binary"
 )
 
 type (

@@ -1,8 +1,9 @@
 package ctxext
 
 import (
-	"github.com/FloatTech/zbputils/process"
 	zero "github.com/wdvxdr1123/ZeroBot"
+
+	"github.com/FloatTech/zbputils/process"
 )
 
 // DoOnceOnSuccess 当返回 true, 之后直接通过, 否则下次触发仍会执行

@@ -10,9 +10,10 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/FloatTech/zbputils/process"
 	reg "github.com/fumiama/go-registry"
 	"github.com/sirupsen/logrus"
+
+	"github.com/FloatTech/zbputils/process"
 )
 
 const (
