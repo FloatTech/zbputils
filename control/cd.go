@@ -9,6 +9,7 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	binutils "github.com/FloatTech/zbputils/binary"
 	"github.com/FloatTech/zbputils/math"
 	"github.com/FloatTech/zbputils/process"
@@ -36,7 +37,7 @@ func init() {
 			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
 				gid := ctx.Event.GroupID
 				w := binutils.SelectWriter()
-				ForEach(func(key string, manager *Control) bool {
+				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					if manager.IsEnabledIn(gid) {
 						w.WriteString("\xfe\xff")
 						w.WriteString(key)
@@ -62,9 +63,9 @@ func init() {
 			if time.Now().Unix()-startTime < 10 {
 				gid := ctx.Event.GroupID
 				for _, s := range strings.Split(b14.DecodeString(ctx.State["regex_matched"].([]string)[1]), "\xfe\xff") {
-					manmu.RLock()
-					c, ok := managers[s]
-					manmu.RUnlock()
+					managers.RLock()
+					c, ok := managers.M[s]
+					managers.RUnlock()
 					if ok && c.IsEnabledIn(gid) {
 						c.Disable(gid)
 					}

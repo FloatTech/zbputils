@@ -5,6 +5,7 @@ import (
 	"os"
 	"unicode"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/file"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -68,7 +69,7 @@ type engineinstance struct {
 var priomap = make(map[int]string)      // priomap is map[prio]service
 var foldermap = make(map[string]string) // foldermap is map[folder]service
 
-func newengine(service string, prio int, o *Options) (e *engineinstance) {
+func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *engineinstance) {
 	e = new(engineinstance)
 	s, ok := priomap[prio]
 	if ok {
@@ -82,7 +83,7 @@ func newengine(service string, prio int, o *Options) (e *engineinstance) {
 			// 防止自触发
 			return ctx.Event.UserID != ctx.Event.SelfID
 		},
-		newctrl(service, o).Handler,
+		newctrl(service, o),
 	)
 	e.prio = prio
 	e.service = service
@@ -124,7 +125,7 @@ func (e *engineinstance) DataFolder() string {
 
 // IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
 func (e *engineinstance) IsEnabledIn(id int64) bool {
-	c, ok := Lookup(e.service)
+	c, ok := managers.Lookup(e.service)
 	if !ok {
 		return false
 	}

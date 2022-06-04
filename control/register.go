@@ -2,6 +2,9 @@ package control
 
 import (
 	"sync/atomic"
+
+	ctrl "github.com/FloatTech/zbpctrl"
+	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
 var (
@@ -10,7 +13,7 @@ var (
 )
 
 // Register 注册插件控制器
-func Register(service string, o *Options) Engine {
+func Register(service string, o *ctrl.Options[*zero.Ctx]) Engine {
 	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
 	enmap[service] = engine
 	return engine
@@ -21,13 +24,13 @@ func Delete(service string) {
 	engine, ok := enmap[service]
 	if ok {
 		engine.Delete()
-		manmu.RLock()
-		_, ok = managers[service]
-		manmu.RUnlock()
+		managers.RLock()
+		_, ok = managers.M[service]
+		managers.RUnlock()
 		if ok {
-			manmu.Lock()
-			delete(managers, service)
-			manmu.Unlock()
+			managers.Lock()
+			delete(managers.M, service)
+			managers.Unlock()
 		}
 	}
 }
