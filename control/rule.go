@@ -34,6 +34,10 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	}
 }
 
+func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
+	return managers.Lookup(service)
+}
+
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
 		err := os.MkdirAll("data/control", 0755)
