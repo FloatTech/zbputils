@@ -29,7 +29,7 @@ var (
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	c := managers.NewControl(service, o)
 	return func(ctx *zero.Ctx) bool {
-		ctx.State["manager"] = c.Manager
+		ctx.State["manager"] = c
 		return c.Handler(uintptr(unsafe.Pointer(ctx)), ctx.Event.GroupID, ctx.Event.UserID)
 	}
 }
