@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/FloatTech/zbputils/binary"
-	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/process"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+
+	"github.com/FloatTech/zbputils/binary"
+	"github.com/FloatTech/zbputils/ctxext"
+	"github.com/FloatTech/zbputils/process"
 )
 
 var global = context{
