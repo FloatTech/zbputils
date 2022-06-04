@@ -56,7 +56,11 @@ func init() {
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
-			service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			service, ok := Lookup(model.Args)
+			if !ok {
+				ctx.SendChain(message.Text("没有找到指定服务!"))
+				return
+			}
 			grp := ctx.Event.GroupID
 			if grp == 0 {
 				// 个人用户
@@ -84,7 +88,11 @@ func init() {
 		}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
-			service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			service, ok := Lookup(model.Args)
+			if !ok {
+				ctx.SendChain(message.Text("没有找到指定服务!"))
+				return
+			}
 			if strings.Contains(model.Command, "启用") || strings.Contains(model.Command, "enable") {
 				service.Enable(0)
 				ctx.SendChain(message.Text("已全局启用服务: " + model.Args))
@@ -97,7 +105,11 @@ func init() {
 		zero.OnCommandGroup([]string{"还原", "reset"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
-			service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			service, ok := Lookup(model.Args)
+			if !ok {
+				ctx.SendChain(message.Text("没有找到指定服务!"))
+				return
+			}
 			grp := ctx.Event.GroupID
 			if grp == 0 {
 				// 个人用户
@@ -114,7 +126,11 @@ func init() {
 			_ = ctx.Parse(&model)
 			args := strings.Split(model.Args, " ")
 			if len(args) >= 2 {
-				service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+				service, ok := Lookup(args[0])
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
 				grp := ctx.Event.GroupID
 				if grp == 0 {
 					grp = -ctx.Event.UserID
@@ -150,7 +166,11 @@ func init() {
 			_ = ctx.Parse(&model)
 			args := strings.Split(model.Args, " ")
 			if len(args) >= 2 {
-				service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+				service, ok := Lookup(args[0])
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
 				msg := "**" + args[0] + "全局报告**"
 				if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
 					for _, usr := range args[1:] {
@@ -213,7 +233,11 @@ func init() {
 		}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
-			service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+			service, ok := Lookup(model.Args)
+			if !ok {
+				ctx.SendChain(message.Text("没有找到指定服务!"))
+				return
+			}
 			err := service.Flip()
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR:", err))
@@ -226,7 +250,11 @@ func init() {
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
-				service := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+				service, ok := Lookup(model.Args)
+				if !ok {
+					ctx.SendChain(message.Text("没有找到指定服务!"))
+					return
+				}
 				if service.Options.Help != "" {
 					gid := ctx.Event.GroupID
 					if gid == 0 {
@@ -245,12 +273,11 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				m := ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).Manager
-				m.RLock()
-				msg := make([]any, 1, len(m.M)*4+1)
-				m.RUnlock()
+				managers.RLock()
+				msg := make([]any, 1, len(managers.M)*4+1)
+				managers.RUnlock()
 				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情"
-				m.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					i++
 					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid), key)
 					return true
@@ -265,12 +292,11 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				m := ctx.State["manager"].(*ctrl.Control[*zero.Ctx]).Manager
-				m.RLock()
-				msgs := make([]any, 1, len(m.M)*7+1)
-				m.RUnlock()
+				managers.RLock()
+				msgs := make([]any, 1, len(managers.M)*7+1)
+				managers.RUnlock()
 				msgs[0] = "---服务详情---\n"
-				m.ForEach(func(key string, service *ctrl.Control[*zero.Ctx]) bool {
+				managers.ForEach(func(key string, service *ctrl.Control[*zero.Ctx]) bool {
 					i++
 					msgs = append(msgs, i, ": ", service.EnableMarkIn(gid), key, "\n", service, "\n\n")
 					return true
