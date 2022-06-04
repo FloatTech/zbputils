@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	registry = reg.NewRegReader("reilia.westeurope.cloudapp.azure.com:32664", "fumiama")
+	registry = reg.NewRegReader("reilia.fumiama.top:32664", "fumiama")
 	connerr  error
 	once     = process.NewOnce()
 )

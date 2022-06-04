@@ -27,7 +27,7 @@ func newItem(name, u string) (*item, error) {
 
 // getItem 唯一标识文件名
 func getItem(name string) (*item, error) {
-	reg := registry.NewRegReader("reilia.westeurope.cloudapp.azure.com:35354", "fumiama")
+	reg := registry.NewRegReader("reilia.fumiama.top:35354", "fumiama")
 	err := reg.ConnectIn(time.Second * 4)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func getItem(name string) (*item, error) {
 // push 推送 item
 func (t *item) push(key string) (err error) {
 	for i := 0; i < 8; i++ {
-		r := registry.NewRegedit("reilia.westeurope.cloudapp.azure.com:35354", "fumiama", key)
+		r := registry.NewRegedit("reilia.fumiama.top:35354", "fumiama", key)
 		err = r.ConnectIn(time.Second * 8)
 		if err != nil {
 			return
