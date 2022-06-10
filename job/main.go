@@ -40,7 +40,7 @@ var (
 
 func init() {
 	db.DBPath = en.DataFolder() + "job.db"
-	err := db.Open()
+	err := db.Open(time.Hour * 24)
 	if err != nil {
 		panic(err)
 	}
