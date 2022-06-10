@@ -44,6 +44,10 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+		err = managers.D.Open(time.Hour * 24)
+		if err != nil {
+			panic(err)
+		}
 		err = managers.InitBlock()
 		if err != nil {
 			panic(err)
