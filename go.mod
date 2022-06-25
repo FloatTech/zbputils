@@ -12,9 +12,11 @@ require (
 	github.com/fumiama/go-base16384 v1.5.3
 	github.com/fumiama/go-registry v0.1.6
 	github.com/go-playground/assert/v2 v2.0.1
+	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.1
 	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220610070647-9eeffcb277ee
+	gitlab.com/gomidi/midi/v2 v2.0.22
 	golang.org/x/text v0.3.7
 )
 
