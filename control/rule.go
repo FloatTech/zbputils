@@ -44,6 +44,37 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+
+		zero.OnCommandGroup([]string{
+			"响应", "response", "沉默", "silence",
+		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			grp := ctx.Event.GroupID
+			if grp == 0 {
+				// 个人用户
+				grp = -ctx.Event.UserID
+			}
+			var msg message.MessageSegment
+			switch ctx.State["command"] {
+			case "响应", "response":
+				err := managers.Response(grp)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始在此工作啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			case "沉默", "silence":
+				err := managers.Silence(grp)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始休息啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			default:
+				msg = message.Text("ERROR: bad command\"", ctx.State["command"], "\"")
+			}
+			ctx.SendChain(msg)
+		})
+
 		zero.OnCommandGroup([]string{
 			"启用", "enable", "禁用", "disable",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
@@ -298,7 +329,7 @@ func init() {
 				managers.RLock()
 				msg := make([]any, 1, len(managers.M)*4+1)
 				managers.RUnlock()
-				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情"
+				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					i++
 					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid), key)
