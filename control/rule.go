@@ -44,17 +44,6 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		err = managers.D.Open(time.Hour * 24)
-		if err != nil {
-			panic(err)
-		}
-		err = managers.InitBlock()
-		if err != nil {
-			panic(err)
-		}
-		zero.OnMessage(func(ctx *zero.Ctx) bool {
-			return managers.IsBlocked(ctx.Event.UserID)
-		}).SetBlock(true).ThirdPriority()
 		zero.OnCommandGroup([]string{
 			"启用", "enable", "禁用", "disable",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
@@ -140,20 +129,49 @@ func init() {
 					grp = -ctx.Event.UserID
 				}
 				msg := "**" + args[0] + "报告**"
+				var members map[int64]struct{}
+				issu := zero.SuperUserPermission(ctx)
+				if !issu {
+					lst := ctx.GetGroupMemberList(ctx.Event.GroupID).Array()
+					members = make(map[int64]struct{}, len(lst))
+					for _, m := range lst {
+						members[m.Get("user_id").Int()] = struct{}{}
+					}
+				}
 				if strings.Contains(model.Command, "允许") || strings.Contains(model.Command, "permit") {
 					for _, usr := range args[1:] {
 						uid, err := strconv.ParseInt(usr, 10, 64)
 						if err == nil {
-							service.Permit(uid, grp)
-							msg += "\n+ 已允许" + usr
+							if issu {
+								service.Permit(uid, grp)
+								msg += "\n+ 已允许" + usr
+							} else {
+								_, ok := members[uid]
+								if ok {
+									service.Permit(uid, grp)
+									msg += "\n+ 已允许" + usr
+								} else {
+									msg += "\nx " + usr + " 不在本群"
+								}
+							}
 						}
 					}
 				} else {
 					for _, usr := range args[1:] {
 						uid, err := strconv.ParseInt(usr, 10, 64)
 						if err == nil {
-							service.Ban(uid, grp)
-							msg += "\n- 已禁止" + usr
+							if issu {
+								service.Ban(uid, grp)
+								msg += "\n- 已禁止" + usr
+							} else {
+								_, ok := members[uid]
+								if ok {
+									service.Ban(uid, grp)
+									msg += "\n- 已禁止" + usr
+								} else {
+									msg += "\nx " + usr + " 不在本群"
+								}
+							}
 						}
 					}
 				}
