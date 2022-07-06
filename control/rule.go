@@ -3,7 +3,6 @@ package control
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -40,11 +39,6 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
-		err := os.MkdirAll("data/control", 0755)
-		if err != nil {
-			panic(err)
-		}
-
 		zero.OnCommandGroup([]string{
 			"响应", "response", "沉默", "silence",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {

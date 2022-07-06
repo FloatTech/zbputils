@@ -1,7 +1,7 @@
 github.com/FloatTech/sqlite v0.3.2 h1:iTg2ZKnzjjZAdlSN3hXmpCBn15odc4Ud484OoM3yXGA=
 github.com/FloatTech/sqlite v0.3.2/go.mod h1:VFtLofV5qxw5eBneZRbWwD451SLSm50o9J3J43iB1iw=
-github.com/FloatTech/zbpctrl v1.4.1-0.20220705050928-b798cd57bc48 h1:dylJ3GJO5477uYuxqJEmt891dCxmf34zOW5rv5HpaFw=
-github.com/FloatTech/zbpctrl v1.4.1-0.20220705050928-b798cd57bc48/go.mod h1:5FDkrlVaQCxUfeqH7XJPTfej0q+y9fzImhvZI4ofu9Y=
+github.com/FloatTech/zbpctrl v1.4.1-0.20220706065402-bff8398fa802 h1:hrQxxW3qfsqMK+02pShaIKHHv6Lsz/Che7VMyBWNBFY=
+github.com/FloatTech/zbpctrl v1.4.1-0.20220706065402-bff8398fa802/go.mod h1:5FDkrlVaQCxUfeqH7XJPTfej0q+y9fzImhvZI4ofu9Y=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c h1:cNPOdTNiVwxLpROLjXCgbIPvdkE+BwvxDvgmdYmWx6Q=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c/go.mod h1:KqZzu7slNKROh3TSYEH/IUMG6f4M+1qubZ5e52QypsE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
