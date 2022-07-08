@@ -71,7 +71,7 @@ func init() {
 
 		zero.OnCommandGroup([]string{
 			"全局响应", "allresponse", "全局沉默", "allsilence",
-		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+		}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			grp := ctx.Event.GroupID
 			if grp == 0 {
 				// 个人用户
