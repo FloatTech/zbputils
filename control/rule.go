@@ -70,6 +70,37 @@ func init() {
 		})
 
 		zero.OnCommandGroup([]string{
+			"全局响应", "allresponse", "全局沉默", "allsilence",
+		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			grp := ctx.Event.GroupID
+			if grp == 0 {
+				// 个人用户
+				grp = -ctx.Event.UserID
+			}
+			var msg message.MessageSegment
+			cmd := ctx.State["command"].(string)
+			switch {
+			case strings.Contains(cmd, "响应") || strings.Contains(cmd, "response"):
+				err := managers.Response(0)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始在全部位置工作啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			case strings.Contains(cmd, "沉默") || strings.Contains(cmd, "silence"):
+				err := managers.Silence(grp)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始在未显式启用的位置休息啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			default:
+				msg = message.Text("ERROR: bad command\"", cmd, "\"")
+			}
+			ctx.SendChain(msg)
+		})
+
+		zero.OnCommandGroup([]string{
 			"启用", "enable", "禁用", "disable",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}

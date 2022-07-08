@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/FloatTech/sqlite v0.3.2
-	github.com/FloatTech/zbpctrl v1.4.1-0.20220706075314-7fdbbc2a2345
+	github.com/FloatTech/zbpctrl v1.4.1-0.20220708120020-996c0e071fca
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fogleman/gg v1.3.0
