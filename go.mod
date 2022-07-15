@@ -3,8 +3,8 @@ module github.com/FloatTech/zbputils
 go 1.18
 
 require (
-	github.com/FloatTech/sqlite v0.3.2
-	github.com/FloatTech/zbpctrl v1.4.1-0.20220708120020-996c0e071fca
+	github.com/FloatTech/sqlite v0.3.3
+	github.com/FloatTech/zbpctrl v1.4.1-0.20220715042842-93f081cb0133
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fogleman/gg v1.3.0
@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/sqlite3 v1.14.6 // indirect
