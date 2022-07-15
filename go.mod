@@ -14,7 +14,7 @@ require (
 	github.com/go-playground/assert/v2 v2.0.1
 	github.com/sirupsen/logrus v1.8.1
 	github.com/tidwall/gjson v1.14.1
-	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220610070647-9eeffcb277ee
+	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220715040337-ef4327320c40
 	golang.org/x/text v0.3.7
 )
 
