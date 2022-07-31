@@ -1,4 +1,5 @@
 // Package pool 图片缓存池
+//nolint: revive
 package pool
 
 import (
@@ -14,7 +15,6 @@ import (
 )
 
 const cacheurl = "https://gchat.qpic.cn/gchatpic_new//%s/0"
-
 
 var (
 	ErrImgFileOutdated = errors.New("img file outdated")
