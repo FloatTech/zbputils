@@ -15,7 +15,7 @@ import (
 
 const cacheurl = "https://gchat.qpic.cn/gchatpic_new//%s/0"
 
-//nolint: revive
+
 var (
 	ErrImgFileOutdated = errors.New("img file outdated")
 	ErrNoSuchImg       = errors.New("no such img")
