@@ -1,3 +1,4 @@
+// Package img gg 的简易封装
 package img
 
 import (

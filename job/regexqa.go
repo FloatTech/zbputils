@@ -210,7 +210,7 @@ func init() {
 		} else {
 			_, _ = fmt.Fprintf(w, "你在该群设置的含有 %s 的问题有：\n", arg)
 		}
-		show := func(insts []inst) []inst {
+		show := func(insts []inst) {
 			for i := range insts {
 				if strings.Contains(insts[i].Pattern, arg) {
 					w.WriteString(strings.Trim(insts[i].Pattern, "^$"))
@@ -220,7 +220,7 @@ func init() {
 					_ = w.WriteByte('\n')
 				}
 			}
-			return insts
+			return
 		}
 
 		if all {
