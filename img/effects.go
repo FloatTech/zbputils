@@ -8,7 +8,7 @@ import (
 )
 
 // AdjustBrightness 亮度(-100, 100)
-func (dst *ImgFactory) AdjustBrightness(s float64) *ImgFactory {
+func (dst *Factory) AdjustBrightness(s float64) *Factory {
 	s = math.Min(math.Max(s, -100.0), 100.0)
 	b := dst.Im.Bounds()
 	for y1 := b.Min.Y; y1 <= b.Max.Y; y1++ {
@@ -27,8 +27,8 @@ func (dst *ImgFactory) AdjustBrightness(s float64) *ImgFactory {
 }
 
 // AdjustContrast 对比度(-100, 100)
-func (dst *ImgFactory) AdjustContrast(a float64) *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) AdjustContrast(a float64) *Factory {
+	return &Factory{
 		Im: imaging.AdjustContrast(dst.Im, a),
 		W:  dst.W,
 		H:  dst.H,
@@ -36,8 +36,8 @@ func (dst *ImgFactory) AdjustContrast(a float64) *ImgFactory {
 }
 
 // AdjustSaturation 饱和度(-100, 100)
-func (dst *ImgFactory) AdjustSaturation(a float64) *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) AdjustSaturation(a float64) *Factory {
+	return &Factory{
 		Im: imaging.AdjustSaturation(dst.Im, a),
 		W:  dst.W,
 		H:  dst.H,
@@ -45,8 +45,8 @@ func (dst *ImgFactory) AdjustSaturation(a float64) *ImgFactory {
 }
 
 // Sharpen 锐化
-func (dst *ImgFactory) Sharpen(a float64) *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) Sharpen(a float64) *Factory {
+	return &Factory{
 		Im: imaging.Sharpen(dst.Im, a),
 		W:  dst.W,
 		H:  dst.H,
@@ -54,8 +54,8 @@ func (dst *ImgFactory) Sharpen(a float64) *ImgFactory {
 }
 
 // Blur 模糊图像 正数
-func (dst *ImgFactory) Blur(a float64) *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) Blur(a float64) *Factory {
+	return &Factory{
 		Im: imaging.Blur(dst.Im, a),
 		W:  dst.W,
 		H:  dst.H,
@@ -63,7 +63,7 @@ func (dst *ImgFactory) Blur(a float64) *ImgFactory {
 }
 
 // Grayscale 灰度
-func (dst *ImgFactory) Grayscale() *ImgFactory {
+func (dst *Factory) Grayscale() *Factory {
 	b := dst.Im.Bounds()
 	for y1 := b.Min.Y; y1 <= b.Max.Y; y1++ {
 		for x1 := b.Min.X; x1 <= b.Max.X; x1++ {
@@ -80,7 +80,7 @@ func (dst *ImgFactory) Grayscale() *ImgFactory {
 }
 
 // Invert 反色
-func (dst *ImgFactory) Invert() *ImgFactory {
+func (dst *Factory) Invert() *Factory {
 	b := dst.Im.Bounds()
 	for y1 := b.Min.Y; y1 <= b.Max.Y; y1++ {
 		for x1 := b.Min.X; x1 <= b.Max.X; x1++ {
@@ -96,8 +96,8 @@ func (dst *ImgFactory) Invert() *ImgFactory {
 }
 
 // Convolve3x3 浮雕
-func (dst *ImgFactory) Convolve3x3() *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) Convolve3x3() *Factory {
+	return &Factory{
 		Im: imaging.Convolve3x3(
 			dst.Im,
 			[9]float64{

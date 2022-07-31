@@ -1,5 +1,6 @@
 package ctxext
 
+// ListGetter 获得实时刷新的 list
 type ListGetter interface {
 	List() []string
 }

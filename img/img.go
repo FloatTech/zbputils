@@ -39,8 +39,8 @@ func Load(path string) (img image.Image, err error) {
 }
 
 // NewFactory 设置底图
-func NewFactory(w, h int, fillColor color.Color) *ImgFactory {
-	var dst ImgFactory
+func NewFactory(w, h int, fillColor color.Color) *Factory {
+	var dst Factory
 	dst.W = w
 	dst.H = h
 	c := color.NRGBAModel.Convert(fillColor).(color.NRGBA)
@@ -57,7 +57,7 @@ func NewFactory(w, h int, fillColor color.Color) *ImgFactory {
 }
 
 // LoadFirstFrame 载入图片第一帧作底图
-func LoadFirstFrame(path string, w, h int) (*ImgFactory, error) {
+func LoadFirstFrame(path string, w, h int) (*Factory, error) {
 	im, err := Load(path)
 	if err != nil {
 		return nil, err
@@ -104,8 +104,8 @@ func LoadAllFrames(path string, w, h int) ([]*image.NRGBA, error) {
 }
 
 // Size 变形
-func Size(im image.Image, w, h int) *ImgFactory {
-	var dc ImgFactory
+func Size(im image.Image, w, h int) *Factory {
+	var dc Factory
 	// 修改尺寸
 	switch {
 	case w > 0 && h > 0:
@@ -130,9 +130,9 @@ func Size(im image.Image, w, h int) *ImgFactory {
 }
 
 // Rotate 旋转
-func Rotate(img image.Image, angle float64, w, h int) *ImgFactory {
+func Rotate(img image.Image, angle float64, w, h int) *Factory {
 	im := Size(img, w, h)
-	var dc ImgFactory
+	var dc Factory
 	dc.Im = imaging.Rotate(im.Im, angle, color.NRGBA{0, 0, 0, 0})
 	dc.W = dc.Im.Bounds().Size().X
 	dc.H = dc.Im.Bounds().Size().Y
@@ -140,8 +140,8 @@ func Rotate(img image.Image, angle float64, w, h int) *ImgFactory {
 }
 
 // MergeW 横向合并图片
-func MergeW(im []*image.NRGBA) *ImgFactory {
-	dc := make([]*ImgFactory, len(im))
+func MergeW(im []*image.NRGBA) *Factory {
+	dc := make([]*Factory, len(im))
 	h := im[0].Bounds().Size().Y
 	w := 0
 	for i, value := range im {
@@ -158,8 +158,8 @@ func MergeW(im []*image.NRGBA) *ImgFactory {
 }
 
 // MergeH 纵向合并图片
-func MergeH(im []*image.NRGBA) *ImgFactory {
-	dc := make([]*ImgFactory, len(im))
+func MergeH(im []*image.NRGBA) *Factory {
+	dc := make([]*Factory, len(im))
 	w := im[0].Bounds().Size().X
 	h := 0
 	for i, value := range im {
@@ -176,8 +176,8 @@ func MergeH(im []*image.NRGBA) *ImgFactory {
 }
 
 // Text 文本框 字体, 大小, 颜色 , 背景色, 文本
-func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFactory {
-	var dst ImgFactory
+func Text(font string, size float64, col []int, col1 []int, txt string) *Factory {
+	var dst Factory
 	dc := gg.NewContext(10, 10)
 	dc.SetRGBA255(0, 0, 0, 0)
 	dc.Clear()

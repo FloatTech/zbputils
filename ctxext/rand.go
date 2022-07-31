@@ -9,6 +9,7 @@ import (
 	"github.com/FloatTech/zbputils/binary"
 )
 
+// RandSenderPerDayN 每个用户每天随机数
 func RandSenderPerDayN(uid int64, n int) int {
 	sum := crc64.New(crc64.MakeTable(crc64.ISO))
 	sum.Write(binary.StringToBytes(time.Now().Format("20060102")))

@@ -9,17 +9,20 @@ import (
 	"github.com/FloatTech/zbputils/binary"
 )
 
+//nolint: revive
 type (
 	NoCtxGetMsg  func(int64) zero.Message
 	NoCtxSendMsg func(any) int64
 )
 
+// GetMessage ...
 func GetMessage(ctx *zero.Ctx) NoCtxGetMsg {
 	return func(id int64) zero.Message {
 		return ctx.GetMessage(message.NewMessageIDFromInteger(id))
 	}
 }
 
+// GetFirstMessageInForward ...
 func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
 	return func(id int64) zero.Message {
 		msg := GetMessage(ctx)(id)
@@ -42,24 +45,28 @@ func GetFirstMessageInForward(ctx *zero.Ctx) NoCtxGetMsg {
 	}
 }
 
+// SendTo ...
 func SendTo(ctx *zero.Ctx, user int64) NoCtxSendMsg {
 	return func(msg any) int64 {
 		return ctx.SendPrivateMessage(user, msg)
 	}
 }
 
+// Send ...
 func Send(ctx *zero.Ctx) NoCtxSendMsg {
 	return func(msg any) int64 {
 		return ctx.Send(msg).ID()
 	}
 }
 
+// SendToSelf ...
 func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
 	return func(msg any) int64 {
 		return ctx.SendPrivateMessage(ctx.Event.SelfID, msg)
 	}
 }
 
+// FakeSenderForwardNode ...
 func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) message.MessageSegment {
 	return message.CustomNode(
 		ctx.Event.Sender.NickName,
@@ -67,6 +74,7 @@ func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) messag
 		msgs)
 }
 
+// SendFakeForwardToGroup ...
 func SendFakeForwardToGroup(ctx *zero.Ctx, msgs ...message.MessageSegment) NoCtxSendMsg {
 	return func(msg any) int64 {
 		return ctx.SendGroupForwardMessage(ctx.Event.GroupID, message.Message{

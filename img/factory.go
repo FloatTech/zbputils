@@ -9,16 +9,16 @@ import (
 	"github.com/fogleman/gg"
 )
 
-// 处理中图像
-type ImgFactory struct {
+// Factory 处理中图像
+type Factory struct {
 	Im *image.NRGBA
 	W  int
 	H  int
 }
 
 // Clone 克隆
-func (dst *ImgFactory) Clone() *ImgFactory {
-	var src ImgFactory
+func (dst *Factory) Clone() *Factory {
+	var src Factory
 	src.Im = image.NewNRGBA(image.Rect(0, 0, dst.W, dst.H))
 	draw.Over.Draw(src.Im, src.Im.Bounds(), dst.Im, dst.Im.Bounds().Min)
 	src.W = dst.W
@@ -27,14 +27,14 @@ func (dst *ImgFactory) Clone() *ImgFactory {
 }
 
 // Reshape 变形
-func (dst *ImgFactory) Reshape(w, h int) *ImgFactory {
+func (dst *Factory) Reshape(w, h int) *Factory {
 	dst = Size(dst.Im, w, h)
 	return dst
 }
 
 // FlipH 水平翻转
-func (dst *ImgFactory) FlipH() *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) FlipH() *Factory {
+	return &Factory{
 		Im: imaging.FlipH(dst.Im),
 		W:  dst.W,
 		H:  dst.H,
@@ -42,8 +42,8 @@ func (dst *ImgFactory) FlipH() *ImgFactory {
 }
 
 // FlipV 垂直翻转
-func (dst *ImgFactory) FlipV() *ImgFactory {
-	return &ImgFactory{
+func (dst *Factory) FlipV() *Factory {
+	return &Factory{
 		Im: imaging.FlipV(dst.Im),
 		W:  dst.W,
 		H:  dst.H,
@@ -51,7 +51,7 @@ func (dst *ImgFactory) FlipV() *ImgFactory {
 }
 
 // InsertUp 上部插入图片
-func (dst *ImgFactory) InsertUp(im image.Image, w, h, x, y int) *ImgFactory {
+func (dst *Factory) InsertUp(im image.Image, w, h, x, y int) *Factory {
 	im1 := Size(im, w, h).Im
 	// 叠加图片
 	draw.Over.Draw(dst.Im, dst.Im.Bounds(), im1, im1.Bounds().Min.Sub(image.Pt(x, y)))
@@ -59,7 +59,7 @@ func (dst *ImgFactory) InsertUp(im image.Image, w, h, x, y int) *ImgFactory {
 }
 
 // InsertUpC 上部插入图片 x,y是中心点
-func (dst *ImgFactory) InsertUpC(im image.Image, w, h, x, y int) *ImgFactory {
+func (dst *Factory) InsertUpC(im image.Image, w, h, x, y int) *Factory {
 	im1 := Size(im, w, h)
 	// 叠加图片
 	draw.Over.Draw(dst.Im, dst.Im.Bounds(), im1.Im, im1.Im.Bounds().Min.Sub(image.Pt(x-im1.W/2, y-im1.H/2)))
@@ -67,7 +67,7 @@ func (dst *ImgFactory) InsertUpC(im image.Image, w, h, x, y int) *ImgFactory {
 }
 
 // InsertBottom 底部插入图片
-func (dst *ImgFactory) InsertBottom(im image.Image, w, h, x, y int) *ImgFactory {
+func (dst *Factory) InsertBottom(im image.Image, w, h, x, y int) *Factory {
 	im1 := Size(im, w, h).Im
 	dc := dst.Clone()
 	dst = NewFactory(dst.W, dst.H, color.NRGBA{0, 0, 0, 0})
@@ -77,7 +77,7 @@ func (dst *ImgFactory) InsertBottom(im image.Image, w, h, x, y int) *ImgFactory 
 }
 
 // InsertBottomC 底部插入图片 x,y是中心点
-func (dst *ImgFactory) InsertBottomC(im image.Image, w, h, x, y int) *ImgFactory {
+func (dst *Factory) InsertBottomC(im image.Image, w, h, x, y int) *Factory {
 	im1 := Size(im, w, h)
 	dc := dst.Clone()
 	dst = NewFactory(dst.W, dst.H, color.NRGBA{0, 0, 0, 0})
@@ -87,7 +87,7 @@ func (dst *ImgFactory) InsertBottomC(im image.Image, w, h, x, y int) *ImgFactory
 }
 
 // Circle 获取圆图
-func (dst *ImgFactory) Circle(r int) *ImgFactory {
+func (dst *Factory) Circle(r int) *Factory {
 	if r == 0 {
 		r = dst.H / 2
 	}
@@ -104,7 +104,7 @@ func (dst *ImgFactory) Circle(r int) *ImgFactory {
 }
 
 // Clip 剪取方图
-func (dst *ImgFactory) Clip(w, h, x, y int) *ImgFactory {
+func (dst *Factory) Clip(w, h, x, y int) *Factory {
 	dst.Im = dst.Im.SubImage(image.Rect(x, y, x+w, y+h)).(*image.NRGBA)
 	dst.W = w
 	dst.H = h
@@ -112,7 +112,7 @@ func (dst *ImgFactory) Clip(w, h, x, y int) *ImgFactory {
 }
 
 // ClipCircleFix 裁取圆图
-func (dst *ImgFactory) ClipCircleFix(x, y, r int) *ImgFactory {
+func (dst *Factory) ClipCircleFix(x, y, r int) *Factory {
 	dst = dst.Clip(2*r, 2*r, x-r, y-r)
 	b := dst.Im.Bounds()
 	for y1 := b.Min.Y; y1 < b.Max.Y; y1++ {
@@ -126,7 +126,7 @@ func (dst *ImgFactory) ClipCircleFix(x, y, r int) *ImgFactory {
 }
 
 // ClipCircle 扣取圆
-func (dst *ImgFactory) ClipCircle(x, y, r int) *ImgFactory {
+func (dst *Factory) ClipCircle(x, y, r int) *Factory {
 	//  dc := dst.Clip(x-r, y-r, 2*r, 2*r)
 	b := dst.Im.Bounds()
 	for y1 := b.Min.Y; y1 < b.Max.Y; y1++ {
@@ -140,7 +140,7 @@ func (dst *ImgFactory) ClipCircle(x, y, r int) *ImgFactory {
 }
 
 // InsertText 插入文本
-func (dst *ImgFactory) InsertText(font string, size float64, col []int, x, y float64, txt string) *ImgFactory {
+func (dst *Factory) InsertText(font string, size float64, col []int, x, y float64, txt string) *Factory {
 	dc := gg.NewContextForImage(dst.Im)
 	// 字体, 大小, 颜色, 位置
 	err := dc.LoadFontFace(font, size)
@@ -155,7 +155,7 @@ func (dst *ImgFactory) InsertText(font string, size float64, col []int, x, y flo
 }
 
 // InsertUpG gif 上部插入图片
-func (dst *ImgFactory) InsertUpG(im []*image.NRGBA, w, h, x, y int) []*image.NRGBA {
+func (dst *Factory) InsertUpG(im []*image.NRGBA, w, h, x, y int) []*image.NRGBA {
 	if len(im) == 0 {
 		return nil
 	}
