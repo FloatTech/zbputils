@@ -220,7 +220,6 @@ func init() {
 					_ = w.WriteByte('\n')
 				}
 			}
-			return
 		}
 
 		if all {
