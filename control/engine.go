@@ -13,6 +13,7 @@ import (
 	"github.com/FloatTech/zbputils/file"
 )
 
+// Engine is the pre_handler, post_handler manager
 type Engine interface {
 	// Delete 移除该 Engine 注册的所有 Matchers
 	Delete()

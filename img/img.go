@@ -14,7 +14,7 @@ import (
 	"github.com/fogleman/gg"
 )
 
-//  加载图片
+// Load 加载图片
 func Load(path string) (img image.Image, err error) {
 	if strings.HasPrefix(path, "http") {
 		var res *http.Response
@@ -38,7 +38,7 @@ func Load(path string) (img image.Image, err error) {
 	return
 }
 
-// 设置底图
+// NewFactory 设置底图
 func NewFactory(w, h int, fillColor color.Color) *ImgFactory {
 	var dst ImgFactory
 	dst.W = w
@@ -56,7 +56,7 @@ func NewFactory(w, h int, fillColor color.Color) *ImgFactory {
 	return &dst
 }
 
-// 载入图片第一帧作底图
+// LoadFirstFrame 载入图片第一帧作底图
 func LoadFirstFrame(path string, w, h int) (*ImgFactory, error) {
 	im, err := Load(path)
 	if err != nil {
@@ -65,7 +65,7 @@ func LoadFirstFrame(path string, w, h int) (*ImgFactory, error) {
 	return Size(im, w, h), nil
 }
 
-//  加载图片每一帧图片
+// LoadAllFrames 加载图片每一帧图片
 func LoadAllFrames(path string, w, h int) ([]*image.NRGBA, error) {
 	var res *http.Response
 	var err error
@@ -103,7 +103,7 @@ func LoadAllFrames(path string, w, h int) ([]*image.NRGBA, error) {
 	return ims, nil
 }
 
-// 变形
+// Size 变形
 func Size(im image.Image, w, h int) *ImgFactory {
 	var dc ImgFactory
 	// 修改尺寸
@@ -129,7 +129,7 @@ func Size(im image.Image, w, h int) *ImgFactory {
 	return &dc
 }
 
-// 旋转
+// Rotate 旋转
 func Rotate(img image.Image, angle float64, w, h int) *ImgFactory {
 	im := Size(img, w, h)
 	var dc ImgFactory
@@ -139,7 +139,7 @@ func Rotate(img image.Image, angle float64, w, h int) *ImgFactory {
 	return &dc
 }
 
-// 横向合并图片
+// MergeW 横向合并图片
 func MergeW(im []*image.NRGBA) *ImgFactory {
 	dc := make([]*ImgFactory, len(im))
 	h := im[0].Bounds().Size().Y
@@ -157,7 +157,7 @@ func MergeW(im []*image.NRGBA) *ImgFactory {
 	return ds
 }
 
-// 纵向合并图片
+// MergeH 纵向合并图片
 func MergeH(im []*image.NRGBA) *ImgFactory {
 	dc := make([]*ImgFactory, len(im))
 	w := im[0].Bounds().Size().X
@@ -175,7 +175,7 @@ func MergeH(im []*image.NRGBA) *ImgFactory {
 	return ds
 }
 
-// 文本框 字体, 大小, 颜色 , 背景色, 文本
+// Text 文本框 字体, 大小, 颜色 , 背景色, 文本
 func Text(font string, size float64, col []int, col1 []int, txt string) *ImgFactory {
 	var dst ImgFactory
 	dc := gg.NewContext(10, 10)

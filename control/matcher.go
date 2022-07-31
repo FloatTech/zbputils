@@ -5,6 +5,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 )
 
+// Matcher 是 ZeroBot 匹配和处理事件的最小单元
 type Matcher interface {
 	// SetBlock 设置是否阻断后面的 Matcher 触发
 	SetBlock(block bool) Matcher
@@ -17,11 +18,13 @@ type Matcher interface {
 
 type matcherinstance zero.Matcher
 
+// SetBlock 设置是否阻断后面的 Matcher 触发
 func (m *matcherinstance) SetBlock(block bool) Matcher {
 	_ = (*zero.Matcher)(m).SetBlock(block)
 	return m
 }
 
+// Handle 直接处理事件
 func (m *matcherinstance) Handle(handler zero.Handler) {
 	_ = (*zero.Matcher)(m).Handle(handler)
 }

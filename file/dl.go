@@ -16,7 +16,6 @@ var (
 )
 
 // DownloadTo 下载到路径
-
 func DownloadTo(url, file string, chkcrt bool) error {
 	var resp *http.Response
 	var err error

@@ -18,6 +18,7 @@ func init() {
 	_ = os.MkdirAll(FontPath, 0755)
 }
 
+// Text gg canvas
 type Text struct {
 	canvas *gg.Context
 }

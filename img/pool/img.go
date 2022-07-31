@@ -15,6 +15,7 @@ import (
 
 const cacheurl = "https://gchat.qpic.cn/gchatpic_new//%s/0"
 
+//nolint: revive
 var (
 	ErrImgFileOutdated = errors.New("img file outdated")
 	ErrNoSuchImg       = errors.New("no such img")
@@ -22,6 +23,7 @@ var (
 	ErrGetMsg          = errors.New("get msg error")
 )
 
+// Image 图片数据
 type Image struct {
 	*item
 	n, f string
@@ -83,6 +85,7 @@ func (m *Image) SetFile(f string) {
 	}
 }
 
+// Push context
 func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent bool, err error) {
 	id := send(message.Message{message.Image(m.f)})
 	if id == 0 {

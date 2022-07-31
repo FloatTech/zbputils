@@ -1,3 +1,4 @@
+// Package driver 函数调用式驱动, 用于 gocqzbp
 package driver
 
 import (
@@ -86,7 +87,7 @@ func (f *FCClient) Connect() {
 		zero.APICallers.Store(f.selfID, f) // 添加Caller到 APICaller list...
 		log.Infoln("连接funcall对端成功")
 	} else {
-		log.Warnln("连接funcall对端失败：", err)
+		log.Warnln("连接funcall对端失败: ", err)
 	}
 }
 
@@ -96,7 +97,7 @@ func (f *FCClient) Listen(handler func([]byte, zero.APICaller)) {
 }
 
 // CallApi 发送请求
-//nolint: revive
+//nolint: stylecheck
 func (f *FCClient) CallApi(req zero.APIRequest) (zero.APIResponse, error) {
 	req.Echo = f.nextSeq()
 	rsp, err := f.handleRequest(&req)
@@ -123,21 +124,21 @@ func runFuncall(b CQBot) {
 	}
 }
 
-func (s *FCClient) handleRequest(req *zero.APIRequest) (r *zero.APIResponse, err error) {
+func (f *FCClient) handleRequest(req *zero.APIRequest) (r *zero.APIResponse, err error) {
 	defer func() {
 		if err := recover(); err != nil {
-			log.Errorf("处置funcall插件%s的命令时发生无法恢复的异常：%v\n%s", s.name, err, debug.Stack())
+			log.Errorf("处置funcall插件%s的命令时发生无法恢复的异常: %v\n%s", f.name, err, debug.Stack())
 		}
 	}()
 	t := strings.TrimSuffix(req.Action, "_async")
 	var p []byte
 	p, err = json.Marshal(req.Params)
 	if err != nil {
-		log.Errorf("funcall插件%s序列化参数失败：%v\n", s.name, err)
+		log.Errorf("funcall插件%s序列化参数失败: %v\n", f.name, err)
 		return nil, err
 	}
-	log.Debugf("funcall插件%s接收到API调用: %v 参数: %v", s.name, t, helper.BytesToString(p))
-	ret := s.caller.Call(t, helper.BytesToString(p))
+	log.Debugf("funcall插件%s接收到API调用: %v 参数: %v", f.name, t, helper.BytesToString(p))
+	ret := f.caller.Call(t, helper.BytesToString(p))
 	if req.Echo > 0 { // 存在echo字段，是api调用的返回
 		buffer := new(bytes.Buffer)
 		err = json.NewEncoder(buffer).Encode(MSG{"data": ret["data"]})
@@ -172,12 +173,12 @@ func (s *FCClient) handleRequest(req *zero.APIRequest) (r *zero.APIResponse, err
 	return &nullResponse, errors.New("null echo response")
 }
 
-func (s *FCClient) onBotPushEvent(e Event) {
-	log.Debugf("向funcall插件%s推送Event: %s", s.name, e.JSONBytes())
+func (f *FCClient) onBotPushEvent(e Event) {
+	log.Debugf("向funcall插件%s推送Event: %s", f.name, e.JSONBytes())
 	rsp := e.RawMSG()
 	if m, ok := rsp["meta_event_type"]; ok && m != nil && m.(string) != "heartbeat" || !ok { // 忽略心跳事件
 		payload := e.JSONBytes()
 		log.Debug("接收到事件: ", helper.BytesToString(payload))
-		go s.handler(payload, s)
+		go f.handler(payload, f)
 	}
 }
