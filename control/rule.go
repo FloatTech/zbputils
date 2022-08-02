@@ -445,12 +445,12 @@ func init() {
 					gid = -ctx.Event.UserID
 				}
 				managers.RLock()
-				managers.RUnlock()
 				msg := []string{"--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"}
+				managers.RUnlock()
 				var enableService []string
 				var disableService []string
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.EnableMarkIn(gid) == true {
+					if manager.IsEnabledIn(gid) == true {
 						i++
 						enableService = append(enableService, strconv.Itoa(i)+":"+key)
 					} else {
