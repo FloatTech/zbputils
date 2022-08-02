@@ -340,6 +340,7 @@ func init() {
 				}
 				if service.Options.Help == "" {
 					ctx.SendChain(message.Text("该服务无帮助!"))
+					return
 				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
@@ -347,7 +348,7 @@ func init() {
 				}
 				// 绘制图片
 				/***********获取看板娘图片***********/
-				data, err := web.GetData("https://gitcode.net/u011570312/zbpdata/-/raw/main/zbp看板娘.png")
+				data, err := file.GetLazyData("data/Control/kanban.png", true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
@@ -380,7 +381,7 @@ func init() {
 				// 计算卡片大小
 				backXmax := 1500
 				backYmax := 1056
-				serviceinfo := strings.Split(fmt.Sprintf("%s", service), "\n")
+				serviceinfo := strings.Split(service.String(), "\n")
 				for i, info := range serviceinfo {
 					width, h := canvas.MeasureString(info)
 					if backXmax < int(width) {
@@ -440,34 +441,32 @@ func init() {
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				i := 0
+				j := 0
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
 				managers.RLock()
-				msg := make([]any, 1, len(managers.M)*4+1)
 				managers.RUnlock()
-				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话\n\n→以下服务已开启："
-				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.EnableMarkIn(gid) == false {
-						return true
-					}
-					i++
-					msg = append(msg, "\n", i, ": ", key)
-					return true
-				})
-				msg = append(msg, "\n\n→以下服务未开启：")
+				msg := []string{"--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"}
+				var enableService []string
+				var disableService []string
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					if manager.EnableMarkIn(gid) == true {
-						return true
+						i++
+						enableService = append(enableService, strconv.Itoa(i)+":"+key)
+					} else {
+						j++
+						disableService = append(disableService, strconv.Itoa(j)+":"+key)
 					}
-					i++
-					msg = append(msg, "\n", i, ": ", key)
 					return true
 				})
-				data, err := text.RenderToBase64(fmt.Sprint(msg...), text.FontFile, 400, 20)
+				msg = append(msg, "\n\n→以下服务已开启：\n", strings.Join(enableService, "\n"))
+				msg = append(msg, "\n\n→以下服务未开启：\n", strings.Join(disableService, "\n"))
+				data, err := text.RenderToBase64(strings.Join(msg, ""), text.FontFile, 400, 20)
 				if err != nil {
-					log.Errorf("[control] %v", err)
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
 				}
 				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
@@ -492,7 +491,8 @@ func init() {
 				})
 				data, err := text.RenderToBase64(fmt.Sprint(msgs...), text.FontFile, 400, 20)
 				if err != nil {
-					log.Errorf("[control] %v", err)
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
 				}
 				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
