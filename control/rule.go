@@ -450,7 +450,7 @@ func init() {
 				var enableService []string
 				var disableService []string
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.IsEnabledIn(gid) == true {
+					if manager.IsEnabledIn(gid) {
 						i++
 						enableService = append(enableService, strconv.Itoa(i)+":"+key)
 					} else {
