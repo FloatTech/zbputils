@@ -41,6 +41,7 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	}
 }
 
+// Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
 }
