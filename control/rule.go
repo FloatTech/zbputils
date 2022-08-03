@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 	"unsafe"
+	"bytes"
 
-	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -16,8 +16,16 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
-	"github.com/FloatTech/zbputils/img/text"
 	"github.com/FloatTech/zbputils/process"
+
+
+	// 图片输出
+	"image"
+	"github.com/FloatTech/zbputils/file"
+	"github.com/FloatTech/zbputils/img"
+	"github.com/FloatTech/zbputils/img/text"
+	"github.com/FloatTech/zbputils/img/writer"
+	"github.com/fogleman/gg"
 )
 
 var (
@@ -33,6 +41,7 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	}
 }
 
+// Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
 }
@@ -328,34 +337,139 @@ func init() {
 					ctx.SendChain(message.Text("没有找到指定服务!"))
 					return
 				}
-				if service.Options.Help != "" {
-					gid := ctx.Event.GroupID
-					if gid == 0 {
-						gid = -ctx.Event.UserID
-					}
-					ctx.SendChain(message.Text(service.EnableMarkIn(gid), " ", service))
-				} else {
+				if service.Options.Help == "" {
 					ctx.SendChain(message.Text("该服务无帮助!"))
+					return
 				}
+				gid := ctx.Event.GroupID
+				if gid == 0 {
+					gid = -ctx.Event.UserID
+				}
+				// 绘制图片
+				/***********获取看板娘图片***********/
+				data, err := file.GetLazyData("data/Control/kanban.png", true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				back, _, err := image.Decode(bytes.NewReader(data))
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				/***********设置图片的大小和底色***********/
+				backX := 902
+				backY := 1056
+				canvas := gg.NewContext(backX, backY)
+				// 设置文字大小
+				fontSize := 50.0
+				_, err = file.GetLazyData(text.BoldFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				// 计算卡片大小
+				backXmax := 1500
+				backYmax := 1056
+				serviceinfo := strings.Split(service.String(), "\n")
+				for i, info := range serviceinfo {
+					width, h := canvas.MeasureString(info)
+					if backXmax < int(width) {
+						backXmax = int(width) + 100 // 获取最大宽度
+					}
+					high := 300 + i*int(h+20) // 获取文本高度
+					if backYmax < high {
+						backYmax = high // 获取最大高度
+					}
+				}
+				canvas = gg.NewContext(backXmax+backX+50, backYmax)
+				// 设置背景色
+				canvas.SetRGB(1, 1, 1)
+				canvas.Clear()
+				/***********放置好看的图片***********/
+				back = img.Size(back, backX, backY).Im
+				canvas.DrawImage(back, 0, 0)
+				/***********写入插件信息***********/
+				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				xCoordinate := float64(backX + 50)       // 看板娘的坐标
+				length, h := canvas.MeasureString("看用法") // 获取文字宽度与高度
+				// 标记启动状态
+				canvas.DrawRoundedRectangle(xCoordinate-length*0.1, 130-h*2.5, length*1.2, h*2, fontSize*0.2)
+				enable := "未启用"
+				if service.EnableMarkIn(gid) {
+					canvas.SetRGB255(0, 221, 0)
+					enable = "已启用"
+				} else {
+					canvas.SetRGB255(221, 221, 221)
+				}
+				canvas.Fill()
+				canvas.SetRGB(0, 0, 0)
+				canvas.DrawString(enable, xCoordinate, 130-h)
+				// 写入插件helper内容
+				canvas.DrawRoundedRectangle(xCoordinate-30, 140, float64(backXmax)-30, float64(backYmax-160), fontSize*0.3)
+				canvas.SetRGB255(0, 221, 221)
+				canvas.Fill()
+				canvas.SetRGB(0, 0, 0)
+				for i, info := range serviceinfo {
+					canvas.DrawString(info, xCoordinate, 260+(h+20)*float64(i-1))
+				}
+				// 写入插件名称
+				if err = canvas.LoadFontFace(text.SakuraFontFile, fontSize*2); err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				canvas.DrawString(model.Args, xCoordinate+length*1.2, 130-h)
+				// 生成图片
+				data, cl := writer.ToBytes(canvas.Image())
+				ctx.SendChain(message.ImageBytes(data))
+				cl()
 			})
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				i := 0
+				j := 0
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
 				managers.RLock()
-				msg := make([]any, 1, len(managers.M)*4+1)
+				msg := []string{"--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"}
 				managers.RUnlock()
-				msg[0] = "--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"
+				var enableService []string
+				var disableService []string
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					i++
-					msg = append(msg, "\n", i, ": ", manager.EnableMarkIn(gid), key)
+					if manager.IsEnabledIn(gid) {
+						i++
+						enableService = append(enableService, strconv.Itoa(i)+":"+key)
+					} else {
+						j++
+						disableService = append(disableService, strconv.Itoa(j)+":"+key)
+					}
 					return true
 				})
-				ctx.Send(message.Text(msg...))
+				msg = append(msg, "\n\n→以下服务已开启：\n", strings.Join(enableService, "\n"))
+				msg = append(msg, "\n\n→以下服务未开启：\n", strings.Join(disableService, "\n"))
+				data, err := text.RenderToBase64(strings.Join(msg, ""), text.FontFile, 400, 20)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
+					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+				}
 			})
 
 		zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
@@ -376,7 +490,8 @@ func init() {
 				})
 				data, err := text.RenderToBase64(fmt.Sprint(msgs...), text.FontFile, 400, 20)
 				if err != nil {
-					log.Errorf("[control] %v", err)
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
 				}
 				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
