@@ -37,11 +37,18 @@ func GetImage(name string) (m *Image, err error) {
 	if err == nil && m.u != "" {
 		var resp *http.Response
 		resp, err = http.Head(m.String())
-		if err != nil || resp.StatusCode != http.StatusOK {
-			err = ErrImgFileOutdated
-			logrus.Debugln("[imgpool] image", name, m, "outdated")
-			return
+		if err == nil {
+			_ = resp.Body.Close()
+		} else {
+			goto OUTDATE
 		}
+		if resp.StatusCode != http.StatusOK {
+			goto OUTDATE
+		}
+		return
+	OUTDATE:
+		err = ErrImgFileOutdated
+		logrus.Debugln("[imgpool] image", name, m, "outdated")
 		return
 	}
 	err = ErrNoSuchImg
@@ -58,8 +65,11 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 	if err == nil && m.item.u != "" {
 		var resp *http.Response
 		resp, err = http.Head(m.String())
-		if err == nil && resp.StatusCode == http.StatusOK {
-			return
+		if err == nil {
+			_ = resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				return
+			}
 		}
 		logrus.Debugln("[imgpool] image", name, m, "outdated, updating...")
 		get = nil
