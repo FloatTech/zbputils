@@ -12,8 +12,8 @@ require (
 	github.com/fumiama/go-base16384 v1.5.4
 	github.com/fumiama/go-registry v0.1.6
 	github.com/go-playground/assert/v2 v2.0.1
-	github.com/sirupsen/logrus v1.8.1
-	github.com/tidwall/gjson v1.14.1
+	github.com/sirupsen/logrus v1.9.0
+	github.com/tidwall/gjson v1.14.2
 	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220715040337-ef4327320c40
 	golang.org/x/text v0.3.7
 )
@@ -29,9 +29,9 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	golang.org/x/image v0.0.0-20220601225756-64ec528b34cd // indirect
-	golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68 // indirect
-	modernc.org/libc v1.16.8 // indirect
+	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
+	golang.org/x/sys v0.0.0-20220804214406-8e32c043e418 // indirect
+	modernc.org/libc v1.16.19 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.1.1 // indirect
 )
