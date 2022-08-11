@@ -2,12 +2,13 @@
 package control
 
 import (
+	"bytes"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
 	"unsafe"
-	"bytes"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
@@ -18,9 +19,9 @@ import (
 
 	"github.com/FloatTech/zbputils/process"
 
-
 	// 图片输出
 	"image"
+
 	"github.com/FloatTech/zbputils/file"
 	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
@@ -48,6 +49,11 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
+		err := os.MkdirAll("data/Control", 0755)
+		if err != nil {
+			panic(err)
+		}
+
 		zero.OnCommandGroup([]string{
 			"响应", "response", "沉默", "silence",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
