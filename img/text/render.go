@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/fogleman/gg"
+	"github.com/Coloured-glaze/gg"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/FloatTech/zbputils/file"

@@ -3,6 +3,7 @@ module github.com/FloatTech/zbputils
 go 1.18
 
 require (
+	github.com/Coloured-glaze/gg v1.3.2
 	github.com/FloatTech/sqlite v0.3.3
 	github.com/FloatTech/zbpctrl v1.4.1-0.20220715042842-93f081cb0133
 	github.com/disintegration/imaging v1.6.2

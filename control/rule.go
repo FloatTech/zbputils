@@ -4,6 +4,7 @@ package control
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -17,22 +18,33 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
+	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/process"
 
 	// 图片输出
 	"image"
 
+	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/FloatTech/zbputils/img/writer"
-	"github.com/fogleman/gg"
 )
 
 var (
 	// managers 每个插件对应的管理
 	managers = ctrl.NewManager[*zero.Ctx]("data/control/plugins.db", 10*time.Second)
 )
+
+type mpic struct {
+	kanban string      // 看板娘
+	stat   string      // 启用状态
+	stat2  bool        // 启用状态
+	plugin string      // 插件名
+	ttf1   string      // 字体1
+	ttf2   string      // 字体2
+	info   []string    // 插件信息
+	im     image.Image // 图片
+}
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	c := managers.NewControl(service, o)
@@ -351,94 +363,66 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				// 绘制图片
+				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
+				var menu = mpic{
+					kanban: "data/Control/kanban.png", // 看板娘图片
+					stat:   "○未启用",                    // 启用状态
+					stat2:  false,                     // 启用状态
+					plugin: model.Args,                // 插件名
+					ttf1:   text.BoldFontFile,         // 字体1
+					ttf2:   text.SakuraFontFile,       // 字体2
+					info:   serviceinfo,               // 插件信息
+				}
 				/***********获取看板娘图片***********/
-				data, err := file.GetLazyData("data/Control/kanban.png", true)
+				data, err := file.GetLazyData(menu.kanban, true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				back, _, err := image.Decode(bytes.NewReader(data))
+				w, _, err := gg.GetImgWH(data, menu.kanban) // 解析图片的宽高信息
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				/***********设置图片的大小和底色***********/
-				backX := 902
-				backY := 1056
-				canvas := gg.NewContext(backX, backY)
-				// 设置文字大小
-				fontSize := 50.0
-				_, err = file.GetLazyData(text.BoldFontFile, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				_, err = file.GetLazyData(text.SakuraFontFile, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				// 计算卡片大小
-				backXmax := 1500
-				backYmax := 1056
-				serviceinfo := strings.Split(service.String(), "\n")
-				for i, info := range serviceinfo {
-					width, h := canvas.MeasureString(info)
-					if backXmax < int(width) {
-						backXmax = int(width) + 100 // 获取最大宽度
+				var back image.Image
+
+				if w > 1024 { // 限制图片大小
+					back, _, err = image.Decode(bytes.NewReader(data))
+					if err != nil {
+						ctx.SendChain(message.Text("ERROR:", err))
+						return
 					}
-					high := 300 + i*int(h+20) // 获取文本高度
-					if backYmax < high {
-						backYmax = high // 获取最大高度
-					}
+					back = img.Limit(back, 1024, 1920)
+					goto label //跳转
 				}
-				canvas = gg.NewContext(backXmax+backX+50, backYmax)
-				// 设置背景色
-				canvas.SetRGB(1, 1, 1)
-				canvas.Clear()
-				/***********放置好看的图片***********/
-				back = img.Size(back, backX, backY).Im
-				canvas.DrawImage(back, 0, 0)
-				/***********写入插件信息***********/
-				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
+
+				back, _, err = image.Decode(bytes.NewReader(data))
+				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				xCoordinate := float64(backX + 50)       // 看板娘的坐标
-				length, h := canvas.MeasureString("看用法") // 获取文字宽度与高度
-				// 标记启动状态
-				canvas.DrawRoundedRectangle(xCoordinate-length*0.1, 130-h*2.5, length*1.2, h*2, fontSize*0.2)
-				enable := "未启用"
+			label:
+				menu.im = back                             // 设置看板娘图片
+				_, err = file.GetLazyData(menu.ttf1, true) // 获取字体
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				_, err = file.GetLazyData(menu.ttf2, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
 				if service.EnableMarkIn(gid) {
-					canvas.SetRGB255(0, 221, 0)
-					enable = "已启用"
-				} else {
-					canvas.SetRGB255(221, 221, 221)
+					menu.stat = "●已启用"
+					menu.stat2 = true
 				}
-				canvas.Fill()
-				canvas.SetRGB(0, 0, 0)
-				canvas.DrawString(enable, xCoordinate, 130-h)
-				// 写入插件helper内容
-				canvas.DrawRoundedRectangle(xCoordinate-30, 140, float64(backXmax)-30, float64(backYmax-160), fontSize*0.3)
-				canvas.SetRGB255(0, 221, 221)
-				canvas.Fill()
-				canvas.SetRGB(0, 0, 0)
-				for i, info := range serviceinfo {
-					canvas.DrawString(info, xCoordinate, 260+(h+20)*float64(i-1))
-				}
-				// 写入插件名称
-				if err = canvas.LoadFontFace(text.SakuraFontFile, fontSize*2); err != nil {
+				pic, err := dyna(&menu)
+				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				canvas.DrawString(model.Args, xCoordinate+length*1.2, 130-h)
-				// 生成图片
-				data, cl := writer.ToBytes(canvas.Image())
+				data, cl := writer.ToBytes(pic) // 生成图片
 				ctx.SendChain(message.ImageBytes(data))
 				cl()
 			})
@@ -504,4 +488,111 @@ func init() {
 				}
 			})
 	})
+}
+
+// 返回菜单图片
+func dyna(mp *mpic) (image.Image, error) {
+	toww, fonts := 1024.0, 50.0                    // 图片宽度和字体大小
+	tow := gg.NewContextForImage(mp.im)            // 看板娘
+	one := gg.NewContext(int(toww*2.5), int(toww)) // 新图像
+	one.SetRGB255(255, 255, 255)
+	one.Clear()
+	one.DrawImage(tow.Image(), 0, 0) // 放入看板娘的位置
+	if err := one.LoadFontFace(mp.ttf2, fonts*2); err != nil {
+		return nil, err
+	}
+	one.SetRGBA255(55, 55, 55, 255) // 字体颜色
+	one.DrawString(mp.plugin, toww*1.35, fonts*2)
+	if err := one.LoadFontFace(mp.ttf1, fonts); err != nil { // 加载字体
+		return nil, err
+	}
+	one.DrawRoundedRectangle(toww+50, fonts-5, fonts*4.5, fonts*1.5, 10) // 创建圆角矩形
+	one.SetRGBA255(221, 221, 221, 255)                                   // 填充背景颜色
+	if mp.stat2 {
+		one.SetRGBA255(0, 200, 0, 200)
+	}
+	one.Fill()                                // 填充颜色
+	one.SetRGBA255(55, 55, 55, 255)           // 字体颜色
+	one.DrawString(mp.stat, toww+58, fonts*2) // 绘制文字
+
+	lineX, lineY, hi := 5.0, 140.0, 0   // 宽高记录
+	maxTwidth := toww * 1.35            // 文字边距
+	for i := 0; i < len(mp.info); i++ { // 遍历文字切片
+		lineTexts := make([]string, 0, len(mp.info[i]))
+		lineText, dynaw, dynah, tmpw := "", 0.0, 0.0, 0.0
+
+		for len(mp.info[i]) > 0 {
+			lineText, tmpw = truncate(one, mp.info[i], maxTwidth)
+			lineTexts = append(lineTexts, lineText)
+			if tmpw > dynaw {
+				dynaw = tmpw
+			}
+			if len(lineText) >= len(mp.info[i]) {
+				break // 如果写入的文本大于等于本次写入的文本 则跳出
+			}
+			dynah += fonts * 1.3                    // 截断一次加一行高度
+			mp.info[i] = mp.info[i][len(lineText):] // 丢弃已经写入的文字并重新赋值
+		}
+		threew, threeh := dynaw+fonts, (dynah + (fonts * 1.2)) // 圆角矩形宽度和高度
+		drawx := toww + lineX + 35                             // 圆角矩形位置宽度
+		if int(lineX+dynaw+fonts)-int(toww) >= 180 {           // 越界宽容度
+			goto label
+		}
+		one.DrawRoundedRectangle(drawx, lineY, threew, threeh, 20.0) // 创建圆角矩形
+		drawsc(one, fonts, drawx, lineY, lineTexts)
+		lineX += float64(threew) + fonts/2 // 添加后加一次宽度
+		hi = int(threeh)
+
+		continue // 跳出循环
+	label:
+		lineY += float64(hi) + fonts/4              // 加一次高度
+		lineX = 5                                   // 重置宽度位置
+		if threeh+lineY+fonts >= float64(one.H()) { // 超出最大高度则进行加高
+			itmp := gg.NewContext(one.W(), int(lineY+threeh*2)) // X2 高度
+			itmp.SetRGB255(255, 255, 255)
+			itmp.Clear()
+			itmp.DrawImage(one.Image(), 0, 0)
+			one = gg.NewContextForImage(itmp.Image())
+			if err := one.LoadFontFace(mp.ttf1, fonts); err != nil { // 加载字体
+				return nil, err
+			}
+		}
+		drawx = toww + lineX + 35                                    // 圆角矩形位置宽度
+		one.DrawRoundedRectangle(drawx, lineY, threew, threeh, 20.0) // 创建圆角矩形
+		drawsc(one, fonts, drawx, lineY, lineTexts)
+		lineX += threew + fonts/2 // 添加后加一次宽度
+		hi = int(threeh)
+	}
+	return one.Image(), nil
+}
+
+// 填充颜色和绘制文字
+func drawsc(one *gg.Context, fonts, lineX, lineY float64, lineTexts []string) {
+	rand.Seed(time.Now().UnixNano())
+	one.SetRGBA255(rand.Intn(250), rand.Intn(250), rand.Intn(250), 90)
+	one.Fill() // 填充颜色
+	one.SetRGBA255(55, 55, 55, 255)
+	h := fonts + lineY
+	for i := range lineTexts { // 逐行绘制文字
+		one.DrawString(lineTexts[i], lineX+fonts/2, h)
+		h += fonts + (fonts / 4)
+	}
+}
+
+// 截断文字
+func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
+	var tmp strings.Builder
+	tmp.Grow(len(text))
+	res, w := make([]rune, 0, len(text)), 0.0
+	for _, r := range text {
+		tmp.WriteRune(r)
+		width, _ := one.MeasureString(tmp.String()) // 获取文字宽度
+		if width > maxW {                           // 如果宽度大于文字边距
+			break //跳出
+		} else {
+			w = width
+			res = append(res, r) // 写入
+		}
+	}
+	return string(res), w
 }
