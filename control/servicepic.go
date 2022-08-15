@@ -2,7 +2,7 @@ package control
 
 import (
 	"bytes"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -347,10 +347,10 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 // 编码看板娘图片和加载字体
 func loadpic(mp *mpic) error {
 	if !file.IsExist(mp.font1) { // 获取字体
-		return fmt.Errorf("文件%v 不存在", mp.font1)
+		return errors.New("文件 " + mp.font1 + " 不存在")
 	}
 	if !file.IsExist(mp.font2) { // 获取字体
-		return fmt.Errorf("文件%v 不存在", mp.font2)
+		return errors.New("文件 " + mp.font2 + " 不存在")
 	}
 	data, err := ioutil.ReadFile(mp.kanban)
 	if err != nil {
