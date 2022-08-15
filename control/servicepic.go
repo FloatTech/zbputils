@@ -2,12 +2,16 @@ package control
 
 import (
 	"bytes"
+	"fmt"
+	"io/ioutil"
+	"log"
 	"math/rand"
 	"strings"
 	"sync"
 
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/zbputils/img"
+	"github.com/FloatTech/zbputils/img/text"
 
 	// 图片输出
 	"image"
@@ -42,6 +46,21 @@ type location struct {
 	drawX, maxTwidth float64 // 文字边距
 	rlineX, rlineY   float64 // 宽高记录
 	rtitleW          float64 // 标题位置
+}
+
+func init() {
+	_, err := file.GetLazyData("data/Control/kanban.png", true)
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = file.GetLazyData(text.BoldFontFile, true)
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = file.GetLazyData(text.SakuraFontFile, true)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 // 返回菜单图片
@@ -164,7 +183,7 @@ func createPic(one *gg.Context, mp *mpic, lt location) (image.Image, error) {
 			one.DrawImage(mp.im, (one.W()/2)+(one.W()/2-mp.kanbanH)/2, imRY+5) // 放入看板娘
 		}
 
-	} else { ///////////////////////////////////////////////////////////////////////
+	} else { //==================================================================>>
 
 		titlec = randColor(titlec)
 		wg.Add(1)
@@ -327,15 +346,13 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 
 // 编码看板娘图片和加载字体
 func loadpic(mp *mpic) error {
-	_, err := file.GetLazyData(mp.font1, true) // 获取字体
-	if err != nil {
-		return err
+	if !file.IsExist(mp.font1) { // 获取字体
+		return fmt.Errorf("文件%v 不存在", mp.font1)
 	}
-	_, err = file.GetLazyData(mp.font2, true) // 获取字体
-	if err != nil {
-		return err
+	if !file.IsExist(mp.font2) { // 获取字体
+		return fmt.Errorf("文件%v 不存在", mp.font2)
 	}
-	data, err := file.GetLazyData(mp.kanban, true)
+	data, err := ioutil.ReadFile(mp.kanban)
 	if err != nil {
 		return err
 	}
@@ -356,7 +373,6 @@ func loadpic(mp *mpic) error {
 	if err != nil {
 		return err
 	}
-
 	mp.kanbanW, mp.kanbanH = width, height
 	return nil
 }
