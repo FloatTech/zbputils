@@ -243,8 +243,8 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 			goto label
 		}
 		one.DrawRoundedRectangle(lt.drawX, lt.rlineY, threeW, threeH, 20.0) // 创建圆角矩形
-		drawsc(one, mp, titlec, fontSize, lt.drawX, lt.rlineY, lineTexts)
-		lt.rlineX += float64(threeW) + fontSize/2 // 添加后加一次宽度
+		drawsc(one, titlec, fontSize, lt.drawX, lt.rlineY, lineTexts)
+		lt.rlineX += threeW + fontSize/2 // 添加后加一次宽度
 		lt.lastH = int(threeH)
 
 		continue // 跳出本次循环
@@ -262,7 +262,7 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 		}
 		lt.drawX = lt.rlineX + 30                                           // 圆角矩形位置宽度
 		one.DrawRoundedRectangle(lt.drawX, lt.rlineY, threeW, threeH, 20.0) // 创建圆角矩形
-		drawsc(one, mp, titlec, fontSize, lt.drawX, lt.rlineY, lineTexts)
+		drawsc(one, titlec, fontSize, lt.drawX, lt.rlineY, lineTexts)
 		lt.rlineX += threeW + fontSize/2 // 添加后加一次宽度
 		lt.lastH = int(threeH)
 	}
@@ -270,7 +270,7 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 }
 
 // 绘制文字
-func drawsc(one *gg.Context, mp *mpic, titlec titleColor, fontSize, drawX, rlineY float64, lineTexts []string) {
+func drawsc(one *gg.Context, titlec titleColor, fontSize, drawX, rlineY float64, lineTexts []string) {
 	if titlec.s {
 		titlec = randColor(titlec)
 	}
@@ -351,12 +351,12 @@ func loadpic(mp *mpic) error {
 		mp.im = img.Limit(mp.im, 1024, 1500)
 		mp.kanbanW, mp.kanbanH = 1024, 1500
 		return nil
-	} else {
-		mp.im, _, err = image.Decode(bytes.NewReader(data))
-		if err != nil {
-			return err
-		}
 	}
+	mp.im, _, err = image.Decode(bytes.NewReader(data))
+	if err != nil {
+		return err
+	}
+
 	mp.kanbanW, mp.kanbanH = width, height
 	return nil
 }
