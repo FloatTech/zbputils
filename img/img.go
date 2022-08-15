@@ -11,8 +11,8 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Coloured-glaze/gg"
 	"github.com/disintegration/imaging"
-	"github.com/fogleman/gg"
 )
 
 // Load 加载图片

@@ -2,7 +2,6 @@
 package control
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"strconv"
@@ -13,20 +12,13 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
-	"github.com/wdvxdr1123/ZeroBot/utils/helper"
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
 	"github.com/FloatTech/zbputils/process"
 
-	// 图片输出
-	"image"
-
-	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
 	"github.com/FloatTech/zbputils/img/writer"
-	"github.com/fogleman/gg"
 )
 
 var (
@@ -351,95 +343,43 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				// 绘制图片
 				/***********获取看板娘图片***********/
-				data, err := file.GetLazyData("data/Control/kanban.png", true)
+				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
+				var menu = mpic{
+					kanban:   "data/Control/kanban.png", // 看板娘图片
+					status:   "●已启用",                    // 启用状态
+					status2:  true,                      // 启用状态
+					plugin:   model.Args,                // 插件名
+					font1:    text.BoldFontFile,         // 字体1
+					font2:    text.SakuraFontFile,       // 字体2
+					info:     serviceinfo,               // 插件信息
+					multiple: 2.5,                       // 倍数
+					fontSize: 50,                        // 字体大小
+				}
+				var lt = location{
+					lastH:     0, //
+					drawX:     0.0,
+					maxTwidth: 1200.0, // 文字边距
+					rlineX:    0.0,    // 宽高记录
+					rlineY:    140.0,
+				}
+				if !service.EnableMarkIn(gid) {
+					menu.status = "○未启用"
+				}
+				err := loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				back, _, err := image.Decode(bytes.NewReader(data))
+				pic, err := dyna(&menu, lt)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				/***********设置图片的大小和底色***********/
-				backX := 902
-				backY := 1056
-				canvas := gg.NewContext(backX, backY)
-				// 设置文字大小
-				fontSize := 50.0
-				_, err = file.GetLazyData(text.BoldFontFile, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
+				data, cl := writer.ToBytes(pic) // 生成图片
+				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
+					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
-				_, err = file.GetLazyData(text.SakuraFontFile, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				// 计算卡片大小
-				backXmax := 1500
-				backYmax := 1056
-				serviceinfo := strings.Split(service.String(), "\n")
-				for i, info := range serviceinfo {
-					width, h := canvas.MeasureString(info)
-					if backXmax < int(width) {
-						backXmax = int(width) + 100 // 获取最大宽度
-					}
-					high := 300 + i*int(h+20) // 获取文本高度
-					if backYmax < high {
-						backYmax = high // 获取最大高度
-					}
-				}
-				canvas = gg.NewContext(backXmax+backX+50, backYmax)
-				// 设置背景色
-				canvas.SetRGB(1, 1, 1)
-				canvas.Clear()
-				/***********放置好看的图片***********/
-				back = img.Size(back, backX, backY).Im
-				canvas.DrawImage(back, 0, 0)
-				/***********写入插件信息***********/
-				if err = canvas.LoadFontFace(text.BoldFontFile, fontSize); err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				xCoordinate := float64(backX + 50)       // 看板娘的坐标
-				length, h := canvas.MeasureString("看用法") // 获取文字宽度与高度
-				// 标记启动状态
-				canvas.DrawRoundedRectangle(xCoordinate-length*0.1, 130-h*2.5, length*1.2, h*2, fontSize*0.2)
-				enable := "未启用"
-				if service.EnableMarkIn(gid) {
-					canvas.SetRGB255(0, 221, 0)
-					enable = "已启用"
-				} else {
-					canvas.SetRGB255(221, 221, 221)
-				}
-				canvas.Fill()
-				canvas.SetRGB(0, 0, 0)
-				canvas.DrawString(enable, xCoordinate, 130-h)
-				// 写入插件helper内容
-				canvas.DrawRoundedRectangle(xCoordinate-30, 140, float64(backXmax)-30, float64(backYmax-160), fontSize*0.3)
-				canvas.SetRGB255(0, 221, 221)
-				canvas.Fill()
-				canvas.SetRGB(0, 0, 0)
-				for i, info := range serviceinfo {
-					canvas.DrawString(info, xCoordinate, 260+(h+20)*float64(i-1))
-				}
-				// 写入插件名称
-				if err = canvas.LoadFontFace(text.SakuraFontFile, fontSize*2); err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				canvas.DrawString(model.Args, xCoordinate+length*1.2, 130-h)
-				// 生成图片
-				data, cl := writer.ToBytes(canvas.Image())
-				ctx.SendChain(message.ImageBytes(data))
 				cl()
 			})
 
@@ -452,56 +392,151 @@ func init() {
 					gid = -ctx.Event.UserID
 				}
 				managers.RLock()
-				msg := []string{"--------服务列表--------\n发送\"/用法 name\"查看详情\n发送\"/响应\"启用会话"}
+				var tmp strings.Builder
+				var enable strings.Builder
+				var disable strings.Builder
+				tmp.Grow(512)
+				enable.Grow(256)
+				tmp.WriteString("\t\t\t <----------服务列表---------> \t\t\t\n" +
+					"\t\t\t\t   ◇发送\"/用法 name\"查看详情   \t\t\t\t\n" +
+					"\t\t\t\t   ◇发送\"/响应\"启用会话        \t\t\t\t\t\n",
+				)
 				managers.RUnlock()
-				var enableService []string
-				var disableService []string
+				enable.WriteString("\t\t\t\t\t     ↓ 以下服务已开启↓         \t\t\t\t\n")
+				disable.WriteString("\t\t\t\t\t     ↓ 以下服务未开启↓         \t\t\t\t\n")
+
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					if manager.IsEnabledIn(gid) {
 						i++
-						enableService = append(enableService, strconv.Itoa(i)+":"+key)
+						enable.WriteString(strconv.Itoa(i) + ": " + key + "\n")
 					} else {
 						j++
-						disableService = append(disableService, strconv.Itoa(j)+":"+key)
+						disable.WriteString(strconv.Itoa(j) + ": " + key + "\n")
 					}
 					return true
 				})
-				msg = append(msg, "\n\n→以下服务已开启：\n", strings.Join(enableService, "\n"))
-				msg = append(msg, "\n\n→以下服务未开启：\n", strings.Join(disableService, "\n"))
-				data, err := text.RenderToBase64(strings.Join(msg, ""), text.FontFile, 400, 20)
+				tmp.WriteString(enable.String())
+				tmp.WriteString(disable.String())
+				msg := strings.Split(strings.Trim(tmp.String(), "\n"), "\n")
+
+				var menu = mpic{
+					kanban:   "data/Control/kanban.png", // 看板娘图片
+					status:   "●Plugin",                 // 启用状态
+					status2:  true,                      // 启用状态
+					plugin:   "ZeroBot-Plugin",          // 插件名
+					font1:    text.BoldFontFile,         // 字体1
+					font2:    text.SakuraFontFile,       // 字体2
+					info:     msg,                       // 插件信息
+					multiple: 2.5,                       // 倍数
+					fontSize: 50,                        // 字体大小
+				}
+				var lt = location{
+					lastH:     0,
+					drawX:     0.0,
+					maxTwidth: 1200.0, // 文字边距
+					rlineX:    0.0,    // 宽高记录
+					rlineY:    140.0,
+				}
+				err := loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
+				pic, err := dyna(&menu, lt)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				data, cl := writer.ToBytes(pic) // 生成图片
+				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
+				cl()
 			})
 
 		zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				i := 0
+				double, i, j := true, 0, 0
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
 				managers.RLock()
-				msgs := make([]any, 1, len(managers.M)*7+1)
+				lenmap := len(managers.M)
 				managers.RUnlock()
-				msgs[0] = "---服务详情---\n"
+				if lenmap == 0 {
+					ctx.SendChain(message.Text("服务数量为 ", lenmap))
+					return
+				}
+				var tmp strings.Builder
+				var tmp2 strings.Builder
+				tmp.Grow(lenmap * 100)
+				tmp2.Grow(lenmap * 100)
+
+				end := lenmap / 2
+				if lenmap <= 2 {
+					double = false // 单列模式
+				}
+				tab := "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n"
+				tmp.WriteString("\t\t\t\t  <---------服务详情--------->   \t\t\t\t")
 				managers.ForEach(func(key string, service *ctrl.Control[*zero.Ctx]) bool {
 					i++
-					msgs = append(msgs, i, ": ", service.EnableMarkIn(gid), key, "\n", service, "\n\n")
+					if i > end && lenmap >= 2 {
+						goto label
+					}
+					tmp.WriteString(fmt.Sprint("\n", i, ": ", service.EnableMarkIn(gid), " ", key,
+						tab, strings.Trim(fmt.Sprint(service), "\n")))
+					return true
+
+				label:
+					if j > 0 {
+						tmp2.WriteString(fmt.Sprint("\n", i, ": ", service.EnableMarkIn(gid), " ", key,
+							tab, strings.Trim(fmt.Sprint(service), "\n")))
+					} else {
+						tmp2.WriteString(fmt.Sprint(i, ": ", service.EnableMarkIn(gid), " ", key,
+							tab, strings.Trim(fmt.Sprint(service), "\n")))
+					}
+					j++
 					return true
 				})
-				data, err := text.RenderToBase64(fmt.Sprint(msgs...), text.FontFile, 400, 20)
+
+				msg := strings.Split(tmp.String(), "\n")
+				msg2 := strings.Split(tmp2.String(), "\n")
+				var menu = mpic{
+					kanban:   "data/Control/kanban.png", // 看板娘图片
+					status:   "○ INFO",                  // 启用状态
+					status2:  false,                     // 启用状态
+					double:   double,                    // 双列排版
+					plugin:   "ZeroBot-Plugin",          // 插件名
+					font1:    text.BoldFontFile,         // 字体1
+					font2:    text.SakuraFontFile,       // 字体2
+					info:     msg,                       // 插件信息
+					info2:    msg2,                      // 插件信息
+					multiple: 5,                         // 倍数
+					fontSize: 40,                        // 字体大小
+				}
+				var lt = location{
+					lastH:     0,
+					drawX:     0.0,
+					maxTwidth: 1200.0, // 文字边距
+					rlineX:    0.0,    // 宽高记录
+					rlineY:    140.0,
+				}
+				err := loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
 				}
-				if id := ctx.SendChain(message.Image("base64://" + helper.BytesToString(data))); id.ID() == 0 {
+				pic, err := dyna(&menu, lt)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR:", err))
+					return
+				}
+				data, cl := writer.ToBytes(pic) // 生成图片
+				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
+				cl()
 			})
 	})
 }

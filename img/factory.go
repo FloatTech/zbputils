@@ -5,8 +5,8 @@ import (
 	"image/color"
 	"image/draw"
 
+	"github.com/Coloured-glaze/gg"
 	"github.com/disintegration/imaging"
-	"github.com/fogleman/gg"
 )
 
 // Factory 处理中图像
