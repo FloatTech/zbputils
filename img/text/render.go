@@ -9,8 +9,8 @@ import (
 	"github.com/Coloured-glaze/gg"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/FloatTech/zbputils/file"
-	"github.com/FloatTech/zbputils/img/writer"
+	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/floatbox/img/writer"
 )
 
 // 加载数据库

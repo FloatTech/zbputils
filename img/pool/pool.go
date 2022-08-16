@@ -6,7 +6,7 @@ import (
 
 	"github.com/fumiama/go-registry"
 
-	"github.com/FloatTech/zbputils/process"
+	"github.com/FloatTech/floatbox/process"
 )
 
 type item struct {

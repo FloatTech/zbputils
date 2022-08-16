@@ -16,7 +16,7 @@ import (
 	// 图片输出
 	"image"
 
-	"github.com/FloatTech/zbputils/file"
+	"github.com/FloatTech/floatbox/file"
 )
 
 type mpic struct {

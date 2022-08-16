@@ -5,7 +5,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/FloatTech/zbputils/file"
+	"github.com/FloatTech/floatbox/file"
 	"github.com/sirupsen/logrus"
 )
 

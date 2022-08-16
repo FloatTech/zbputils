@@ -6,7 +6,7 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/FloatTech/zbputils/binary"
+	"github.com/FloatTech/floatbox/binary"
 )
 
 //nolint: revive

@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/Coloured-glaze/gg v1.3.2
+	github.com/FloatTech/floatbox v0.0.0-20220816052111-cbf40c78757a
 	github.com/FloatTech/sqlite v0.3.3
 	github.com/FloatTech/zbpctrl v1.4.1-0.20220715042842-93f081cb0133
 	github.com/disintegration/imaging v1.6.2
@@ -15,7 +16,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.2
 	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20220715040337-ef4327320c40
-	golang.org/x/text v0.3.7
 )
 
 require (
@@ -31,6 +31,7 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	golang.org/x/image v0.0.0-20220722155232-062f8c9fd539 // indirect
 	golang.org/x/sys v0.0.0-20220804214406-8e32c043e418 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	modernc.org/libc v1.16.19 // indirect
 	modernc.org/mathutil v1.4.1 // indirect
 	modernc.org/memory v1.1.1 // indirect

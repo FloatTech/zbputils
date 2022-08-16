@@ -15,10 +15,10 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
-	"github.com/FloatTech/zbputils/process"
+	"github.com/FloatTech/floatbox/process"
 
+	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/zbputils/img/text"
-	"github.com/FloatTech/zbputils/img/writer"
 )
 
 var (

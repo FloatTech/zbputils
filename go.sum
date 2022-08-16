@@ -1,5 +1,7 @@
 github.com/Coloured-glaze/gg v1.3.2 h1:HRWF0qoIxwhO1O0N5eN2eTPwaO+xHpFu1FfNhtls22w=
 github.com/Coloured-glaze/gg v1.3.2/go.mod h1:Ih5NLNNDHOy3RJbB0EPqGTreIzq/H02TGThIagh8HJg=
+github.com/FloatTech/floatbox v0.0.0-20220816052111-cbf40c78757a h1:g5qRftm3bA6hzkwjT7NqVe0XhZUFTU+QNcN/jvNiTFk=
+github.com/FloatTech/floatbox v0.0.0-20220816052111-cbf40c78757a/go.mod h1:hK2HTQddBomA/sY2oD7VeW0GA5BxlIoYqcAOnamw1EU=
 github.com/FloatTech/sqlite v0.3.3 h1:cSlpv+DcIehqaUG2YyjW0Twh396FoGsybpEpFZnX3Jg=
 github.com/FloatTech/sqlite v0.3.3/go.mod h1:i33d92OtR8jcp5fBUvQtospf27+MkfUxnGwnZ95E/dA=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=

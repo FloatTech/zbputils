@@ -11,9 +11,9 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
-	binutils "github.com/FloatTech/zbputils/binary"
-	"github.com/FloatTech/zbputils/math"
-	"github.com/FloatTech/zbputils/process"
+	binutils "github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/floatbox/process"
 )
 
 var startTime int64
