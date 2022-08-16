@@ -57,8 +57,10 @@ type Engine interface {
 	DataFolder() string
 	// IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
 	IsEnabledIn(id int64) bool
-	// 下载并获取本 engine 文件夹下的懒加载数据
+	// GetLazyData 下载并获取本 engine 文件夹下的懒加载数据
 	GetLazyData(filename string, isDataMustEqual bool) ([]byte, error)
+	// InitWhenNoError 在 errfun 无误时执行 do
+	InitWhenNoError(errfun func() error, do func())
 }
 
 type engineinstance struct {
