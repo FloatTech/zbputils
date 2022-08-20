@@ -3,9 +3,11 @@ package control
 import (
 	"bytes"
 	"errors"
+	"image"
 	"io/ioutil"
 	"log"
 	"math/rand"
+	"os"
 	"strings"
 	"sync"
 
@@ -13,27 +15,26 @@ import (
 	"github.com/FloatTech/zbputils/img"
 	"github.com/FloatTech/zbputils/img/text"
 
-	// 图片输出
-	"image"
-
 	"github.com/FloatTech/floatbox/file"
 )
 
 type mpic struct {
-	kanban   string      // 看板娘图片路径
-	kanbanW  int         // 看板娘图片宽度
-	kanbanH  int         // 看板娘图片高度
-	status   string      // 启用状态
-	status2  bool        // 启用状态
-	double   bool        // 双列排版
-	plugin   string      // 插件名
-	font1    string      // 字体1
-	font2    string      // 字体2
-	info     []string    // 插件信息
-	info2    []string    // 插件信息2
-	multiple float64     // 图片拓展倍数
-	fontSize float64     // 字体大小
-	im       image.Image // 图片
+	kanban       string      // 看板娘图片路径
+	kanbanW      int         // 看板娘图片宽度
+	kanbanH      int         // 看板娘图片高度
+	kanbanON     bool        // 显示看板娘
+	customKanban bool        // 自定义看板娘
+	status       string      // 状态文本
+	status2      bool        // 启用状态
+	double       bool        // 双列排版
+	plugin       string      // 插件名
+	font1        string      // 字体1
+	font2        string      // 字体2
+	info         []string    // 插件信息
+	info2        []string    // 插件信息2
+	multiple     float64     // 图片拓展倍数
+	fontSize     float64     // 字体大小
+	im           image.Image // 图片
 }
 
 type titleColor struct {
@@ -48,8 +49,21 @@ type location struct {
 	rtitleW          float64 // 标题位置
 }
 
+var (
+	customKanban = false // 自定义看板娘
+	kanbanEnable = true  // 开关
+	kanbanPath   = "data/Control/"
+	roleName     = "kanban.png"
+)
+
 func init() {
-	_, err := file.GetLazyData("data/Control/kanban.png", true)
+	if !file.IsExist(kanbanPath + "img") {
+		err := os.MkdirAll(kanbanPath+"img", 0755)
+		if err != nil {
+			log.Println("创建文件夹出错: ", err)
+		}
+	}
+	_, err := file.GetLazyData(kanbanPath+roleName, true)
 	if err != nil {
 		log.Println(err)
 	}
@@ -66,35 +80,55 @@ func init() {
 // 返回菜单图片
 func dyna(mp *mpic, lt location) (image.Image, error) {
 	var err error
-	fontSize := mp.fontSize                                               // 图片宽度和字体大小
-	var one = gg.NewContext(int(1024.0*2.5), mp.kanbanH+int(mp.fontSize)) // 新图像
-	one.SetRGB255(255, 255, 255)
-	one.Clear()
-	if mp.double {
-		one.DrawImage(mp.im, (one.W()/2-mp.kanbanH)/2, 0) // 放入看板娘
+	titleW := 1280          // 标题文字
+	fontSize := mp.fontSize // 图片宽度和字体大小
+	if mp.kanbanON && !mp.double {
+		titleW += mp.kanbanW // 标题位置
+	}
+	var one = gg.NewContext(titleW, 256+len(mp.info)*15) // 新图像
+	if mp.double && mp.kanbanON || mp.double && !mp.kanbanON {
+		one = gg.NewContext(titleW*2, 256+len(mp.info)*15) // 新图像
 		lt.rtitleW = float64(one.W()) / 2
 	} else {
-		lt.rtitleW = 1100
+		lt.rtitleW = float64(one.W() - 1280)
 	}
+	one.SetRGB255(255, 255, 255)
+	one.Clear()
 	if err = one.LoadFontFace(mp.font2, fontSize*2); err != nil {
 		return nil, err
 	}
-	one.SetRGBA255(55, 55, 55, 255)                             // 字体颜色
-	one.DrawString(mp.plugin, lt.rtitleW*1.35, fontSize*2)      // 插件名
+	one.SetRGBA255(55, 55, 55, 255) // 字体颜色
+	if mp.double && !mp.kanbanON || !mp.double && !mp.kanbanON {
+		width, _ := one.MeasureString(mp.plugin)
+		one.DrawString(mp.plugin, (float64(one.W())-width)/2, fontSize*2) // 绘制插件名在中间
+	} else if mp.double && mp.kanbanON { //
+		one.DrawString(mp.plugin, lt.rtitleW*1.36, fontSize*2) // 绘制插件名在右边
+	} else {
+		width, _ := one.MeasureString(mp.plugin)
+		one.DrawString(mp.plugin, (1280.0-width)/2+float64(mp.kanbanW), fontSize*2) // 绘制插件名在右边
+	}
 	if err = one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
 		return nil, err
 	}
-	one.DrawRoundedRectangle(lt.rtitleW+32, fontSize-5, fontSize*4.5, fontSize*1.5, 10) // 创建圆角矩形
-	if mp.status2 {                                                                     // 如果启用
-		one.SetRGBA255(15, 200, 15, 200)   // 设置背景颜色
+	if mp.double && !mp.kanbanON || !mp.double && !mp.kanbanON {
+		one.DrawRoundedRectangle(27, fontSize-5, fontSize*4.5, fontSize*1.5, 10) // 创建圆角矩形
+	} else if mp.double || mp.kanbanON { //
+		one.DrawRoundedRectangle(lt.rtitleW+27, fontSize-5, fontSize*4.5, fontSize*1.5, 10) // 创建圆角矩形
+	}
+	if mp.status2 { // 如果启用
+		one.SetRGBA255(15, 175, 15, 200)   // 设置绿色
 		one.Fill()                         // 填充
 		one.SetRGBA255(255, 255, 255, 255) // 设置白色
 	} else {
-		one.SetRGBA255(221, 221, 221, 255)
+		one.SetRGBA255(200, 15, 15, 200) // 设置红色
 		one.Fill()
-		one.SetRGBA255(55, 55, 55, 255) // 设置黑色
+		one.SetRGBA255(255, 255, 255, 255)
 	}
-	one.DrawString(mp.status, lt.rtitleW+40, fontSize*2) // 绘制启用状态
+	if mp.double && !mp.kanbanON || !mp.double && !mp.kanbanON {
+		one.DrawString(mp.status, 35, fontSize*2) // 绘制启用状态
+	} else if mp.double || mp.kanbanON { //
+		one.DrawString(mp.status, lt.rtitleW+35, fontSize*2) // 绘制启用状态
+	}
 	return createPic(one, mp, lt)
 }
 
@@ -145,42 +179,38 @@ func createPic(one *gg.Context, mp *mpic, lt location) (image.Image, error) {
 		for im2 := range ch2 {
 			imgs[1] = im2
 		}
-		imRY := imgs[0].Bounds().Dy() // 右边 图像的高度
-		imLY := imgs[1].Bounds().Dy() // 左边 图像的高度
-
-		max, min, left := 0, 0, false
-		tmpRY := imRY + 100
-		tmpLY := imLY + mp.kanbanH + 5
-
-		if tmpRY > tmpLY {
-			max = tmpRY
-			min = tmpLY // 剩余空间最大
-			left = true
+		imRY := imgs[0].Bounds().Dy() + 100 // 右边 图像的高度
+		imLY := imgs[1].Bounds().Dy() + 5   // 左边 图像的高度
+		max := 0
+		if mp.kanbanON {
+			imLY += mp.kanbanH + 5
+		}
+		if imRY > imLY {
+			max = imRY
 		} else {
-			max = tmpLY
-			min = tmpRY
+			max = imLY
 		}
 		if max > one.H() {
-			itmp := gg.NewContext(one.W(), max+int(mp.fontSize)) // 高度
-			itmp.SetRGB255(255, 255, 255)
-			itmp.Clear()
-			itmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(itmp.Image())
+			imgtmp := gg.NewContext(one.W(), max+int(mp.fontSize)) // 高度
+			imgtmp.SetRGB255(255, 255, 255)
+			imgtmp.Clear()
+			imgtmp.DrawImage(one.Image(), 0, 0)
+			one = gg.NewContextForImage(imgtmp.Image())
 		}
-		min = one.H() - min //
-		if min < mp.kanbanH {
-			itmp := gg.NewContext(one.W(), one.H()+(mp.kanbanH-min)+int(mp.fontSize)) // 高度
-			itmp.SetRGB255(255, 255, 255)
-			itmp.Clear()
-			itmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(itmp.Image())
-		}
-		one.DrawImage(imgs[0], 1250, 0) // 最终的绘制位置
-		one.DrawImage(imgs[1], 0, mp.kanbanH+5)
-		if left {
-			one.DrawImage(mp.im, (one.W()/2-mp.kanbanH)/2-50, tmpLY+5) // 放入看板娘
+		if mp.kanbanON {
+			if imLY > one.H() {
+				imgtmp := gg.NewContext(one.W(), imLY) // 高度
+				imgtmp.SetRGB255(255, 255, 255)
+				imgtmp.Clear()
+				imgtmp.DrawImage(one.Image(), 0, 0)
+				one = gg.NewContextForImage(imgtmp.Image())
+			}
+			one.DrawImage(mp.im, 0, 0) // 放入看板娘
+			one.DrawImage(imgs[1], 0, mp.kanbanH+5)
+			one.DrawImage(imgs[0], 1280, 0) // 最终的绘制位置
 		} else {
-			one.DrawImage(mp.im, (one.W()/2)+(one.W()/2-mp.kanbanH)/2, imRY+5) // 放入看板娘
+			one.DrawImage(imgs[0], 0, 0) // 最终的绘制位置
+			one.DrawImage(imgs[1], 1280, 0)
 		}
 
 	} else { //==================================================================>>
@@ -205,22 +235,34 @@ func createPic(one *gg.Context, mp *mpic, lt location) (image.Image, error) {
 				return nil, err
 			}
 		}
-		var imgs [2]image.Image
+		var imgs [1]image.Image
 		for im := range ch {
 			imgs[0] = im
 		}
 		imY := imgs[0].Bounds().Dy()
 		if imY+int(mp.fontSize) > one.H() {
-			itmp := gg.NewContext(one.W(), imY) // 高度
-			itmp.SetRGB255(255, 255, 255)
-			itmp.Clear()
-			itmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(itmp.Image())
+			imgtmp := gg.NewContext(one.W(), imY) // 高度
+			imgtmp.SetRGB255(255, 255, 255)
+			imgtmp.Clear()
+			imgtmp.DrawImage(one.Image(), 0, 0)
+			one = gg.NewContextForImage(imgtmp.Image())
 		}
-		one.DrawImage(mp.im, (one.W()/2-mp.kanbanH)/2-50, 0) // 放入看板娘
-		one.DrawImage(imgs[0], int(lt.rtitleW), 50)          // 最终的绘制位置
-		if one.H() > mp.kanbanH*3 {                          // 超出三倍高度
-			one.DrawImage(mp.im, (one.W()/2-mp.kanbanH)/2-50, imY-mp.kanbanH-int(mp.fontSize*5)) // 放入看板娘
+		if mp.kanbanON {
+			if mp.kanbanH > one.H() {
+				imgtmp := gg.NewContext(one.W(), mp.kanbanH) // 宽和高
+				imgtmp.SetRGB255(255, 255, 255)
+				imgtmp.Clear()
+				imgtmp.DrawImage(one.Image(), 0, 0)
+				one = gg.NewContextForImage(imgtmp.Image())
+			}
+			if mp.customKanban { // 如果自定义看板娘
+				one.DrawImage(mp.im, 0, (one.H()-mp.kanbanH)/2) // 放入看板娘
+			} else {
+				one.DrawImage(mp.im, 0, 0) // 最终的绘制位置
+			}
+			one.DrawImage(imgs[0], one.W()-1280, 50) // 最终的绘制位置
+		} else {
+			one.DrawImage(imgs[0], 0, 50) // 最终的绘制位置
 		}
 	}
 	return one.Image(), nil
@@ -231,14 +273,13 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 	info []string) (image.Image, error) {
 	defer wg.Done()
 	fontSize := mp.fontSize
-	var one = gg.NewContext(1280, mp.kanbanH)
+	var one = gg.NewContext(1280, 256+len(mp.info)*15)
 	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
 		return nil, err
 	}
 	for i := 0; i < len(info); i++ { // 遍历文字切片
 		lineTexts := make([]string, 0, len(info[i]))
 		lineText, textW, textH, tmpw := "", 0.0, 0.0, 0.0
-
 		if mp.double {
 			if strings.Contains(info[i], ": ● ") || strings.Contains(info[i], ": ○ ") {
 				titlec = randColor(titlec) // 随机一次颜色
@@ -257,7 +298,7 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 			info[i] = info[i][len(lineText):] // 丢弃已经写入的文字并重新赋值
 		}
 		threeW, threeH := textW+fontSize, (textH + (fontSize * 1.2)) // 圆角矩形宽度和高度
-		lt.drawX = lt.rlineX + 30                                    // 圆角矩形位置宽度
+		lt.drawX = lt.rlineX + 13                                    // 圆角矩形位置宽度
 		if int(lt.rlineX+textW)+int(fontSize*2) > one.W() {          // 越界
 			goto label
 		}
@@ -272,14 +313,14 @@ func createPic2(mp *mpic, lt location, titlec titleColor, wg *sync.WaitGroup,
 		lt.rlineY += float64(lt.lastH) + fontSize/4 // 加一次高度
 		lt.rlineX = 5                                      // 重置宽度位置
 		if threeH+lt.rlineY+fontSize >= float64(one.H()) { // 超出最大高度则进行加高
-			itmp := gg.NewContext(one.W(), int(lt.rlineY+threeH*mp.multiple)) // 高度
-			itmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(itmp.Image())
+			imgtmp := gg.NewContext(one.W(), int(lt.rlineY+threeH*mp.multiple)) // 高度
+			imgtmp.DrawImage(one.Image(), 0, 0)
+			one = gg.NewContextForImage(imgtmp.Image())
 			if err := one.LoadFontFace(mp.font1, mp.fontSize); err != nil { // 加载字体
 				return nil, err
 			}
 		}
-		lt.drawX = lt.rlineX + 30                                           // 圆角矩形位置宽度
+		lt.drawX = lt.rlineX + 13                                           // 圆角矩形位置宽度
 		one.DrawRoundedRectangle(lt.drawX, lt.rlineY, threeW, threeH, 20.0) // 创建圆角矩形
 		drawsc(one, titlec, fontSize, lt.drawX, lt.rlineY, lineTexts)
 		lt.rlineX += threeW + fontSize/2 // 添加后加一次宽度
@@ -305,7 +346,6 @@ func drawsc(one *gg.Context, titlec titleColor, fontSize, drawX, rlineY float64,
 
 // 填充颜色
 func randColor(titlec titleColor) titleColor {
-	//	rand.Seed(time.Now().UnixNano())
 	titlec.r = rand.Intn(245) // 随机颜色
 	titlec.g = rand.Intn(245)
 	titlec.b = rand.Intn(245)
@@ -352,27 +392,29 @@ func loadpic(mp *mpic) error {
 	if !file.IsExist(mp.font2) { // 获取字体
 		return errors.New("文件 " + mp.font2 + " 不存在")
 	}
-	data, err := ioutil.ReadFile(mp.kanban)
-	if err != nil {
-		return err
-	}
-	width, height, err := gg.GetImgWH(data, mp.kanban) // 解析图片的宽高信息
-	if err != nil {
-		return err
-	}
-	if width > 1024 { // 图片超出大小则进行限制
+	if mp.kanbanON {
+		data, err := ioutil.ReadFile(mp.kanban)
+		if err != nil {
+			return err
+		}
+		width, height, err := gg.GetImgWH(data) // 解析图片的宽高信息
+		if err != nil {
+			return err
+		}
+		if width > 1280 { // 图片超出大小则进行限制
+			mp.im, _, err = image.Decode(bytes.NewReader(data))
+			if err != nil {
+				return err
+			}
+			mp.im = img.Limit(mp.im, 1280, 1280)
+			mp.kanbanW, mp.kanbanH = 1280, 1280
+			return nil
+		}
 		mp.im, _, err = image.Decode(bytes.NewReader(data))
 		if err != nil {
 			return err
 		}
-		mp.im = img.Limit(mp.im, 1024, 1500)
-		mp.kanbanW, mp.kanbanH = 1024, 1500
-		return nil
+		mp.kanbanW, mp.kanbanH = width, height
 	}
-	mp.im, _, err = image.Decode(bytes.NewReader(data))
-	if err != nil {
-		return err
-	}
-	mp.kanbanW, mp.kanbanH = width, height
 	return nil
 }

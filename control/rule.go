@@ -15,6 +15,7 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
+	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/process"
 
 	"github.com/FloatTech/floatbox/img/writer"
@@ -326,6 +327,64 @@ func init() {
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
+		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.UserOrGrpAdmin).
+			SetBlock(true).Handle(func(ctx *zero.Ctx) {
+			str := ctx.State["regex_matched"].([]string)[1]
+			switch {
+			case str == "开启", str == "on":
+				kanbanEnable = true
+			case str == "关闭", str == "off":
+				kanbanEnable = false
+			case str == "重置", str == "reset":
+				customKanban = false
+				roleName = "kanban.png"
+			default:
+				ctx.SendChain(message.Text("输入错误了."))
+				return
+			}
+			ctx.SendChain(message.Text("已经 ", str, " 了!"))
+		})
+
+		zero.OnRegex(`^看板娘(\[CQ:at,qq=(.\d+)\]|(.\d+))`, zero.UserOrGrpAdmin).SetBlock(true).
+			Handle(func(ctx *zero.Ctx) {
+				str := ctx.State["regex_matched"].([]string)
+				user := ""
+				id, err := strconv.ParseInt(str[2], 10, 64)
+				if err != nil {
+					id, err = strconv.ParseInt(str[1], 10, 64)
+					if err != nil {
+						ctx.SendChain(message.Text("发生错误了: ", err))
+						return
+					}
+				}
+				user = strconv.FormatInt(id, 10)
+				if id > 100 {
+					err = file.DownloadTo("http://q4.qlogo.cn/g?b=qq&nk="+user+"&s=640",
+						kanbanPath+"img/"+user+".jpg", false)
+					if err != nil {
+						ctx.SendChain(message.Text("发生错误了: ", err))
+						return
+					}
+					customKanban = true
+					roleName = "img/" + user + ".jpg"
+					ctx.SendChain(message.Text("设置成功。"))
+				}
+			})
+
+		zero.OnKeywordGroup([]string{"看板娘图片", "kanban"}, zero.MustProvidePicture, zero.AdminPermission).
+			SetBlock(true).Handle(func(ctx *zero.Ctx) {
+			id := fmt.Sprint(ctx.Event.UserID)
+			url := ctx.State["image_url"].([]string)
+			err := file.DownloadTo(url[0], kanbanPath+"img/"+id+".jpg", false)
+			if err != nil {
+				ctx.SendChain(message.Text("发生错误了: ", err))
+				return
+			}
+			customKanban = true
+			roleName = "img/" + id + ".jpg"
+			ctx.SendChain(message.Text("设置成功。"))
+		})
+
 		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
@@ -346,15 +405,17 @@ func init() {
 				/***********获取看板娘图片***********/
 				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
 				var menu = mpic{
-					kanban:   "data/Control/kanban.png", // 看板娘图片
-					status:   "●已启用",                    // 启用状态
-					status2:  true,                      // 启用状态
-					plugin:   model.Args,                // 插件名
-					font1:    text.BoldFontFile,         // 字体1
-					font2:    text.SakuraFontFile,       // 字体2
-					info:     serviceinfo,               // 插件信息
-					multiple: 2.5,                       // 倍数
-					fontSize: 50,                        // 字体大小
+					kanban:       kanbanPath + roleName, // 看板娘图片
+					kanbanON:     kanbanEnable,          // 显示看板娘
+					customKanban: customKanban,
+					status:       "●已启用",              // 启用状态
+					status2:      true,                // 启用状态
+					plugin:       model.Args,          // 插件名
+					font1:        text.BoldFontFile,   // 字体1
+					font2:        text.SakuraFontFile, // 字体2
+					info:         serviceinfo,         // 插件信息
+					multiple:     2.5,                 // 倍数
+					fontSize:     50,                  // 字体大小
 				}
 				var lt = location{
 					lastH:     0, //
@@ -365,6 +426,7 @@ func init() {
 				}
 				if !service.EnableMarkIn(gid) {
 					menu.status = "○未启用"
+					menu.status2 = false
 				}
 				err := loadpic(&menu)
 				if err != nil {
@@ -420,15 +482,17 @@ func init() {
 				msg := strings.Split(strings.Trim(tmp.String(), "\n"), "\n")
 
 				var menu = mpic{
-					kanban:   "data/Control/kanban.png", // 看板娘图片
-					status:   "●Plugin",                 // 启用状态
-					status2:  true,                      // 启用状态
-					plugin:   "ZeroBot-Plugin",          // 插件名
-					font1:    text.BoldFontFile,         // 字体1
-					font2:    text.SakuraFontFile,       // 字体2
-					info:     msg,                       // 插件信息
-					multiple: 2.5,                       // 倍数
-					fontSize: 50,                        // 字体大小
+					kanban:       kanbanPath + roleName, // 看板娘图片
+					kanbanON:     kanbanEnable,          // 显示看板娘
+					customKanban: customKanban,
+					status:       "●Plugin",           // 启用状态
+					status2:      true,                // 启用状态
+					plugin:       "ZeroBot-Plugin",    // 插件名
+					font1:        text.BoldFontFile,   // 字体1
+					font2:        text.SakuraFontFile, // 字体2
+					info:         msg,                 // 插件信息
+					multiple:     2.5,                 // 倍数
+					fontSize:     50,                  // 字体大小
 				}
 				var lt = location{
 					lastH:     0,
@@ -456,7 +520,8 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				double, i, j := true, 0, 0
+				i, j := 0, 0
+				double, fontSize, multiple := true, 40.0, 5.0
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
@@ -465,7 +530,7 @@ func init() {
 				lenmap := len(managers.M)
 				managers.RUnlock()
 				if lenmap == 0 {
-					ctx.SendChain(message.Text("服务数量为 ", lenmap))
+					ctx.SendChain(message.Text("服务数量为: ", lenmap))
 					return
 				}
 				var tmp strings.Builder
@@ -474,14 +539,16 @@ func init() {
 				tmp2.Grow(lenmap * 100)
 
 				end := lenmap / 2
-				if lenmap <= 2 {
+				if lenmap <= 5 {
 					double = false // 单列模式
+					fontSize = 40
+					multiple = 3
 				}
 				tab := "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n"
 				tmp.WriteString("\t\t\t\t  <---------服务详情--------->   \t\t\t\t")
 				managers.ForEach(func(key string, service *ctrl.Control[*zero.Ctx]) bool {
 					i++
-					if i > end && lenmap >= 2 {
+					if i > end+1 && lenmap > 5 {
 						goto label
 					}
 					tmp.WriteString(fmt.Sprint("\n", i, ": ", service.EnableMarkIn(gid), " ", key,
@@ -503,17 +570,19 @@ func init() {
 				msg := strings.Split(tmp.String(), "\n")
 				msg2 := strings.Split(tmp2.String(), "\n")
 				var menu = mpic{
-					kanban:   "data/Control/kanban.png", // 看板娘图片
-					status:   "○ INFO",                  // 启用状态
-					status2:  false,                     // 启用状态
-					double:   double,                    // 双列排版
-					plugin:   "ZeroBot-Plugin",          // 插件名
-					font1:    text.BoldFontFile,         // 字体1
-					font2:    text.SakuraFontFile,       // 字体2
-					info:     msg,                       // 插件信息
-					info2:    msg2,                      // 插件信息
-					multiple: 5,                         // 倍数
-					fontSize: 40,                        // 字体大小
+					kanban:       kanbanPath + roleName, // 看板娘图片
+					kanbanON:     kanbanEnable,          // 显示看板娘
+					customKanban: customKanban,
+					status:       "○ INFO",            // 启用状态
+					status2:      false,               // 启用状态
+					double:       double,              // 双列排版
+					plugin:       "ZeroBot-Plugin",    // 插件名
+					font1:        text.BoldFontFile,   // 字体1
+					font2:        text.SakuraFontFile, // 字体2
+					info:         msg,                 // 插件信息
+					info2:        msg2,                // 插件信息
+					multiple:     multiple,            // 倍数
+					fontSize:     fontSize,            // 字体大小
 				}
 				var lt = location{
 					lastH:     0,
