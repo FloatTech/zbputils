@@ -5,7 +5,6 @@ import (
 	"errors"
 	"image"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"os"
 	"strings"
@@ -60,20 +59,20 @@ func init() {
 	if !file.IsExist(kanbanPath + "img") {
 		err := os.MkdirAll(kanbanPath+"img", 0755)
 		if err != nil {
-			log.Println("创建文件夹出错: ", err)
+			panic(err)
 		}
 	}
 	_, err := file.GetLazyData(kanbanPath+roleName, true)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 	_, err = file.GetLazyData(text.BoldFontFile, true)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 	_, err = file.GetLazyData(text.SakuraFontFile, true)
 	if err != nil {
-		log.Println(err)
+		panic(err)
 	}
 }
 
