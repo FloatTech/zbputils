@@ -299,20 +299,14 @@ func (titlec *titleColor) randfill() {
 	titlec.r = rand.Intn(245) // 随机颜色
 	titlec.g = rand.Intn(245)
 	titlec.b = rand.Intn(245)
-lop:
-	for {
-		switch {
-		case titlec.r < 15 && titlec.g < 15 && titlec.b < 15:
-			titlec.r = rand.Intn(245)
-			titlec.g = rand.Intn(245)
-			titlec.b = rand.Intn(245)
-		case titlec.r > 210 && titlec.g > 210 && titlec.b > 210:
-			titlec.r = rand.Intn(245)
-			titlec.g = rand.Intn(245)
-			titlec.b = rand.Intn(245)
-		default:
-			break lop
-		}
+	for titlec.r < 15 || titlec.r > 210 {
+		titlec.r = rand.Intn(245)
+	}
+	for titlec.g < 15 || titlec.g > 210 {
+		titlec.g = rand.Intn(245)
+	}
+	for titlec.b < 15 || titlec.b > 210 {
+		titlec.b = rand.Intn(245)
 	}
 }
 
