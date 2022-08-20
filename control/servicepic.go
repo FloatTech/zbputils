@@ -98,12 +98,13 @@ func dyna(mp *mpic, lt location) (image.Image, error) {
 		return nil, err
 	}
 	one.SetRGBA255(55, 55, 55, 255) // 字体颜色
-	if mp.double && !mp.kanbanON || !mp.double && !mp.kanbanON {
+	switch {
+	case mp.double && !mp.kanbanON, !mp.double && !mp.kanbanON:
 		width, _ := one.MeasureString(mp.plugin)
 		one.DrawString(mp.plugin, (float64(one.W())-width)/2, fontSize*2) // 绘制插件名在中间
-	} else if mp.double && mp.kanbanON { //
+	case mp.double && mp.kanbanON: //
 		one.DrawString(mp.plugin, lt.rtitleW*1.36, fontSize*2) // 绘制插件名在右边
-	} else {
+	default:
 		width, _ := one.MeasureString(mp.plugin)
 		one.DrawString(mp.plugin, (1280.0-width)/2+float64(mp.kanbanW), fontSize*2) // 绘制插件名在右边
 	}
