@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"image"
-	"io/ioutil"
 	"math/rand"
 	"os"
 	"strings"
@@ -12,7 +11,6 @@ import (
 
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/zbputils/img"
-	"github.com/FloatTech/zbputils/img/text"
 
 	"github.com/FloatTech/floatbox/file"
 )
@@ -63,14 +61,6 @@ func init() {
 		}
 	}
 	_, err := file.GetLazyData(kanbanPath+roleName, true)
-	if err != nil {
-		panic(err)
-	}
-	_, err = file.GetLazyData(text.BoldFontFile, true)
-	if err != nil {
-		panic(err)
-	}
-	_, err = file.GetLazyData(text.SakuraFontFile, true)
 	if err != nil {
 		panic(err)
 	}
@@ -393,7 +383,7 @@ func loadpic(mp *mpic) error {
 		return errors.New("文件 " + mp.font2 + " 不存在")
 	}
 	if mp.kanbanON {
-		data, err := ioutil.ReadFile(mp.kanban)
+		data, err := os.ReadFile(mp.kanban)
 		if err != nil {
 			return err
 		}

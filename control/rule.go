@@ -398,6 +398,16 @@ func init() {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 					return
 				}
+				_, err := file.GetLazyData(text.BoldFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
@@ -428,7 +438,7 @@ func init() {
 					menu.status = "○未启用"
 					menu.status2 = false
 				}
-				err := loadpic(&menu)
+				err = loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
@@ -447,6 +457,16 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
+				_, err := file.GetLazyData(text.BoldFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
 				i := 0
 				j := 0
 				gid := ctx.Event.GroupID
@@ -501,7 +521,7 @@ func init() {
 					rlineX:    0.0,    // 宽高记录
 					rlineY:    140.0,
 				}
-				err := loadpic(&menu)
+				err = loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
@@ -520,6 +540,16 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务详情", "service_detail"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
+				_, err := file.GetLazyData(text.BoldFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
 				i, j := 0, 0
 				double, fontSize, multiple := true, 40.0, 5.0
 				gid := ctx.Event.GroupID
@@ -591,7 +621,7 @@ func init() {
 					rlineX:    0.0,    // 宽高记录
 					rlineY:    140.0,
 				}
-				err := loadpic(&menu)
+				err = loadpic(&menu)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR:", err))
 					return
