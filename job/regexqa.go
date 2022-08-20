@@ -289,7 +289,7 @@ func init() {
 			}
 		}
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("删除成功"))
@@ -322,7 +322,7 @@ func init() {
 			})
 			if err != nil {
 				cl()
-				ctx.SendChain(message.Text("ERROR:", err))
+				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
 			logrus.Debugln("[job] inject:", binary.BytesToString(vev))

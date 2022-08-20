@@ -321,7 +321,7 @@ func init() {
 			}
 			err := service.Flip()
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err))
+				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
@@ -353,7 +353,7 @@ func init() {
 				if err != nil {
 					id, err = strconv.ParseInt(str[1], 10, 64)
 					if err != nil {
-						ctx.SendChain(message.Text("发生错误了: ", err))
+						ctx.SendChain(message.Text("ERROR: ", err))
 						return
 					}
 				}
@@ -362,7 +362,7 @@ func init() {
 					err = file.DownloadTo("http://q4.qlogo.cn/g?b=qq&nk="+user+"&s=640",
 						kanbanPath+"img/"+user+".jpg", false)
 					if err != nil {
-						ctx.SendChain(message.Text("发生错误了: ", err))
+						ctx.SendChain(message.Text("ERROR: ", err))
 						return
 					}
 					customKanban = true
@@ -377,7 +377,7 @@ func init() {
 			url := ctx.State["image_url"].([]string)
 			err := file.DownloadTo(url[0], kanbanPath+"img/"+id+".jpg", false)
 			if err != nil {
-				ctx.SendChain(message.Text("发生错误了: ", err))
+				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
 			customKanban = true
@@ -415,37 +415,36 @@ func init() {
 				/***********获取看板娘图片***********/
 				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
 				var menu = mpic{
-					kanban:       kanbanPath + roleName, // 看板娘图片
-					kanbanON:     kanbanEnable,          // 显示看板娘
-					customKanban: customKanban,
-					status:       "●已启用",              // 启用状态
-					status2:      true,                // 启用状态
-					plugin:       model.Args,          // 插件名
-					font1:        text.BoldFontFile,   // 字体1
-					font2:        text.SakuraFontFile, // 字体2
-					info:         serviceinfo,         // 插件信息
-					multiple:     2.5,                 // 倍数
-					fontSize:     50,                  // 字体大小
+					path:       kanbanPath + roleName, // 看板娘图片
+					isDisplay:  kanbanEnable,          // 显示看板娘
+					isCustom:   customKanban,
+					statusText: "●已启用",              // 启用状态
+					enableText: true,                // 启用状态
+					pluginName: model.Args,          // 插件名
+					font1:      text.BoldFontFile,   // 字体1
+					font2:      text.SakuraFontFile, // 字体2
+					info:       serviceinfo,         // 插件信息
+					multiple:   2.5,                 // 倍数
+					fontSize:   50,                  // 字体大小
 				}
-				var lt = location{
+				if !service.EnableMarkIn(gid) {
+					menu.statusText = "○未启用"
+					menu.enableText = false
+				}
+				err = menu.loadpic()
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				pic, err := menu.dyna(&location{
 					lastH:     0, //
 					drawX:     0.0,
 					maxTwidth: 1200.0, // 文字边距
 					rlineX:    0.0,    // 宽高记录
 					rlineY:    140.0,
-				}
-				if !service.EnableMarkIn(gid) {
-					menu.status = "○未启用"
-					menu.status2 = false
-				}
-				err = loadpic(&menu)
+				})
 				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				pic, err := dyna(&menu, lt)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
+					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				data, cl := writer.ToBytes(pic) // 生成图片
@@ -502,33 +501,32 @@ func init() {
 				msg := strings.Split(strings.Trim(tmp.String(), "\n"), "\n")
 
 				var menu = mpic{
-					kanban:       kanbanPath + roleName, // 看板娘图片
-					kanbanON:     kanbanEnable,          // 显示看板娘
-					customKanban: customKanban,
-					status:       "●Plugin",           // 启用状态
-					status2:      true,                // 启用状态
-					plugin:       "ZeroBot-Plugin",    // 插件名
-					font1:        text.BoldFontFile,   // 字体1
-					font2:        text.SakuraFontFile, // 字体2
-					info:         msg,                 // 插件信息
-					multiple:     2.5,                 // 倍数
-					fontSize:     50,                  // 字体大小
+					path:       kanbanPath + roleName, // 看板娘图片
+					isDisplay:  kanbanEnable,          // 显示看板娘
+					isCustom:   customKanban,
+					statusText: "●Plugin",           // 启用状态
+					enableText: true,                // 启用状态
+					pluginName: "ZeroBot-Plugin",    // 插件名
+					font1:      text.BoldFontFile,   // 字体1
+					font2:      text.SakuraFontFile, // 字体2
+					info:       msg,                 // 插件信息
+					multiple:   2.5,                 // 倍数
+					fontSize:   50,                  // 字体大小
 				}
-				var lt = location{
+				err = menu.loadpic()
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				pic, err := menu.dyna(&location{
 					lastH:     0,
 					drawX:     0.0,
 					maxTwidth: 1200.0, // 文字边距
 					rlineX:    0.0,    // 宽高记录
 					rlineY:    140.0,
-				}
-				err = loadpic(&menu)
+				})
 				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				pic, err := dyna(&menu, lt)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
+					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				data, cl := writer.ToBytes(pic) // 生成图片
@@ -600,35 +598,34 @@ func init() {
 				msg := strings.Split(tmp.String(), "\n")
 				msg2 := strings.Split(tmp2.String(), "\n")
 				var menu = mpic{
-					kanban:       kanbanPath + roleName, // 看板娘图片
-					kanbanON:     kanbanEnable,          // 显示看板娘
-					customKanban: customKanban,
-					status:       "○ INFO",            // 启用状态
-					status2:      false,               // 启用状态
-					double:       double,              // 双列排版
-					plugin:       "ZeroBot-Plugin",    // 插件名
-					font1:        text.BoldFontFile,   // 字体1
-					font2:        text.SakuraFontFile, // 字体2
-					info:         msg,                 // 插件信息
-					info2:        msg2,                // 插件信息
-					multiple:     multiple,            // 倍数
-					fontSize:     fontSize,            // 字体大小
+					path:       kanbanPath + roleName, // 看板娘图片
+					isDisplay:  kanbanEnable,          // 显示看板娘
+					isCustom:   customKanban,
+					statusText: "○ INFO",            // 启用状态
+					enableText: false,               // 启用状态
+					isDouble:   double,              // 双列排版
+					pluginName: "ZeroBot-Plugin",    // 插件名
+					font1:      text.BoldFontFile,   // 字体1
+					font2:      text.SakuraFontFile, // 字体2
+					info:       msg,                 // 插件信息
+					info2:      msg2,                // 插件信息
+					multiple:   multiple,            // 倍数
+					fontSize:   fontSize,            // 字体大小
 				}
-				var lt = location{
+				err = menu.loadpic()
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				pic, err := menu.dyna(&location{
 					lastH:     0,
 					drawX:     0.0,
 					maxTwidth: 1200.0, // 文字边距
 					rlineX:    0.0,    // 宽高记录
 					rlineY:    140.0,
-				}
-				err = loadpic(&menu)
+				})
 				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
-					return
-				}
-				pic, err := dyna(&menu, lt)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR:", err))
+					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				data, cl := writer.ToBytes(pic) // 生成图片

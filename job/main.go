@@ -150,7 +150,7 @@ func init() {
 		}
 		err := addcmd(ctx, c)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
@@ -166,7 +166,7 @@ func init() {
 		}
 		err := registercmd(ctx.Event.SelfID, c)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
@@ -182,7 +182,7 @@ func init() {
 		}
 		err := registercmd(ctx.Event.SelfID, c)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
@@ -191,7 +191,7 @@ func init() {
 		cron := ctx.State["regex_matched"].([]string)[1]
 		err := rmcmd(ctx.Event.SelfID, ctx.Event.UserID, cron)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
@@ -207,7 +207,7 @@ func init() {
 		cron += ctx.State["regex_matched"].([]string)[1]
 		err := delcmd(ctx.Event.SelfID, cron)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text("成功!"))
@@ -219,7 +219,7 @@ func init() {
 		defer mu.Unlock()
 		n, err := db.Count(ids)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		lst := make([]string, 0, n)
@@ -228,7 +228,7 @@ func init() {
 			return nil
 		})
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text(lst))
@@ -241,7 +241,7 @@ func init() {
 		defer mu.Unlock()
 		n, err := db.Count(ids)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		lst := make([]string, 0, n)
@@ -250,7 +250,7 @@ func init() {
 			return nil
 		})
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text(lst))
@@ -270,7 +270,7 @@ func init() {
 		defer mu.Unlock()
 		n, err := db.Count(ids)
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		lst := make([]string, 0, n)
@@ -279,7 +279,7 @@ func init() {
 			return nil
 		})
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		ctx.SendChain(message.Text(lst))
@@ -314,7 +314,7 @@ func init() {
 				})
 				if err != nil {
 					cl()
-					ctx.SendChain(message.Text("ERROR:", err))
+					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				logrus.Debugln("[job] inject:", binary.BytesToString(vev))
@@ -387,7 +387,7 @@ func generalhandler(command string) zero.Handler {
 		})
 		if err != nil {
 			cl()
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		logrus.Debugln("[job] inject:", binary.BytesToString(vev))
@@ -415,7 +415,7 @@ func superuserhandler(rsp []byte) (zero.Handler, error) {
 		})
 		if err != nil {
 			cl()
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
 		logrus.Debugln("[job] inject:", binary.BytesToString(vev))
@@ -507,7 +507,7 @@ func parseArgs(ctx *zero.Ctx) bool {
 		msg := ctx.Event.RawEvent.Raw[start+3 : msgend]
 		arg, err := strconv.Atoi(ctx.Event.RawEvent.Raw[msgend+2 : numend])
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return false
 		}
 		arr, ok := args[arg]
@@ -556,7 +556,7 @@ func parseArgs(ctx *zero.Ctx) bool {
 		}
 		arg, err := strconv.Atoi(ctx.Event.RawEvent.Raw[msgend+2 : numend])
 		if err != nil {
-			ctx.SendChain(message.Text("ERROR:", err))
+			ctx.SendChain(message.Text("ERROR: ", err))
 			return false
 		}
 		arr, ok := args[arg]
@@ -570,7 +570,7 @@ func parseArgs(ctx *zero.Ctx) bool {
 			}
 			b, err := web.GetData(u)
 			if err != nil {
-				ctx.SendChain(message.Text("ERROR:", err))
+				ctx.SendChain(message.Text("ERROR: ", err))
 				if !isnilable {
 					return false
 				}
