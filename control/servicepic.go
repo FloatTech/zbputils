@@ -133,11 +133,11 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		titlec := titleColor{isRandom: false}
 		titlec.randfill()
 		go func() {
-			imgs[0], err1 = mp.createPic2(lt, &titlec, mp.info)
+			imgs[0], err1 = mp.createPic2(*lt, &titlec, mp.info)
 			wg.Done()
 		}()
 		go func() {
-			imgs[1], err2 = mp.createPic2(lt, &titlec, mp.info2)
+			imgs[1], err2 = mp.createPic2(*lt, &titlec, mp.info2)
 			wg.Done()
 		}()
 		wg.Wait()
@@ -187,7 +187,7 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		var err1 error
 		wg.Add(1)
 		go func() {
-			img, err1 = mp.createPic2(lt, &titlec, mp.info)
+			img, err1 = mp.createPic2(*lt, &titlec, mp.info)
 			wg.Done()
 		}()
 		wg.Wait()
@@ -224,7 +224,7 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 }
 
 // 创建图片
-func (mp *mpic) createPic2(lt *location, titlec *titleColor, info []string) (image.Image, error) {
+func (mp *mpic) createPic2(lt location, titlec *titleColor, info []string) (image.Image, error) {
 	fontSize := mp.fontSize
 	one := gg.NewContext(1280, 256+len(mp.info)*15)
 	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
