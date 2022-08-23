@@ -126,6 +126,7 @@ func (mp *mpic) dyna(lt *location) (image.Image, error) {
 // 创建图片
 func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 	var wg sync.WaitGroup
+	copylt := *lt
 	if mp.isDouble {
 		var imgs [2]image.Image
 		var err1, err2 error
@@ -133,11 +134,11 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		titlec := titleColor{isRandom: false}
 		titlec.randfill()
 		go func() {
-			imgs[0], err1 = mp.createPic2(*lt, &titlec, mp.info)
+			imgs[0], err1 = mp.createPic2(copylt, &titlec, mp.info)
 			wg.Done()
 		}()
 		go func() {
-			imgs[1], err2 = mp.createPic2(*lt, &titlec, mp.info2)
+			imgs[1], err2 = mp.createPic2(copylt, &titlec, mp.info2)
 			wg.Done()
 		}()
 		wg.Wait()
@@ -187,7 +188,7 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		var err1 error
 		wg.Add(1)
 		go func() {
-			img, err1 = mp.createPic2(*lt, &titlec, mp.info)
+			img, err1 = mp.createPic2(copylt, &titlec, mp.info)
 			wg.Done()
 		}()
 		wg.Wait()
