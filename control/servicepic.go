@@ -126,7 +126,6 @@ func (mp *mpic) dyna(lt *location) (image.Image, error) {
 // 创建图片
 func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 	var wg sync.WaitGroup
-	copylt := *lt
 	if mp.isDouble {
 		var imgs [2]image.Image
 		var err1, err2 error
@@ -134,11 +133,11 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		titlec := titleColor{isRandom: false}
 		titlec.randfill()
 		go func() {
-			imgs[0], err1 = mp.createPic2(copylt, &titlec, mp.info)
+			imgs[0], err1 = mp.createPic2(lt, &titlec, mp.info)
 			wg.Done()
 		}()
 		go func() {
-			imgs[1], err2 = mp.createPic2(copylt, &titlec, mp.info2)
+			imgs[1], err2 = mp.createPic2(lt, &titlec, mp.info2)
 			wg.Done()
 		}()
 		wg.Wait()
@@ -188,7 +187,7 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 		var err1 error
 		wg.Add(1)
 		go func() {
-			img, err1 = mp.createPic2(copylt, &titlec, mp.info)
+			img, err1 = mp.createPic2(lt, &titlec, mp.info)
 			wg.Done()
 		}()
 		wg.Wait()
@@ -225,13 +224,16 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 }
 
 // 创建图片
-func (mp *mpic) createPic2(lt location, titlec *titleColor, info []string) (image.Image, error) {
+func (mp *mpic) createPic2(lt *location, titlec *titleColor, info []string) (image.Image, error) {
 	fontSize := mp.fontSize
 	one := gg.NewContext(1280, 256+len(mp.info)*15)
 	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
 		return nil, err
 	}
 	lineTexts := make([]string, 0, 32)
+	rlx := lt.rlineX
+	rly := lt.rlineY
+	lh := lt.lastH
 	for i := 0; i < len(info); i++ { // 遍历文字切片
 		lineText, textW, textH, tmpw := "", 0.0, 0.0, 0.0
 		if mp.isDouble {
@@ -252,28 +254,28 @@ func (mp *mpic) createPic2(lt location, titlec *titleColor, info []string) (imag
 			info[i] = info[i][len(lineText):] // 丢弃已经写入的文字并重新赋值
 		}
 		threeW, threeH := textW+fontSize, (textH + (fontSize * 1.2)) // 圆角矩形宽度和高度
-		lt.drawX = lt.rlineX + 13                                    // 圆角矩形位置宽度
-		if int(lt.rlineX+textW)+int(fontSize*2) > one.W() {          // 越界
-			lt.rlineY += float64(lt.lastH) + fontSize/4        // 加一次高度
-			lt.rlineX = 5                                      // 重置宽度位置
-			if threeH+lt.rlineY+fontSize >= float64(one.H()) { // 超出最大高度则进行加高
-				imgtmp := gg.NewContext(one.W(), int(lt.rlineY+threeH*mp.multiple)) // 高度
+		if int(rlx+textW)+int(fontSize*2) > one.W() {          // 越界
+			rly += float64(lh) + fontSize/4        // 加一次高度
+			rlx = 5                                      // 重置宽度位置
+			if threeH+rly+fontSize >= float64(one.H()) { // 超出最大高度则进行加高
+				imgtmp := gg.NewContext(one.W(), int(rly+threeH*mp.multiple)) // 高度
 				imgtmp.DrawImage(one.Image(), 0, 0)
 				one = gg.NewContextForImage(imgtmp.Image())
 				if err := one.LoadFontFace(mp.font1, mp.fontSize); err != nil { // 加载字体
 					return nil, err
 				}
 			}
-			lt.drawX = lt.rlineX + 13                                           // 圆角矩形位置宽度
-			one.DrawRoundedRectangle(lt.drawX, lt.rlineY, threeW, threeH, 20.0) // 创建圆角矩形
-			titlec.drawsc(one, fontSize, lt.drawX, lt.rlineY, lineTexts)
-			lt.rlineX += threeW + fontSize/2 // 添加后加一次宽度
-			lt.lastH = int(threeH)
+			dx := rlx + 13                                           // 圆角矩形位置宽度
+			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
+			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
+			rlx += threeW + fontSize/2 // 添加后加一次宽度
+			lh = int(threeH)
 		} else {
-			one.DrawRoundedRectangle(lt.drawX, lt.rlineY, threeW, threeH, 20.0) // 创建圆角矩形
-			titlec.drawsc(one, fontSize, lt.drawX, lt.rlineY, lineTexts)
-			lt.rlineX += threeW + fontSize/2 // 添加后加一次宽度
-			lt.lastH = int(threeH)
+			dx := rlx + 13                                    // 圆角矩形位置宽度
+			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
+			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
+			rlx += threeW + fontSize/2 // 添加后加一次宽度
+			lh = int(threeH)
 		}
 		lineTexts = lineTexts[:0]
 	}
