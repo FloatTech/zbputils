@@ -138,7 +138,7 @@ func init() {
 		}
 		gid := ctx.Event.GroupID
 		uid := ctx.Event.UserID
-		pattern := matched[3]
+		pattern := message.UnescapeCQCodeText(matched[3])
 		template := strings.TrimPrefix(ctx.MessageString(), matched[0])
 		if global.group[gid] == nil {
 			global.group[gid] = &regexGroup{
@@ -238,6 +238,10 @@ func init() {
 		uid := ctx.Event.UserID
 		matched := ctx.State["regex_matched"].([]string)
 		pattern := strings.TrimPrefix(ctx.MessageString(), matched[0])
+		escapedpattern := message.UnescapeCQCodeText(pattern)
+		if pattern == escapedpattern {
+			escapedpattern = ""
+		}
 		rg := global.group[gid]
 		if rg == nil {
 			return
@@ -258,32 +262,54 @@ func init() {
 			}
 			isInject = true
 		}
-		deleteInst := func(insts []inst) ([]inst, error) {
-			for i := range insts {
-				if insts[i].Pattern == pattern {
-					insts[i] = insts[len(insts)-1]
-					insts = insts[:len(insts)-1]
-					return insts, nil
+		var deleteInst func(insts []inst) ([]inst, error)
+		if escapedpattern == "" {
+			deleteInst = func(insts []inst) ([]inst, error) {
+				for i := range insts {
+					if insts[i].Pattern == pattern {
+						insts[i] = insts[len(insts)-1]
+						insts = insts[:len(insts)-1]
+						return insts, nil
+					}
 				}
+				return insts, errors.New("没有找到对应的问答词条")
 			}
-			return insts, errors.New("没有找到对应的问答词条")
+		} else {
+			deleteInst = func(insts []inst) ([]inst, error) {
+				for i := range insts {
+					if insts[i].Pattern == pattern || insts[i].Pattern == escapedpattern {
+						insts[i] = insts[len(insts)-1]
+						insts = insts[:len(insts)-1]
+						return insts, nil
+					}
+				}
+				return insts, errors.New("没有找到对应的问答词条")
+			}
+		}
+		removeInDB := func(f func(int64, int64, string, string) error, gid, uid int64, bots, pattern string) (err error) {
+			err = f(gid, uid, bots, pattern)
+			if err != nil && escapedpattern == "" {
+				return
+			}
+			if escapedpattern != "" {
+				err = f(gid, uid, bots, escapedpattern)
+			}
+			return
 		}
 		var err error
+		var f func(int64, int64, string, string) error
+		if isInject {
+			f = removeInjectRegex
+		} else {
+			f = removeRegex
+		}
 		if matched[1] == "我" {
-			if isInject {
-				err = removeInjectRegex(gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
-			} else {
-				err = removeRegex(gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
-			}
+			err = removeInDB(f, gid, uid, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
 			if err == nil {
 				rg.Private[uid], err = deleteInst(rg.Private[uid])
 			}
 		} else {
-			if isInject {
-				err = removeInjectRegex(gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
-			} else {
-				err = removeRegex(gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
-			}
+			err = removeInDB(f, gid, 0, strconv.FormatInt(ctx.Event.SelfID, 36), pattern)
 			if err == nil {
 				rg.All, err = deleteInst(rg.All)
 			}
