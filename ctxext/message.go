@@ -70,7 +70,7 @@ func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
 // FakeSenderForwardNode ...
 func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) message.MessageSegment {
 	return message.CustomNode(
-		ctx.Event.Sender.NickName,
+		ctx.CardOrNickName(ctx.Event.UserID),
 		ctx.Event.UserID,
 		msgs)
 }
