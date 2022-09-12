@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"unicode"
+	"unsafe"
 
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/sirupsen/logrus"
@@ -89,6 +90,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *enginei
 		},
 		newctrl(service, o),
 	)
+	e.en.UsePostHandler(func(ctx *zero.Ctx) { managers.B.Delete(uintptr(unsafe.Pointer(ctx))) })
 	e.prio = prio
 	e.service = service
 	switch {
