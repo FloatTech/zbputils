@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -24,7 +23,7 @@ import (
 
 var (
 	// managers 每个插件对应的管理
-	managers = ctrl.NewManager[*zero.Ctx]("data/control/plugins.db", 10*time.Second)
+	managers = ctrl.NewManager[*zero.Ctx]("data/control/plugins.db")
 )
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
