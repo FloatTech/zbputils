@@ -10,7 +10,7 @@ require (
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/go-base16384 v1.5.5
+	github.com/fumiama/go-base16384 v1.6.0
 	github.com/fumiama/go-registry v0.1.6
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.0
