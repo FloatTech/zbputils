@@ -126,7 +126,8 @@ func init() {
 					})
 					return nil
 				}
-				eid, err := process.CronTab.AddFunc(c.Cron, inject(zero.GetBot(id), []byte(c.Cmd)))
+				cr, _, _ := strings.Cut(c.Cron, ":->")
+				eid, err := process.CronTab.AddFunc(cr, inject(zero.GetBot(id), []byte(c.Cmd)))
 				if err != nil {
 					return err
 				}
@@ -140,9 +141,13 @@ func init() {
 		logrus.Infoln("[job]本地环回初始化完成")
 		process.GlobalInitMutex.Unlock()
 	}()
-	en.OnRegex(`^记录在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
+	en.OnRegex(`^记录在"(.*)"触发的(别名.*的)?指令$`, zero.UserOrGrpAdmin, isfirstregmatchnotnil, logevent).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
+		alias := ctx.State["regex_matched"].([]string)[2]
 		command := ctx.State["job_raw_event"].(string)
+		if alias != "" {
+			cron += ":->" + alias[len("别名"):len(alias)-len("的")]
+		}
 		c := &cmd{
 			ID:   idof(cron, command),
 			Cron: cron,
@@ -350,7 +355,8 @@ func idof(cron, cmd string) int64 {
 func addcmd(ctx *zero.Ctx, c *cmd) error {
 	mu.Lock()
 	defer mu.Unlock()
-	eid, err := process.CronTab.AddFunc(c.Cron, inject(ctx, []byte(c.Cmd)))
+	cr, _, _ := strings.Cut(c.Cron, ":->")
+	eid, err := process.CronTab.AddFunc(cr, inject(ctx, []byte(c.Cmd)))
 	if err != nil {
 		return err
 	}
@@ -434,7 +440,7 @@ func rmcmd(bot, caller int64, cron string) error {
 	bots := strconv.FormatInt(bot, 36)
 	e := new(zero.Event)
 	var delcmd []string
-	err := db.FindFor(bots, c, "WHERE cron='"+cron+"'", func() error {
+	err := db.FindFor(bots, c, "WHERE cron='"+cron+"' OR cron LIKE '"+cron+":->%'", func() error {
 		err := json.Unmarshal(binary.StringToBytes(c.Cmd), e)
 		if err != nil {
 			return err
