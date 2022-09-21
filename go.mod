@@ -5,8 +5,8 @@ go 1.18
 require (
 	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/floatbox v0.0.0-20220917062226-31fb3ec4b135
-	github.com/FloatTech/sqlite v0.3.3
-	github.com/FloatTech/zbpctrl v1.5.2-0.20220919124954-6ab7f2656545
+	github.com/FloatTech/sqlite v0.4.0
+	github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0

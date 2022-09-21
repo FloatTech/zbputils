@@ -2,12 +2,12 @@ github.com/Coloured-glaze/gg v1.3.4 h1:l31zIF/HaVwkzjrj+A56RGQoSKyKuR1IWtIrqXGFS
 github.com/Coloured-glaze/gg v1.3.4/go.mod h1:Ih5NLNNDHOy3RJbB0EPqGTreIzq/H02TGThIagh8HJg=
 github.com/FloatTech/floatbox v0.0.0-20220917062226-31fb3ec4b135 h1:HJZRF10i/vszUsZXJ+13oz+y1DTgCW453SFTeJvjjyo=
 github.com/FloatTech/floatbox v0.0.0-20220917062226-31fb3ec4b135/go.mod h1:VNqP+XqXDOEArudsDVYQJfZd5bO6Sj4l4oRa8DM8cAw=
-github.com/FloatTech/sqlite v0.3.3 h1:cSlpv+DcIehqaUG2YyjW0Twh396FoGsybpEpFZnX3Jg=
-github.com/FloatTech/sqlite v0.3.3/go.mod h1:i33d92OtR8jcp5fBUvQtospf27+MkfUxnGwnZ95E/dA=
+github.com/FloatTech/sqlite v0.4.0 h1:fvQ1vc7fw99jYXccs5KItMluy7QL1t6NxbkH7aN1F4g=
+github.com/FloatTech/sqlite v0.4.0/go.mod h1:i33d92OtR8jcp5fBUvQtospf27+MkfUxnGwnZ95E/dA=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
-github.com/FloatTech/zbpctrl v1.5.2-0.20220919124954-6ab7f2656545 h1:MhJ+ihagJsOKNBBWn5502+WQAL8vHNdppFMM9L0vifI=
-github.com/FloatTech/zbpctrl v1.5.2-0.20220919124954-6ab7f2656545/go.mod h1:Je/7SFwqfMeTvjav4qmwWE7w7aT8cYzCYVgrie9tuu4=
+github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c h1:zYcKvMbwQeifSQg0LnxhmCdyP3mb7ZqS6rjt68jbukw=
+github.com/FloatTech/zbpctrl v1.5.2-0.20220921013146-40d64bc7799c/go.mod h1:+2mGs9vUWJsvfcbodcmFegqOKEqHnLwopF1jTLVs/gU=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c h1:cNPOdTNiVwxLpROLjXCgbIPvdkE+BwvxDvgmdYmWx6Q=
 github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c/go.mod h1:KqZzu7slNKROh3TSYEH/IUMG6f4M+1qubZ5e52QypsE=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

@@ -227,8 +227,17 @@ func init() {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
-		lst := make([]string, 0, n)
-		err = db.FindFor(ids, c, "GROUP BY cron", func() error {
+		lst := make([]string, 0, n+2)
+		q := ""
+		if ctx.Event.GroupID != 0 {
+			grp := strconv.FormatInt(ctx.Event.GroupID, 36)
+			q = "WHERE cron LIKE 'fm:%' OR cron LIKE 'sm:%' OR cron LIKE '_m:" + grp + ":%' OR cron LIKE '_p:%:" + grp + ":%' "
+			lst = append(lst, "在本群的触发指令]\n")
+		} else {
+			lst = append(lst, "全部触发指令]\n")
+		}
+		q += "GROUP BY cron"
+		err = db.FindFor(ids, c, q, func() error {
 			lst = append(lst, c.Cron+"\n")
 			return nil
 		})
@@ -236,6 +245,7 @@ func init() {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
 		}
+		lst = append(lst, "[END")
 		ctx.SendChain(message.Text(lst))
 	})
 	en.OnRegex(`^查看在"(.*)"触发的指令$`, zero.SuperUserPermission, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
