@@ -10,11 +10,13 @@ import (
 
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/zbputils/img"
+	"github.com/FloatTech/zbputils/img/text"
 
 	"github.com/FloatTech/floatbox/file"
 )
 
-type mpic struct {
+type menucfg struct {
+	mu         *sync.RWMutex
 	path       string      // 看板娘图片路径
 	w          int         // 看板娘图片宽度
 	h          int         // 看板娘图片高度
@@ -50,9 +52,17 @@ const (
 )
 
 var (
-	customKanban = false // 自定义看板娘
-	kanbanEnable = true  // 开关
-	roleName     = "kanban.png"
+	mc = menucfg{
+		mu:         &sync.RWMutex{},
+		path:       kanbanPath + "kanban.png", // 看板娘图片
+		isDisplay:  true,                      // 显示看板娘
+		statusText: "●Plugin",                 // 启用状态
+		enableText: true,                      // 启用状态
+		font1:      text.BoldFontFile,         // 字体1
+		font2:      text.SakuraFontFile,       // 字体2
+		multiple:   2.5,                       // 倍数
+		fontSize:   50,                        // 字体大小
+	}
 )
 
 func init() {
@@ -62,14 +72,16 @@ func init() {
 			panic(err)
 		}
 	}
-	_, err := file.GetLazyData(kanbanPath+roleName, true)
+	_, err := file.GetLazyData(mc.path, true)
 	if err != nil {
 		panic(err)
 	}
 }
 
 // 返回菜单图片
-func (mp *mpic) dyna(lt *location) (image.Image, error) {
+func (mp *menucfg) draw(lt *location) (image.Image, error) {
+	mp.mu.RLock()
+	defer mp.mu.RUnlock()
 	titleW := 1280          // 标题文字
 	fontSize := mp.fontSize // 图片宽度和字体大小
 	if mp.isDisplay && !mp.isDouble {
@@ -124,7 +136,7 @@ func (mp *mpic) dyna(lt *location) (image.Image, error) {
 }
 
 // 创建图片
-func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
+func (mp *menucfg) createPic(one *gg.Context, lt *location) (image.Image, error) {
 	var wg sync.WaitGroup
 	if mp.isDouble {
 		var imgs [2]image.Image
@@ -224,7 +236,7 @@ func (mp *mpic) createPic(one *gg.Context, lt *location) (image.Image, error) {
 }
 
 // 创建图片
-func (mp *mpic) createPic2(lt *location, titlec *titleColor, info []string) (image.Image, error) {
+func (mp *menucfg) createPic2(lt *location, titlec *titleColor, info []string) (image.Image, error) {
 	fontSize := mp.fontSize
 	one := gg.NewContext(1280, 256+len(mp.info)*15)
 	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
@@ -254,8 +266,8 @@ func (mp *mpic) createPic2(lt *location, titlec *titleColor, info []string) (ima
 			info[i] = info[i][len(lineText):] // 丢弃已经写入的文字并重新赋值
 		}
 		threeW, threeH := textW+fontSize, (textH + (fontSize * 1.2)) // 圆角矩形宽度和高度
-		if int(rlx+textW)+int(fontSize*2) > one.W() {          // 越界
-			rly += float64(lh) + fontSize/4        // 加一次高度
+		if int(rlx+textW)+int(fontSize*2) > one.W() {                // 越界
+			rly += float64(lh) + fontSize/4              // 加一次高度
 			rlx = 5                                      // 重置宽度位置
 			if threeH+rly+fontSize >= float64(one.H()) { // 超出最大高度则进行加高
 				imgtmp := gg.NewContext(one.W(), int(rly+threeH*mp.multiple)) // 高度
@@ -265,13 +277,13 @@ func (mp *mpic) createPic2(lt *location, titlec *titleColor, info []string) (ima
 					return nil, err
 				}
 			}
-			dx := rlx + 13                                           // 圆角矩形位置宽度
+			dx := rlx + 13                                          // 圆角矩形位置宽度
 			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
 			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
 			rlx += threeW + fontSize/2 // 添加后加一次宽度
 			lh = int(threeH)
 		} else {
-			dx := rlx + 13                                    // 圆角矩形位置宽度
+			dx := rlx + 13                                          // 圆角矩形位置宽度
 			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
 			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
 			rlx += threeW + fontSize/2 // 添加后加一次宽度
@@ -332,19 +344,29 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 }
 
 // 编码看板娘图片和加载字体
-func (mp *mpic) loadpic() error {
+func (mp *menucfg) loadpic() error {
+	mp.mu.RLock()
+	if mp.im != nil {
+		mp.mu.RUnlock()
+		return nil
+	}
 	if !file.IsExist(mp.font1) { // 获取字体
+		mp.mu.RUnlock()
 		return errors.New("文件 " + mp.font1 + " 不存在")
 	}
 	if !file.IsExist(mp.font2) { // 获取字体
+		mp.mu.RUnlock()
 		return errors.New("文件 " + mp.font2 + " 不存在")
 	}
 	if mp.isDisplay {
 		f, err := os.Open(mp.path)
+		mp.mu.RUnlock()
 		if err != nil {
 			return err
 		}
 		defer f.Close()
+		mp.mu.Lock()
+		defer mp.mu.Unlock()
 		mp.im, _, err = image.Decode(f)
 		if err != nil {
 			return err
@@ -352,6 +374,8 @@ func (mp *mpic) loadpic() error {
 		mp.im = img.Limit(mp.im, 1280, 1280)
 		b := mp.im.Bounds().Size()
 		mp.w, mp.h = b.X, b.Y
+		return nil
 	}
+	mp.mu.RUnlock()
 	return nil
 }
