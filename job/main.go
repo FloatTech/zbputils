@@ -11,6 +11,7 @@ import (
 	"sync"
 	"time"
 
+	sql "github.com/FloatTech/sqlite"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/fumiama/cron"
 	"github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ var (
 	limit    = rate.NewLimiter(time.Second*2, 1)
 	en       = control.Register("job", &ctrl.Options[*zero.Ctx]{
 		DisableOnDefault:  false,
-		Help:              "定时指令触发器\n- 记录以\"完全匹配关键词\"触发的指令\n- 取消以\"完全匹配关键词\"触发的指令\n- 记录在\"cron\"触发的指令\n- 取消在\"cron\"触发的指令\n- 查看所有触发指令\n- 查看在\"cron\"触发的指令\n- 查看以\"完全匹配关键词\"触发的指令\n- 注入指令结果：任意指令\n- 执行指令：任意指令\n- [我|大家|有人][说|问][正则表达式]你[答|说|做|执行][模版]\n- [查看|看看][我|大家|有人][说|问][正则表达式]\n- 删除[大家|有人|我][说|问|让你做|让你执行][正则表达式]",
+		Help:              "定时指令触发器\n- 记录以\"完全匹配关键词\"触发的指令\n- 取消以\"完全匹配关键词\"触发的指令\n- 记录在\"cron\"触发的(别名xxx的)指令\n- 取消在\"cron\"触发的指令\n- 查看所有触发指令\n- 查看在\"cron\"触发的指令\n- 查看以\"完全匹配关键词\"触发的指令\n- 注入指令结果：任意指令\n- 执行指令：任意指令\n- [我|大家|有人][说|问][正则表达式]你[答|说|做|执行][模版]\n- [查看|看看][我|大家|有人][说|问][正则表达式]\n- 删除[大家|有人|我][说|问|让你做|让你执行][正则表达式]",
 		PrivateDataFolder: "job",
 	})
 )
@@ -134,7 +135,7 @@ func init() {
 				entries[c.ID] = eid
 				return nil
 			})
-			if err != nil && err.Error() != "sql.FindFor: null result" {
+			if err != nil && err != sql.ErrNullResult {
 				panic(err)
 			}
 		}
