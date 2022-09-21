@@ -326,7 +326,7 @@ func init() {
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
-		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.UserOrGrpAdmin).
+		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.AdminPermission).
 			SetBlock(true).Handle(func(ctx *zero.Ctx) {
 			str := ctx.State["regex_matched"].([]string)[1]
 			switch {
@@ -344,7 +344,7 @@ func init() {
 			ctx.SendChain(message.Text("已经 ", str, " 了!"))
 		})
 
-		zero.OnRegex(`^设置看板娘头像(\[CQ:at,qq=(.\d+)\]|(.\d+))`, zero.UserOrGrpAdmin).SetBlock(true).
+		zero.OnRegex(`^设置看板娘头像(\[CQ:at,qq=(.\d+)\]|(.\d+))`, zero.SuperUserPermission).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
 				str := ctx.State["regex_matched"].([]string)
 				user := ""
@@ -370,7 +370,7 @@ func init() {
 				}
 			})
 
-		zero.OnKeyword("看板娘图片", zero.MustProvidePicture, zero.AdminPermission).
+		zero.OnKeyword("看板娘图片", zero.MustProvidePicture, zero.SuperUserPermission).
 			SetBlock(true).Handle(func(ctx *zero.Ctx) {
 			id := fmt.Sprint(ctx.Event.UserID)
 			url := ctx.State["image_url"].([]string)
