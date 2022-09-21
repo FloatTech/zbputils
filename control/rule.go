@@ -326,7 +326,7 @@ func init() {
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
-		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.AdminPermission).
+		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.SuperUserPermission).
 			SetBlock(true).Handle(func(ctx *zero.Ctx) {
 			str := ctx.State["regex_matched"].([]string)[1]
 			switch {
