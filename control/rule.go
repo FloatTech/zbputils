@@ -383,7 +383,7 @@ func init() {
 				}
 				mc.mu.Lock()
 				mc.isCustom = true
-				mc.path = kanbanPath + "img/" + rn
+				mc.path = kanbanPath + rn
 				mc.im = nil
 				mc.mu.Unlock()
 				ctx.SendChain(message.Text("设置成功"))
