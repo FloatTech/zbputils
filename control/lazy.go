@@ -20,6 +20,17 @@ func (e *engineinstance) GetLazyData(filename string, isDataMustEqual bool) ([]b
 	return file.GetLazyData(e.datafolder+filename, isDataMustEqual)
 }
 
+// GetCustomLazyData 下载并获取本 engine 文件夹下的自动定义懒加载数据
+func (e *engineinstance) GetCustomLazyData(dataurl, filename string) ([]byte, error) {
+	if e.datafolder == "" {
+		return nil, errors.New("datafolder is empty")
+	}
+	if !strings.HasSuffix(e.datafolder, "/") || !strings.HasPrefix(e.datafolder, "data/") || strings.Index(e.datafolder[5:], "/") <= 0 {
+		return nil, errors.New("invalid datafolder")
+	}
+	return file.GetCustomLazyData(dataurl, e.datafolder+filename)
+}
+
 // InitWhenNoError 在 errfun 无误时执行 do
 func (e *engineinstance) InitWhenNoError(errfun func() error, do func()) {
 	err := errfun()
