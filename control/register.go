@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	enmap = make(map[string]*engineinstance)
+	enmap = make(map[string]*Engine)
 	prio  uint64
 )
 
 // Register 注册插件控制器
-func Register(service string, o *ctrl.Options[*zero.Ctx]) Engine {
+func Register(service string, o *ctrl.Options[*zero.Ctx]) *Engine {
 	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
 	enmap[service] = engine
 	return engine

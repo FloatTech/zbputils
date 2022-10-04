@@ -63,7 +63,7 @@ func init() {
 				if strings.HasPrefix(c.Cron, "fm:") {
 					m := en.OnFullMatch(c.Cron[3:] /* skip fm: */).SetBlock(true)
 					m.Handle(generalhandler(c.Cmd))
-					matchers[c.ID] = getmatcher(m)
+					matchers[c.ID] = (*zero.Matcher)(m)
 					return nil
 				}
 				if strings.HasPrefix(c.Cron, "sm:") {
@@ -73,7 +73,7 @@ func init() {
 						return nil
 					}
 					m.Handle(h)
-					matchers[c.ID] = getmatcher(m)
+					matchers[c.ID] = (*zero.Matcher)(m)
 					return nil
 				}
 				if strings.HasPrefix(c.Cron, "rm:") || strings.HasPrefix(c.Cron, "im:") {
@@ -388,7 +388,7 @@ func registercmd(bot int64, c *cmd) error {
 	} else {
 		m.Handle(generalhandler(c.Cmd))
 	}
-	matchers[c.ID] = getmatcher(m)
+	matchers[c.ID] = (*zero.Matcher)(m)
 	return db.Insert(strconv.FormatInt(bot, 36), c)
 }
 

@@ -7,14 +7,15 @@ import (
 )
 
 // ApplySingle 应用反并发
-func (e *engineinstance) ApplySingle(s *single.Single[int64]) Engine {
+func (e *Engine) ApplySingle(s *single.Single[int64]) *Engine {
 	s.Apply(e.en)
 	return e
 }
 
 // Limit 限速器
-//    postfn 当请求被拒绝时的操作
-func (m *matcherinstance) Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) Matcher {
+//
+//	postfn 当请求被拒绝时的操作
+func (m *Matcher) Limit(limiterfn func(*zero.Ctx) *rate.Limiter, postfn ...func(*zero.Ctx)) *Matcher {
 	m.Rules = append(m.Rules, func(ctx *zero.Ctx) bool {
 		if limiterfn(ctx).Acquire() {
 			return true

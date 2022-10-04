@@ -10,7 +10,7 @@ import (
 )
 
 // GetLazyData 下载并获取本 engine 文件夹下的懒加载数据
-func (e *engineinstance) GetLazyData(filename string, isDataMustEqual bool) ([]byte, error) {
+func (e *Engine) GetLazyData(filename string, isDataMustEqual bool) ([]byte, error) {
 	if e.datafolder == "" {
 		return nil, errors.New("datafolder is empty")
 	}
@@ -21,7 +21,7 @@ func (e *engineinstance) GetLazyData(filename string, isDataMustEqual bool) ([]b
 }
 
 // GetCustomLazyData 下载并获取本 engine 文件夹下的自动定义懒加载数据
-func (e *engineinstance) GetCustomLazyData(dataurl, filename string) ([]byte, error) {
+func (e *Engine) GetCustomLazyData(dataurl, filename string) ([]byte, error) {
 	if e.datafolder == "" {
 		return nil, errors.New("datafolder is empty")
 	}
@@ -32,7 +32,7 @@ func (e *engineinstance) GetCustomLazyData(dataurl, filename string) ([]byte, er
 }
 
 // InitWhenNoError 在 errfun 无误时执行 do
-func (e *engineinstance) InitWhenNoError(errfun func() error, do func()) {
+func (e *Engine) InitWhenNoError(errfun func() error, do func()) {
 	err := errfun()
 	if err != nil {
 		logrus.Warn("[lazy] stop init plugin", e.service, "for error:", err)
