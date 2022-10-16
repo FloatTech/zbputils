@@ -461,6 +461,12 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
+				err = renderimg(ctx)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				return
 				i := 0
 				j := 0
 				gid := ctx.Event.GroupID
