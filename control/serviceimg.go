@@ -91,11 +91,12 @@ func renderimg(ctx *zero.Ctx) (err error) {
 	var k int
 	for j := 0; j < len(plist)/5; j++ {
 		for i := 0; i < 5; i++ {
-			k++
-			err = drawplugin(canvas, x, y, k, plist[k])
+
+			err = drawplugin(canvas, x, y, k+1, plist[k])
 			if err != nil {
 				return
 			}
+			k++
 			x += 460
 		}
 		x = 75.0
