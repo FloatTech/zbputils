@@ -3,6 +3,7 @@ package control
 import (
 	"fmt"
 	"os"
+	"sort"
 	"unicode"
 
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -70,6 +71,28 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	}
 	logrus.Debugln("[control]插件", service, "已设置数据目录", e.datafolder)
 	return
+}
+
+// ForEachByPrio iterates through managers by their priority.
+func ForEachByPrio(iterator func(i int, manager *ctrl.Control[*zero.Ctx]) bool) {
+	for i, v := range cpmp2lstbyprio() {
+		if !iterator(i, v) {
+			return
+		}
+	}
+}
+
+func cpmp2lstbyprio() []*ctrl.Control[*zero.Ctx] {
+	managers.RLock()
+	defer managers.RUnlock()
+	ret := make([]*ctrl.Control[*zero.Ctx], 0, len(managers.M))
+	for _, v := range managers.M {
+		ret = append(ret, v)
+	}
+	sort.SliceStable(ret, func(i, j int) bool {
+		return enmap[ret[i].Service].prio < enmap[ret[j].Service].prio
+	})
+	return ret
 }
 
 // DataFolder 本插件数据目录, 默认 data/zbp/
