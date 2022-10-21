@@ -152,6 +152,35 @@ func init() {
 			}
 		})
 
+		///////////////////////////////////////
+		// 新增全局私聊消息开启
+		zero.OnCommandGroup([]string{
+			"全局响应私聊", "all_private_response", "全局沉默私聊", "all_private_silence",
+		}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			var msg message.MessageSegment
+			cmd := ctx.State["command"].(string)
+			switch {
+			case strings.Contains(cmd, "响应") || strings.Contains(cmd, "response"):
+				err := managers.Response(1)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始在全部位置工作啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			case strings.Contains(cmd, "沉默") || strings.Contains(cmd, "silence"):
+				err := managers.Silence(1)
+				if err == nil {
+					msg = message.Text(zero.BotConfig.NickName[0], "将开始在未显式启用的位置休息啦~")
+				} else {
+					msg = message.Text("ERROR: ", err)
+				}
+			default:
+				msg = message.Text("ERROR: bad command\"", cmd, "\"")
+			}
+			ctx.SendChain(msg)
+		})
+		///////////////////////////////////////
+
 		zero.OnCommandGroup([]string{"还原", "reset"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
