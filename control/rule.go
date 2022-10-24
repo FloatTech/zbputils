@@ -87,6 +87,8 @@ func init() {
 				err := managers.Response(0)
 				if err == nil {
 					msg = message.Text(zero.BotConfig.NickName[0], "将开始在全部位置工作啦~")
+				} else if strings.Contains(err.Error(), "already in response") {
+					msg = message.Text(zero.BotConfig.NickName[0], "已经在此工作了哦~")
 				} else {
 					msg = message.Text("ERROR: ", err)
 				}
