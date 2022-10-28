@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4
-	github.com/FloatTech/floatbox v0.0.0-20221028072335-ee9640fcf864
+	github.com/FloatTech/floatbox v0.0.0-20221028081326-d9172706f1f7
 	github.com/FloatTech/sqlite v0.5.0
 	github.com/FloatTech/zbpctrl v1.5.2-0.20221011153929-4834c6911511
 	github.com/disintegration/imaging v1.6.2
@@ -15,7 +15,7 @@ require (
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.3
-	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20221028072211-37ad353ce4b2
+	github.com/wdvxdr1123/ZeroBot v1.5.2-0.20221028080942-99b126551f62
 )
 
 require (
