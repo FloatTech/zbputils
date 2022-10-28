@@ -4,14 +4,14 @@ go 1.18
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4
-	github.com/FloatTech/floatbox v0.0.0-20221027084859-e9a3ef49992e
+	github.com/FloatTech/floatbox v0.0.0-20221028033104-a243fca6f2a3
 	github.com/FloatTech/sqlite v0.5.0
 	github.com/FloatTech/zbpctrl v1.5.2-0.20221011153929-4834c6911511
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-base16384 v1.6.1
-	github.com/fumiama/go-registry v0.2.0
+	github.com/fumiama/go-registry v0.2.1
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.3
