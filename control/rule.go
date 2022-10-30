@@ -416,6 +416,12 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
+				err = renderusage(ctx, service, gid)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				return
 				/***********获取看板娘图片***********/
 				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
 				menu := mc
