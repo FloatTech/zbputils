@@ -25,6 +25,7 @@ const bannerpath = "zbpbanner/"
 type plugininfo struct {
 	PluginName   string
 	PluginBrief  string
+	PluginBanner string
 	PluginStatus bool
 }
 type stylecfg struct {
@@ -71,6 +72,7 @@ func renderimg(ctx *zero.Ctx) (err error) {
 		plist = append(plist, &plugininfo{
 			PluginName:   manager.Service,
 			PluginBrief:  manager.Options.Brief,
+			PluginBanner: manager.Options.Banner,
 			PluginStatus: manager.IsEnabledIn(gid),
 		})
 		return true
@@ -164,27 +166,31 @@ func renderimg(ctx *zero.Ctx) (err error) {
 func drawplugin(canvas *gg.Context, x, y float64, i int, list *plugininfo) (err error) {
 	var impng *img.Factory
 	// 绘制图片
-	if strings.HasPrefix(list.PluginBrief, "http://") || strings.HasPrefix(list.PluginBrief, "https://") {
+	switch {
+	case strings.HasPrefix(list.PluginBanner, "http"):
 		if file.IsNotExist(bannerpath + "network/" + list.PluginName + ".png") {
 			_ = os.MkdirAll(bannerpath+"network/", 0755)
 			// 地址无效也继续
-			err = file.DownloadTo(list.PluginBrief, bannerpath+"network/"+list.PluginName+".png", true)
+			err = file.DownloadTo(list.PluginBanner, bannerpath+"network/"+list.PluginName+".png", true)
 			if err != nil {
 				logrus.Warn("[control] ERROR: " + list.PluginName + "图片地址无效")
 			}
 		}
 		impng, err = img.LoadFirstFrame(bannerpath+"network/"+list.PluginName+".png", 768, 512)
-	} else {
-		// 下载失败也不影响运行
+	case list.PluginBanner != "":
+		impng, err = img.LoadFirstFrame(list.PluginBanner, 768, 512)
+	default:
+		// 下载失败也继续
 		_, _ = file.GetLazyData(bannerpath+list.PluginName+".png", true)
 		impng, err = img.LoadFirstFrame(bannerpath+list.PluginName+".png", 768, 512)
 	}
+
 	recw, rech := 384.0, 256.0
 	if err == nil {
 		canvas.DrawImage(img.Size(impng.Im, int(recw), int(rech)).Im, int(x), int(y)+300+30)
 	} else {
 		canvas.DrawRectangle(x, y+300+30, recw, rech)
-		canvas.SetRGBA255(rand.Intn(195)+15, rand.Intn(195)+15, rand.Intn(195)+15, 255)
+		canvas.SetRGBA255(rand.Intn(45)+165, rand.Intn(45)+165, rand.Intn(45)+165, 255)
 		canvas.Fill()
 	}
 
@@ -229,7 +235,7 @@ func drawplugin(canvas *gg.Context, x, y float64, i int, list *plugininfo) (err 
 	if err != nil {
 		return
 	}
-	canvas.DrawString(list.PluginName, x+recw/32, y+300+30+(recw*0.475)+recw/6-canvas.FontHeight()/4)
+	canvas.DrawString(list.PluginBrief, x+recw/32, y+300+30+(recw*0.475)+recw/6-canvas.FontHeight()/4)
 	return nil
 }
 

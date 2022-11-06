@@ -395,17 +395,20 @@ func init() {
 				str := ctx.State["regex_matched"].([]string)[1]
 				num, _ := strconv.Atoi(str)
 				style = &stylecfg{style: num}
-				writefile, err := os.Create(bannerpath + "config.json")
+				reader, err := os.Create(bannerpath + "config.json")
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				err = json.NewEncoder(writefile).Encode(&style)
+				err = json.NewEncoder(reader).Encode(&style)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
+				style.style = num
+				ctx.SendChain(message.Text("已成功切换样式为", str))
 			})
+
 		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
