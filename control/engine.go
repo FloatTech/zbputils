@@ -18,7 +18,6 @@ type Engine struct {
 	prio       int
 	service    string
 	datafolder string
-	banner     string
 }
 
 var priomap = make(map[int]string)      // priomap is map[prio]service
@@ -76,11 +75,6 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 // DataFolder 本插件数据目录, 默认 data/zbp/
 func (e *Engine) DataFolder() string {
 	return e.datafolder
-}
-
-// Banner 本插件背景图
-func (e *Engine) Banner() string {
-	return e.banner
 }
 
 // IsEnabledIn 自己是否在 id (正群负个人零全局) 启用
