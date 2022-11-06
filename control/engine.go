@@ -3,7 +3,6 @@ package control
 import (
 	"fmt"
 	"os"
-	"sort"
 	"unicode"
 
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -19,6 +18,7 @@ type Engine struct {
 	prio       int
 	service    string
 	datafolder string
+	banner     string
 }
 
 var priomap = make(map[int]string)      // priomap is map[prio]service
@@ -73,31 +73,14 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	return
 }
 
-// ForEachByPrio iterates through managers by their priority.
-func ForEachByPrio(iterator func(i int, manager *ctrl.Control[*zero.Ctx]) bool) {
-	for i, v := range cpmp2lstbyprio() {
-		if !iterator(i, v) {
-			return
-		}
-	}
-}
-
-func cpmp2lstbyprio() []*ctrl.Control[*zero.Ctx] {
-	managers.RLock()
-	defer managers.RUnlock()
-	ret := make([]*ctrl.Control[*zero.Ctx], 0, len(managers.M))
-	for _, v := range managers.M {
-		ret = append(ret, v)
-	}
-	sort.SliceStable(ret, func(i, j int) bool {
-		return enmap[ret[i].Service].prio < enmap[ret[j].Service].prio
-	})
-	return ret
-}
-
 // DataFolder 本插件数据目录, 默认 data/zbp/
 func (e *Engine) DataFolder() string {
 	return e.datafolder
+}
+
+// Banner 本插件背景图
+func (e *Engine) Banner() string {
+	return e.banner
 }
 
 // IsEnabledIn 自己是否在 id (正群负个人零全局) 启用

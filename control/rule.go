@@ -2,6 +2,7 @@
 package control
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 	"strings"
@@ -389,6 +390,22 @@ func init() {
 				ctx.SendChain(message.Text("设置成功"))
 			})
 
+		zero.OnRegex(`^切换服务列表样式(0|1)`, zero.SuperUserPermission).SetBlock(true).
+			Handle(func(ctx *zero.Ctx) {
+				str := ctx.State["regex_matched"].([]string)[1]
+				num, _ := strconv.Atoi(str)
+				style = &stylecfg{style: num}
+				writefile, err := os.Create(bannerpath + "config.json")
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				err = json.NewEncoder(writefile).Encode(&style)
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+			})
 		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
@@ -416,12 +433,14 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				err = renderusage(ctx, service, gid)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
+				if style.style == 0 {
+					err = renderusage(ctx, service, gid)
+					if err != nil {
+						ctx.SendChain(message.Text("ERROR: ", err))
+						return
+					}
 					return
 				}
-				return
 				/***********获取看板娘图片***********/
 				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
 				menu := mc
@@ -467,12 +486,14 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				err = renderimg(ctx)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
+				if style.style == 0 {
+					err = renderimg(ctx)
+					if err != nil {
+						ctx.SendChain(message.Text("ERROR: ", err))
+						return
+					}
 					return
 				}
-				return
 				i := 0
 				j := 0
 				gid := ctx.Event.GroupID
