@@ -35,6 +35,10 @@ var style *stylecfg
 
 func init() {
 	_ = os.MkdirAll(bannerpath, 0755)
+	_, err := file.GetLazyData(kanbanPath+"icon.jpg", true)
+	if err != nil {
+		panic(err)
+	}
 	if file.IsExist(bannerpath + "config.json") {
 		reader, err := os.Open(bannerpath + "config.json")
 		if err != nil {
@@ -309,7 +313,7 @@ func renderusage(ctx *zero.Ctx, s *ctrl.Control[*zero.Ctx], gid int64) (err erro
 	fw1, _ := canvas.MeasureString("ZeroBot-Plugin")
 	canvas.DrawString("ZeroBot-Plugin", imgw-25-fw1-170-25, 25+15+canvas.FontHeight()*2+canvas.FontHeight()/2)
 
-	// 加载size为42的字体
+	// 加载size为38的字体
 	err = canvas.LoadFontFace(text.BoldFontFile, 38)
 	if err != nil {
 		return
