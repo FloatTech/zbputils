@@ -79,7 +79,7 @@ func renderimg(ctx *zero.Ctx) (err error) {
 	// 分页
 	page := len(plist) / 27
 	if page%27 == 0 {
-		page -= 1
+		page--
 	}
 	servicelist := make(message.Message, 0, page)
 	var imgtmp image.Image
@@ -207,15 +207,15 @@ func drawplugin(canvas *gg.Context, x, y float64, i int, list *plugininfo) (err 
 	canvas.SetRGBA255(15, 15, 15, 255)
 	var fw2 float64
 	if i > 99 {
-		canvas.LoadFontFace(text.SakuraFontFile, 24)
-		fw2, _ = canvas.MeasureString(strconv.FormatInt(int64(i), 10))
-		canvas.DrawString(strconv.FormatInt(int64(i), 10), x+recw/10+((recw/10-fw2)/2), y+300+30+canvas.FontHeight()*3/8+(rech/8))
+		err = canvas.LoadFontFace(text.SakuraFontFile, 24)
 	} else {
-		canvas.LoadFontFace(text.SakuraFontFile, 28)
-		fw2, _ = canvas.MeasureString(strconv.FormatInt(int64(i), 10))
-		canvas.DrawString(strconv.FormatInt(int64(i), 10), x+recw/10+((recw/10-fw2)/2), y+300+30+canvas.FontHeight()*3/8+(rech/8))
-
+		err = canvas.LoadFontFace(text.SakuraFontFile, 28)
 	}
+	if err != nil {
+		return
+	}
+	fw2, _ = canvas.MeasureString(strconv.FormatInt(int64(i), 10))
+	canvas.DrawString(strconv.FormatInt(int64(i), 10), x+recw/10+((recw/10-fw2)/2), y+300+30+canvas.FontHeight()*3/8+(rech/8))
 
 	// 绘制插件信息
 	canvas.SetRGBA255(240, 240, 240, 255)
@@ -275,7 +275,7 @@ func renderusage(ctx *zero.Ctx, s *ctrl.Control[*zero.Ctx], gid int64) (err erro
 	canvas.DrawImage(icon.Im, int(imgw)-25-170, 25)
 
 	// 绘制标题与内容的分割线
-	canvas.DrawRectangle(0, 220, float64(imgw), 10)
+	canvas.DrawRectangle(0, 220, imgw, 10)
 	canvas.SetRGBA255(240, 240, 240, 255)
 	canvas.Fill()
 
