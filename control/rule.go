@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/Coloured-glaze/gg"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -16,6 +17,7 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/process"
 
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
 
@@ -347,7 +349,7 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				_, err = file.GetLazyData(kanbanPath+"icon.jpg", true)
+				_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -356,10 +358,36 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				err = renderusage(ctx, service, gid)
+				// 处理插件帮助并且计算图像高
+				plugininfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
+				newplugininfo := make([]string, 0, len(plugininfo)*2)
+				font := gg.NewContext(1, 1)
+				err = font.LoadFontFace(text.BoldFontFile, 38)
+				if err != nil {
+					return
+				}
+				for i := 0; i < len(plugininfo); i++ {
+					newlinetext, textw, tmpw := "", 0.0, 0.0
+					for len(plugininfo[i]) > 0 {
+						newlinetext, tmpw = truncate(font, plugininfo[i], imgwight-50)
+						newplugininfo = append(newplugininfo, newlinetext)
+						if tmpw > textw {
+							textw = tmpw
+						}
+						if len(newlinetext) >= len(plugininfo[i]) {
+							break
+						}
+						plugininfo[i] = plugininfo[i][len(newlinetext):]
+					}
+				}
+				var imgs []byte
+				imgs, err = rendertitledtext(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
+				}
+				if id := ctx.Send(ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs))); id.ID() == 0 {
+					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
 			})
 
@@ -375,15 +403,27 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				_, err = file.GetLazyData(kanbanPath+"icon.jpg", true)
+				_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				err = renderimg(ctx)
+				gid := ctx.Event.GroupID
+				if gid == 0 {
+					gid = -ctx.Event.UserID
+				}
+				var imgs [][]byte
+				imgs, err = drawservicesof(gid)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
+				}
+				msg := make(message.Message, len(imgs))
+				for i := 0; i < len(imgs); i++ {
+					msg[i] = ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs[i]))
+				}
+				if id := ctx.Send(msg); id.ID() == 0 {
+					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
 			})
 	})

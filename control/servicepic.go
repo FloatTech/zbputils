@@ -3,7 +3,6 @@ package control
 import (
 	"errors"
 	"image"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -13,305 +12,122 @@ import (
 	"github.com/FloatTech/floatbox/img/writer"
 	ctrl "github.com/FloatTech/zbpctrl"
 	zero "github.com/wdvxdr1123/ZeroBot"
-	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/img"
+	"github.com/FloatTech/rendercard"
 	"github.com/FloatTech/zbputils/img/text"
 )
 
 const (
-	bannerpath = "zbpbanner/"
-	kanbanPath = "data/Control/"
+	PAGECNT    = 27
+	bannerpath = "data/zbpbanner/"
+	kanbanpath = "data/Control/"
 	bannerurl  = "https://gitcode.net/u011570312/zbpbanner/-/raw/main/"
 )
 
 type plugininfo struct {
-	PluginName   string
-	PluginBrief  string
-	PluginBanner string
-	PluginStatus bool
+	name   string
+	brief  string
+	banner string
+	status bool
 }
 
 // 底图缓存
 var imgtmp image.Image
 
 func init() {
-	_ = os.MkdirAll(bannerpath, 0755)
-	_ = os.MkdirAll(bannerpath+"network/", 0755)
+	err := os.MkdirAll(bannerpath, 0755)
+	if err != nil {
+		panic(err)
+	}
+	_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
+	if err != nil {
+		panic(err)
+	}
 }
 
-func renderimg(ctx *zero.Ctx) (err error) {
-	gid := ctx.Event.GroupID
-	if gid == 0 {
-		gid = -ctx.Event.UserID
-	}
-	var plist = make([]*plugininfo, 0, len(priomap))
+func drawservicesof(gid int64) (imgs [][]byte, err error) {
+	plist := make([]*plugininfo, len(priomap))
 	ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		plist = append(plist, &plugininfo{
-			PluginName:   manager.Service,
-			PluginBrief:  manager.Options.Brief,
-			PluginBanner: manager.Options.Banner,
-			PluginStatus: manager.IsEnabledIn(gid),
-		})
+		plist[i] = &plugininfo{
+			name:   manager.Service,
+			brief:  manager.Options.Brief,
+			banner: manager.Options.Banner,
+			status: manager.IsEnabledIn(gid),
+		}
 		return true
 	})
-	var k int
+	k := 0
 	// 分页
-	page := len(plist) / 27
-	if page%27 == 0 {
-		page--
+	page := len(plist) / PAGECNT
+	if len(plist)%PAGECNT != 0 {
+		page++
 	}
-	servicelist := make(message.Message, 0, page)
+	imgs = make([][]byte, 0, page)
 	if imgtmp == nil {
-		imgw := 1272.0
-		// 创建图像
-		canvas := gg.NewContext(int(imgw), 30+30+300+(9*(256+30)))
-		canvas.SetRGBA255(240, 240, 240, 255)
-		canvas.Clear()
-
-		// 标题背景1
-		canvas.DrawRectangle(0, 30, imgw, 300)
-		canvas.SetRGBA255(0, 0, 0, 153)
-		canvas.Fill()
-
-		// 标题背景2
-		canvas.DrawRectangle(0, 30+40, imgw, 220)
-		canvas.SetRGBA255(0, 0, 0, 153)
-		canvas.Fill()
-
-		// 加载size为108的字体
-		err = canvas.LoadFontFace(text.SakuraFontFile, 108)
+		imgtmp, err = rendercard.Titleinfo{
+			Lefttitle:     "服务列表",
+			Leftsubtitle:  "service_list",
+			Righttitle:    "FloatTech",
+			Rightsubtitle: "ZeroBot-Plugin",
+			Textpath:      text.SakuraFontFile,
+			Imgpath:       kanbanpath + "icon.jpg",
+		}.Drawtitle()
 		if err != nil {
 			return
 		}
-
-		// 绘制标题
-		canvas.SetRGBA255(240, 240, 240, 255)
-		canvas.DrawString("服务列表", 25, 30+40+55+canvas.FontHeight()-canvas.FontHeight()/3)
-
-		// 加载size为54的字体
-		err = canvas.LoadFontFace(text.SakuraFontFile, 54)
-		if err != nil {
-			return
-		}
-
-		// 绘制一系列标题
-		canvas.DrawString("service_list", 25+3, 30+40+165+canvas.FontHeight()/3)
-
-		fw, _ := canvas.MeasureString("FloatTech")
-		canvas.DrawString("FloatTech", imgw-25-fw-170-25, 30+40+25+15+canvas.FontHeight()+canvas.FontHeight()/4)
-		fw1, _ := canvas.MeasureString("ZeroBot-Plugin")
-		canvas.DrawString("ZeroBot-Plugin", imgw-25-fw1-170-25, 30+40+25+15+canvas.FontHeight()*2+canvas.FontHeight()/2)
-		canvas.SetRGBA255(240, 240, 240, 255)
-
-		// 加载icon并绘制
-		var icon *img.Factory
-		icon, err = img.LoadFirstFrame(kanbanPath+"icon.jpg", 170, 170)
-		if err != nil {
-			return
-		}
-		canvas.DrawImage(icon.Im, int(imgw)-25-170, 30+40+25)
-		imgtmp = canvas.Image()
 	}
-	for l := 0; l <= page; l++ {
+	var card image.Image
+	for l := 0; l < page; l++ {
 		one := gg.NewContextForImage(imgtmp)
-		x, y := 30.0, 30.0
+		x, y := 30, 30
 		for j := 0; j < 9; j++ {
 			for i := 0; i < 3; i++ {
 				if k == len(plist) {
 					break
 				}
-				err = drawplugin(one, x, y, k+1, plist[k])
+				kstr := strconv.Itoa(k)
+				var banner string
+				switch {
+				case strings.HasPrefix(plist[k].banner, "http"):
+					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png", true)
+					if err != nil {
+						return
+					}
+					banner = bannerpath + plist[k].name + ".png"
+				case plist[k].banner != "":
+					banner = plist[k].banner
+				default:
+					_, err = file.GetCustomLazyData(bannerurl, bannerpath+plist[k].name+".png")
+					if err != nil {
+						err = errors.New("ERROR: 插件背景图下载失败或是自定义插件")
+						return
+					}
+					banner = bannerpath + plist[k].name
+				}
+				card, err = rendercard.Titleinfo{
+					Lefttitle:     plist[k].name,
+					Leftsubtitle:  plist[k].brief,
+					Rightsubtitle: kstr,
+					Imgpath:       banner,
+					Textpath:      text.SakuraFontFile,
+					Textpath2:     text.BoldFontFile,
+					Status:        plist[k].status,
+				}.Drawcard()
 				if err != nil {
 					return
 				}
+				one.DrawImage(card, x, y)
 				k++
 				x += 384 + 30
 			}
-			x = 30.0
+			x = 30
 			y += 256 + 30
 		}
 		data, cl := writer.ToBytes(one.Image()) // 生成图片
-		servicelist = append(servicelist, ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(data)))
+		imgs[l] = data
 		cl()
 	}
-	if id := ctx.Send(servicelist); id.ID() == 0 {
-		ctx.SendChain(message.Text("ERROR: 可能被风控了"))
-	}
-	return nil
-}
 
-func drawplugin(canvas *gg.Context, x, y float64, i int, list *plugininfo) (err error) {
-	var banner *img.Factory
-	// 绘制图片
-	switch {
-	case strings.HasPrefix(list.PluginBanner, "http"):
-		if file.IsNotExist(bannerpath + "network/" + list.PluginName + ".png") {
-			err = file.DownloadTo(list.PluginBanner, bannerpath+"network/"+list.PluginName+".png", true)
-			if err != nil {
-				return
-			}
-		}
-		banner, err = img.LoadFirstFrame(bannerpath+"network/"+list.PluginName+".png", 768, 512)
-	case list.PluginBanner != "":
-		banner, err = img.LoadFirstFrame(list.PluginBanner, 768, 512)
-	default:
-		_, err = file.GetCustomLazyData(bannerurl, bannerpath+list.PluginName+".png")
-		if err != nil {
-			return errors.New("ERROR: 插件背景图下载失败或是自定义插件")
-		}
-		banner, err = img.LoadFirstFrame(bannerpath+list.PluginName+".png", 768, 512)
-	}
-
-	recw, rech := 384.0, 256.0
-	if err == nil {
-		canvas.DrawImage(img.Size(banner.Im, int(recw), int(rech)).Im, int(x), int(y)+300+30)
-	} else {
-		canvas.DrawRectangle(x, y+300+30, recw, rech)
-		canvas.SetRGBA255(rand.Intn(45)+165, rand.Intn(45)+165, rand.Intn(45)+165, 255)
-		canvas.Fill()
-	}
-
-	// 绘制遮罩
-	canvas.DrawRectangle(x, y+300+30+(rech/3*2), recw, rech/3)
-	canvas.SetRGBA255(0, 0, 0, 153)
-	canvas.Fill()
-
-	// 绘制排名
-	canvas.DrawRectangle(x+recw/10, y+300+30, recw/10, (rech/4)-10)
-	canvas.DrawRoundedRectangle(x+recw/10, y+300+30, recw/10, (rech / 4), 8)
-	if list.PluginStatus {
-		canvas.SetRGBA255(15, 175, 15, 255)
-	} else {
-		canvas.SetRGBA255(200, 15, 15, 255)
-	}
-	canvas.Fill()
-
-	// 绘制插件排名
-	canvas.SetRGBA255(15, 15, 15, 255)
-	var fw2 float64
-	if i > 99 {
-		err = canvas.LoadFontFace(text.SakuraFontFile, 24)
-	} else {
-		err = canvas.LoadFontFace(text.SakuraFontFile, 28)
-	}
-	if err != nil {
-		return
-	}
-	fw2, _ = canvas.MeasureString(strconv.FormatInt(int64(i), 10))
-	canvas.DrawString(strconv.FormatInt(int64(i), 10), x+recw/10+((recw/10-fw2)/2), y+300+30+canvas.FontHeight()*3/8+(rech/8))
-
-	// 绘制插件信息
-	canvas.SetRGBA255(240, 240, 240, 255)
-	err = canvas.LoadFontFace(text.SakuraFontFile, 48)
-	if err != nil {
-		return
-	}
-	canvas.DrawString(list.PluginName, x+recw/32, y+300+30+(recw*0.475)+canvas.FontHeight()-canvas.FontHeight()/4)
-
-	err = canvas.LoadFontFace(text.SakuraFontFile, 24)
-	if err != nil {
-		return
-	}
-	canvas.DrawString(list.PluginBrief, x+recw/32, y+300+30+(recw*0.475)+recw/6-canvas.FontHeight()/4)
-	return nil
-}
-
-func renderusage(ctx *zero.Ctx, s *ctrl.Control[*zero.Ctx], gid int64) (err error) {
-	// 图像宽
-	imgw := 1272.0
-
-	// 处理插件帮助并且计算图像高
-	plugininfo := strings.Split(strings.Trim(s.String(), "\n"), "\n")
-	newplugininfo := make([]string, 0, len(plugininfo)*2)
-	font := gg.NewContext(1, 1)
-	err = font.LoadFontFace(text.BoldFontFile, 38)
-	if err != nil {
-		return
-	}
-	for i := 0; i < len(plugininfo); i++ {
-		newlinetext, textw, tmpw := "", 0.0, 0.0
-		for len(plugininfo[i]) > 0 {
-			newlinetext, tmpw = truncate(font, plugininfo[i], imgw-50)
-			newplugininfo = append(newplugininfo, newlinetext)
-			if tmpw > textw {
-				textw = tmpw
-			}
-			if len(newlinetext) >= len(plugininfo[i]) {
-				break
-			}
-			plugininfo[i] = plugininfo[i][len(newlinetext):]
-		}
-	}
-	imgh := len(newplugininfo)*(int(font.FontHeight())+20) + 220 + 10 + 30 + 10 + 50
-
-	// 创建图像
-	canvas := gg.NewContext(int(imgw), imgh)
-	canvas.SetRGBA255(15, 15, 15, 204)
-	canvas.Clear()
-
-	// 加载icon
-	var icon *img.Factory
-	icon, err = img.LoadFirstFrame(kanbanPath+"icon.jpg", 170, 170)
-	if err != nil {
-		return
-	}
-	canvas.DrawImage(icon.Im, int(imgw)-25-170, 25)
-
-	// 绘制标题与内容的分割线
-	canvas.DrawRectangle(0, 220, imgw, 10)
-	canvas.SetRGBA255(240, 240, 240, 255)
-	canvas.Fill()
-
-	// 加载size为108的字体
-	err = canvas.LoadFontFace(text.SakuraFontFile, 108)
-	if err != nil {
-		return
-	}
-
-	// 绘制标题
-	canvas.SetRGBA255(240, 240, 240, 255)
-	canvas.DrawString(s.Service, 25+40+25, 55+canvas.FontHeight()-canvas.FontHeight()/3)
-
-	// 加载size为54的字体
-	err = canvas.LoadFontFace(text.SakuraFontFile, 54)
-	if err != nil {
-		return
-	}
-
-	// 绘制插件开启状态
-	canvas.DrawRectangle(25, 25, 40, 170)
-	if s.IsEnabledIn(gid) {
-		canvas.SetRGBA255(15, 175, 15, 255)
-	} else {
-		canvas.SetRGBA255(200, 15, 15, 255)
-	}
-	canvas.Fill()
-	canvas.SetRGBA255(240, 240, 240, 255)
-
-	// 绘制一系列标题
-	cnname := s.Options.Brief
-	canvas.DrawString(cnname, 25+3+40+25, 165+canvas.FontHeight()/3)
-	fw, _ := canvas.MeasureString("FloatTech")
-	canvas.DrawString("FloatTech", imgw-25-fw-170-25, 25+15+canvas.FontHeight()+canvas.FontHeight()/4)
-	fw1, _ := canvas.MeasureString("ZeroBot-Plugin")
-	canvas.DrawString("ZeroBot-Plugin", imgw-25-fw1-170-25, 25+15+canvas.FontHeight()*2+canvas.FontHeight()/2)
-
-	// 加载size为38的字体
-	err = canvas.LoadFontFace(text.BoldFontFile, 38)
-	if err != nil {
-		return
-	}
-
-	x, y := 25.0, 25.0
-	for i := 0; i < len(newplugininfo); i++ {
-		canvas.DrawString(newplugininfo[i], x, y+220+10+canvas.FontHeight())
-		y += 20 + canvas.FontHeight()
-	}
-	data, cl := writer.ToBytes(canvas.Image())
-	ctx.SendChain(message.ImageBytes(data))
-	cl()
 	return
 }
 
