@@ -18,6 +18,7 @@ import (
 )
 
 const (
+	// PAGECNT card数量
 	PAGECNT    = 27
 	bannerpath = "data/zbpbanner/"
 	kanbanpath = "data/Control/"
