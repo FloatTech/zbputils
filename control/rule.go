@@ -17,6 +17,7 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/process"
 
+	"github.com/FloatTech/rendercard"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
@@ -349,11 +350,6 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
@@ -369,7 +365,7 @@ func init() {
 				for i := 0; i < len(plugininfo); i++ {
 					newlinetext, textw, tmpw := "", 0.0, 0.0
 					for len(plugininfo[i]) > 0 {
-						newlinetext, tmpw = truncate(font, plugininfo[i], imgwight-50)
+						newlinetext, tmpw = truncate(font, plugininfo[i], 1272-50)
 						newplugininfo = append(newplugininfo, newlinetext)
 						if tmpw > textw {
 							textw = tmpw
@@ -381,7 +377,16 @@ func init() {
 					}
 				}
 				var imgs []byte
-				imgs, err = rendertitledtext(newplugininfo)
+				imgs, err = rendercard.Titleinfo{
+					Lefttitle:     service.Service,
+					Leftsubtitle:  service.Options.Brief,
+					Righttitle:    "FloatTech",
+					Rightsubtitle: "ZeroBot-Plugin",
+					Imgpath:       kanbanpath + "icon.jpg",
+					Textpath:      text.SakuraFontFile,
+					Textpath2:     text.BoldFontFile,
+					Status:        service.IsEnabledIn(gid),
+				}.Drawtitledtext(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -399,11 +404,6 @@ func init() {
 					return
 				}
 				_, err = file.GetLazyData(text.SakuraFontFile, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
