@@ -14,10 +14,12 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 
 	"github.com/FloatTech/rendercard"
+
 	"github.com/FloatTech/zbputils/img/text"
 )
 
 const (
+	// PAGECNT card数量
 	PAGECNT    = 27
 	bannerpath = "data/zbpbanner/"
 	kanbanpath = "data/Control/"
@@ -62,7 +64,7 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 	if len(plist)%PAGECNT != 0 {
 		page++
 	}
-	imgs = make([][]byte, 0, page)
+	imgs = make([][]byte, page)
 	if imgtmp == nil {
 		imgtmp, err = rendercard.Titleinfo{
 			Lefttitle:     "服务列表",
@@ -79,14 +81,14 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 	var card image.Image
 	for l := 0; l < page; l++ {
 		one := gg.NewContextForImage(imgtmp)
-		x, y := 30, 30
+		x, y := 30, 30+300+30
 		for j := 0; j < 9; j++ {
 			for i := 0; i < 3; i++ {
 				if k == len(plist) {
 					break
 				}
 				kstr := strconv.Itoa(k)
-				var banner string
+				banner := ""
 				switch {
 				case strings.HasPrefix(plist[k].banner, "http"):
 					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png", true)
@@ -102,7 +104,7 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 						err = errors.New("ERROR: 插件背景图下载失败或是自定义插件")
 						return
 					}
-					banner = bannerpath + plist[k].name
+					banner = bannerpath + plist[k].name + ".png"
 				}
 				card, err = rendercard.Titleinfo{
 					Lefttitle:     plist[k].name,
@@ -127,7 +129,6 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 		imgs[l] = data
 		cl()
 	}
-
 	return
 }
 

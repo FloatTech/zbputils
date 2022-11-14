@@ -5,8 +5,9 @@ go 1.18
 require (
 	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/floatbox v0.0.0-20221110070748-e0d0b3af3e57
-	github.com/FloatTech/sqlite v0.5.0
-	github.com/FloatTech/zbpctrl v1.5.2
+	github.com/FloatTech/rendercard v0.0.1
+	github.com/FloatTech/sqlite v0.5.1
+	github.com/FloatTech/zbpctrl v1.5.3-0.20221110070900-b2888434e9fc
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
@@ -19,7 +20,6 @@ require (
 )
 
 require (
-	github.com/FloatTech/rendercard v0.0.1 // indirect
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b // indirect
 	github.com/RomiChan/syncx v0.0.0-20220404072119-d7ea0ae15a4c // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect

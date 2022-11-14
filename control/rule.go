@@ -18,6 +18,7 @@ import (
 	"github.com/FloatTech/floatbox/process"
 
 	"github.com/FloatTech/rendercard"
+
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
@@ -391,7 +392,7 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				if id := ctx.Send(ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs))); id.ID() == 0 {
+				if id := ctx.SendChain(message.ImageBytes(imgs)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
 			})
