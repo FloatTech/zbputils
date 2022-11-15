@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/floatbox v0.0.0-20221110070748-e0d0b3af3e57
+	github.com/FloatTech/rendercard v0.0.1
 	github.com/FloatTech/sqlite v0.5.1
 	github.com/FloatTech/zbpctrl v1.5.3-0.20221110070900-b2888434e9fc
 	github.com/disintegration/imaging v1.6.2
@@ -30,9 +31,9 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.0 // indirect
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8 // indirect
+	golang.org/x/image v0.1.0 // indirect
 	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/text v0.4.0 // indirect
 	modernc.org/libc v1.19.0 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.4.0 // indirect

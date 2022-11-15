@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unsafe"
 
+	"github.com/Coloured-glaze/gg"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -16,7 +17,9 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/process"
 
-	"github.com/FloatTech/floatbox/img/writer"
+	"github.com/FloatTech/rendercard"
+
+	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
 
@@ -325,70 +328,6 @@ func init() {
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
-		zero.OnRegex(`^(开启|关闭|重置|on|off|reset)看板娘$`, zero.SuperUserPermission).SetBlock(true).
-			Handle(func(ctx *zero.Ctx) {
-				str := ctx.State["regex_matched"].([]string)[1]
-				mc.mu.Lock()
-				defer mc.mu.Unlock()
-				switch str {
-				case "开启", "on":
-					mc.isDisplay = true
-				case "关闭", "off":
-					mc.isDisplay = false
-				case "重置", "reset":
-					mc.isCustom = false
-					mc.path = kanbanPath + "kanban.png"
-				}
-				mc.im = nil
-				ctx.SendChain(message.Text("成功"))
-			})
-
-		zero.OnRegex(`^设置看板娘头像(\[CQ:at,qq=(.\d+)\]|(.\d+))$`, zero.SuperUserPermission).SetBlock(true).
-			Handle(func(ctx *zero.Ctx) {
-				str := ctx.State["regex_matched"].([]string)
-				id, err := strconv.ParseInt(str[2], 10, 64)
-				if err != nil {
-					id, err = strconv.ParseInt(str[1], 10, 64)
-					if err != nil {
-						ctx.SendChain(message.Text("ERROR: ", err))
-						return
-					}
-				}
-				if id < 10000 {
-					return
-				}
-				user := strconv.FormatInt(id, 10)
-				err = file.DownloadTo("http://q4.qlogo.cn/g?b=qq&nk="+user+"&s=640",
-					kanbanPath+"img/"+user+".jpg", false)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				mc.mu.Lock()
-				mc.isCustom = true
-				mc.path = kanbanPath + "img/" + user + ".jpg"
-				mc.im = nil
-				mc.mu.Unlock()
-				ctx.SendChain(message.Text("设置成功"))
-			})
-
-		zero.OnPrefix("设置看板娘图片", zero.MustProvidePicture, zero.SuperUserPermission).SetBlock(true).
-			Handle(func(ctx *zero.Ctx) {
-				u := ctx.State["image_url"].([]string)[0]
-				rn := "img/" + strconv.FormatInt(ctx.Event.UserID, 10) + ".jpg"
-				err := file.DownloadTo(u, kanbanPath+rn, false)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				mc.mu.Lock()
-				mc.isCustom = true
-				mc.path = kanbanPath + rn
-				mc.im = nil
-				mc.mu.Unlock()
-				ctx.SendChain(message.Text("设置成功"))
-			})
-
 		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
@@ -416,37 +355,46 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				/***********获取看板娘图片***********/
-				serviceinfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
-				menu := mc
-				menu.statusText = "●已启用"
-				menu.pluginName = model.Args
-				menu.info = serviceinfo
-				if !service.IsEnabledIn(gid) {
-					menu.statusText = "○未启用"
-					menu.enableText = false
+				// 处理插件帮助并且计算图像高
+				plugininfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
+				newplugininfo := make([]string, 0, len(plugininfo)*2)
+				font := gg.NewContext(1, 1)
+				err = font.LoadFontFace(text.BoldFontFile, 38)
+				if err != nil {
+					return
 				}
-				err = menu.loadpic()
+				for i := 0; i < len(plugininfo); i++ {
+					newlinetext, textw, tmpw := "", 0.0, 0.0
+					for len(plugininfo[i]) > 0 {
+						newlinetext, tmpw = truncate(font, plugininfo[i], 1272-50)
+						newplugininfo = append(newplugininfo, newlinetext)
+						if tmpw > textw {
+							textw = tmpw
+						}
+						if len(newlinetext) >= len(plugininfo[i]) {
+							break
+						}
+						plugininfo[i] = plugininfo[i][len(newlinetext):]
+					}
+				}
+				var imgs []byte
+				imgs, err = rendercard.Titleinfo{
+					Lefttitle:     service.Service,
+					Leftsubtitle:  service.Options.Brief,
+					Righttitle:    "FloatTech",
+					Rightsubtitle: "ZeroBot-Plugin",
+					Imgpath:       kanbanpath + "icon.jpg",
+					Textpath:      text.SakuraFontFile,
+					Textpath2:     text.BoldFontFile,
+					Status:        service.IsEnabledIn(gid),
+				}.Drawtitledtext(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				pic, err := menu.draw(&location{
-					lastH:     0, //
-					drawX:     0.0,
-					maxTwidth: 1200.0, // 文字边距
-					rlineX:    0.0,    // 宽高记录
-					rlineY:    140.0,
-				})
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				data, cl := writer.ToBytes(pic) // 生成图片
-				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
+				if id := ctx.SendChain(message.ImageBytes(imgs)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
-				cl()
 			})
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
@@ -461,63 +409,23 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				i := 0
-				j := 0
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				var tmp strings.Builder
-				var enable strings.Builder
-				var disable strings.Builder
-				tmp.Grow(512)
-				enable.Grow(256)
-				tmp.WriteString("\t\t\t <----------服务列表---------> \t\t\t\n" +
-					"\t\t\t\t   ◇发送\"/用法 name\"查看详情   \t\t\t\t\n" +
-					"\t\t\t\t   ◇发送\"/响应\"启用会话        \t\t\t\t\t\n",
-				)
-				enable.WriteString("\t\t\t\t\t     ↓ 以下服务已开启↓         \t\t\t\t\n")
-				disable.WriteString("\t\t\t\t\t     ↓ 以下服务未开启↓         \t\t\t\t\n")
-
-				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.IsEnabledIn(gid) {
-						i++
-						enable.WriteString(strconv.Itoa(i) + ": " + key + "\n")
-					} else {
-						j++
-						disable.WriteString(strconv.Itoa(j) + ": " + key + "\n")
-					}
-					return true
-				})
-
-				tmp.WriteString(enable.String())
-				tmp.WriteString(disable.String())
-				msg := strings.Split(strings.Trim(tmp.String(), "\n"), "\n")
-				menu := mc
-				menu.statusText = "●Plugin"
-				menu.pluginName = "ZeroBot-Plugin"
-				menu.info = msg
-				err = menu.loadpic()
+				var imgs [][]byte
+				imgs, err = drawservicesof(gid)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				pic, err := menu.draw(&location{
-					lastH:     0,
-					drawX:     0.0,
-					maxTwidth: 1200.0, // 文字边距
-					rlineX:    0.0,    // 宽高记录
-					rlineY:    140.0,
-				})
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
+				msg := make(message.Message, len(imgs))
+				for i := 0; i < len(imgs); i++ {
+					msg[i] = ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs[i]))
 				}
-				data, cl := writer.ToBytes(pic) // 生成图片
-				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
+				if id := ctx.Send(msg); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
-				cl()
 			})
 	})
 }

@@ -3,326 +3,133 @@ package control
 import (
 	"errors"
 	"image"
-	"math/rand"
 	"os"
+	"strconv"
 	"strings"
-	"sync"
 
 	"github.com/Coloured-glaze/gg"
-	"github.com/FloatTech/zbputils/img"
-	"github.com/FloatTech/zbputils/img/text"
-
 	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/floatbox/img/writer"
+	ctrl "github.com/FloatTech/zbpctrl"
+	zero "github.com/wdvxdr1123/ZeroBot"
+
+	"github.com/FloatTech/rendercard"
+
+	"github.com/FloatTech/zbputils/img/text"
 )
-
-type menucfg struct {
-	mu         *sync.RWMutex
-	path       string      // 看板娘图片路径
-	w          int         // 看板娘图片宽度
-	h          int         // 看板娘图片高度
-	isDisplay  bool        // 显示看板娘
-	isCustom   bool        // 自定义看板娘
-	statusText string      // 状态文本
-	enableText bool        // 启用状态
-	isDouble   bool        // 双列排版
-	pluginName string      // 插件名
-	font1      string      // 字体1
-	font2      string      // 字体2
-	info       []string    // 插件信息
-	info2      []string    // 插件信息2
-	multiple   float64     // 图片拓展倍数
-	fontSize   float64     // 字体大小
-	im         image.Image // 图片
-}
-
-type titleColor struct {
-	r, g, b  int  // 颜色
-	isRandom bool // 是否随机
-}
-
-type location struct {
-	lastH            int     // 上一个高度
-	drawX, maxTwidth float64 // 文字边距
-	rlineX, rlineY   float64 // 宽高记录
-	rtitleW          float64 // 标题位置
-}
 
 const (
-	kanbanPath = "data/Control/"
+	// PAGECNT card数量
+	PAGECNT    = 27
+	bannerpath = "data/zbpbanner/"
+	kanbanpath = "data/Control/"
+	bannerurl  = "https://gitcode.net/u011570312/zbpbanner/-/raw/main/"
 )
 
-var (
-	mc = menucfg{
-		mu:         &sync.RWMutex{},
-		path:       kanbanPath + "kanban.png", // 看板娘图片
-		isDisplay:  true,                      // 显示看板娘
-		statusText: "●Plugin",                 // 启用状态
-		enableText: true,                      // 启用状态
-		font1:      text.BoldFontFile,         // 字体1
-		font2:      text.SakuraFontFile,       // 字体2
-		multiple:   2.5,                       // 倍数
-		fontSize:   50,                        // 字体大小
-	}
-)
+type plugininfo struct {
+	name   string
+	brief  string
+	banner string
+	status bool
+}
+
+// 底图缓存
+var imgtmp image.Image
 
 func init() {
-	if !file.IsExist(kanbanPath + "img") {
-		err := os.MkdirAll(kanbanPath+"img", 0755)
-		if err != nil {
-			panic(err)
-		}
+	err := os.MkdirAll(bannerpath, 0755)
+	if err != nil {
+		panic(err)
 	}
-	_, err := file.GetLazyData(mc.path, true)
+	_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
 	if err != nil {
 		panic(err)
 	}
 }
 
-// 返回菜单图片
-func (mp *menucfg) draw(lt *location) (image.Image, error) {
-	mp.mu.RLock()
-	defer mp.mu.RUnlock()
-	titleW := 1280          // 标题文字
-	fontSize := mp.fontSize // 图片宽度和字体大小
-	if mp.isDisplay && !mp.isDouble {
-		titleW += mp.w // 标题位置
-	}
-	one := gg.NewContext(titleW, 256+len(mp.info)*15) // 新图像
-	if mp.isDouble && mp.isDisplay || mp.isDouble && !mp.isDisplay {
-		one = gg.NewContext(titleW*2, 256+len(mp.info)*15) // 新图像
-		lt.rtitleW = float64(one.W()) / 2
-	} else {
-		lt.rtitleW = float64(one.W() - 1280)
-	}
-	one.SetRGB255(255, 255, 255)
-	one.Clear()
-	if err := one.LoadFontFace(mp.font2, fontSize*2); err != nil {
-		return nil, err
-	}
-	one.SetRGBA255(55, 55, 55, 255) // 字体颜色
-	switch {
-	case mp.isDouble && !mp.isDisplay, !mp.isDouble && !mp.isDisplay:
-		width, _ := one.MeasureString(mp.pluginName)
-		one.DrawString(mp.pluginName, (float64(one.W())-width)/2, fontSize*2) // 绘制插件名在中间
-	case mp.isDouble && mp.isDisplay: //
-		one.DrawString(mp.pluginName, lt.rtitleW*1.36, fontSize*2) // 绘制插件名在右边
-	default:
-		width, _ := one.MeasureString(mp.pluginName)
-		one.DrawString(mp.pluginName, (1280.0-width)/2+float64(mp.w), fontSize*2) // 绘制插件名在右边
-	}
-	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
-		return nil, err
-	}
-	if mp.isDouble && !mp.isDisplay || !mp.isDouble && !mp.isDisplay {
-		one.DrawRoundedRectangle(27, fontSize-5, fontSize*4.5, fontSize*1.5, 10) // 创建圆角矩形
-	} else if mp.isDouble || mp.isDisplay { //
-		one.DrawRoundedRectangle(lt.rtitleW+27, fontSize-5, fontSize*4.5, fontSize*1.5, 10) // 创建圆角矩形
-	}
-	if mp.enableText { // 如果启用
-		one.SetRGBA255(15, 175, 15, 200)   // 设置绿色
-		one.Fill()                         // 填充
-		one.SetRGBA255(255, 255, 255, 255) // 设置白色
-	} else {
-		one.SetRGBA255(200, 15, 15, 200) // 设置红色
-		one.Fill()
-		one.SetRGBA255(255, 255, 255, 255)
-	}
-	if mp.isDouble && !mp.isDisplay || !mp.isDouble && !mp.isDisplay {
-		one.DrawString(mp.statusText, 35, fontSize*2) // 绘制启用状态
-	} else if mp.isDouble || mp.isDisplay { //
-		one.DrawString(mp.statusText, lt.rtitleW+35, fontSize*2) // 绘制启用状态
-	}
-	return mp.createPic(one, lt)
-}
-
-// 创建图片
-func (mp *menucfg) createPic(one *gg.Context, lt *location) (image.Image, error) {
-	var wg sync.WaitGroup
-	if mp.isDouble {
-		var imgs [2]image.Image
-		var err1, err2 error
-		wg.Add(2)
-		titlec := titleColor{isRandom: false}
-		titlec.randfill()
-		go func() {
-			imgs[0], err1 = mp.createPic2(lt, &titlec, mp.info)
-			wg.Done()
-		}()
-		go func() {
-			imgs[1], err2 = mp.createPic2(lt, &titlec, mp.info2)
-			wg.Done()
-		}()
-		wg.Wait()
-		if err1 != nil {
-			return nil, err1
+func drawservicesof(gid int64) (imgs [][]byte, err error) {
+	plist := make([]*plugininfo, len(priomap))
+	ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+		plist[i] = &plugininfo{
+			name:   manager.Service,
+			brief:  manager.Options.Brief,
+			banner: manager.Options.Banner,
+			status: manager.IsEnabledIn(gid),
 		}
-		if err2 != nil {
-			return nil, err2
-		}
-		imRY := imgs[0].Bounds().Dy() + 100 // 右边 图像的高度
-		imLY := imgs[1].Bounds().Dy() + 5   // 左边 图像的高度
-		max := 0
-		if mp.isDisplay {
-			imLY += mp.h + 5
-		}
-		if imRY > imLY {
-			max = imRY
-		} else {
-			max = imLY
-		}
-		if max > one.H() {
-			imgtmp := gg.NewContext(one.W(), max+int(mp.fontSize)) // 高度
-			imgtmp.SetRGB255(255, 255, 255)
-			imgtmp.Clear()
-			imgtmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(imgtmp.Image())
-		}
-		if mp.isDisplay {
-			if imLY > one.H() {
-				imgtmp := gg.NewContext(one.W(), imLY) // 高度
-				imgtmp.SetRGB255(255, 255, 255)
-				imgtmp.Clear()
-				imgtmp.DrawImage(one.Image(), 0, 0)
-				one = gg.NewContextForImage(imgtmp.Image())
-			}
-			one.DrawImage(mp.im, 0, 0) // 放入看板娘
-			one.DrawImage(imgs[1], 0, mp.h+5)
-			one.DrawImage(imgs[0], 1280, 0) // 最终的绘制位置
-		} else {
-			one.DrawImage(imgs[0], 0, 0) // 最终的绘制位置
-			one.DrawImage(imgs[1], 1280, 0)
-		}
-	} else {
-		titlec := titleColor{isRandom: true}
-		titlec.randfill()
-		var img image.Image
-		var err1 error
-		wg.Add(1)
-		go func() {
-			img, err1 = mp.createPic2(lt, &titlec, mp.info)
-			wg.Done()
-		}()
-		wg.Wait()
-		if err1 != nil {
-			return nil, err1
-		}
-		imY := img.Bounds().Dy()
-		if imY+int(mp.fontSize) > one.H() {
-			imgtmp := gg.NewContext(one.W(), imY) // 高度
-			imgtmp.SetRGB255(255, 255, 255)
-			imgtmp.Clear()
-			imgtmp.DrawImage(one.Image(), 0, 0)
-			one = gg.NewContextForImage(imgtmp.Image())
-		}
-		if mp.isDisplay {
-			if mp.h > one.H() {
-				imgtmp := gg.NewContext(one.W(), mp.h) // 宽和高
-				imgtmp.SetRGB255(255, 255, 255)
-				imgtmp.Clear()
-				imgtmp.DrawImage(one.Image(), 0, 0)
-				one = gg.NewContextForImage(imgtmp.Image())
-			}
-			if mp.isCustom { // 如果自定义看板娘
-				one.DrawImage(mp.im, 0, (one.H()-mp.h)/2) // 放入看板娘
-			} else {
-				one.DrawImage(mp.im, 0, 0) // 最终的绘制位置
-			}
-			one.DrawImage(img, one.W()-1280, 50) // 最终的绘制位置
-		} else {
-			one.DrawImage(img, 0, 50) // 最终的绘制位置
+		return true
+	})
+	k := 0
+	// 分页
+	page := len(plist) / PAGECNT
+	if len(plist)%PAGECNT != 0 {
+		page++
+	}
+	imgs = make([][]byte, page)
+	if imgtmp == nil {
+		imgtmp, err = rendercard.Titleinfo{
+			Lefttitle:     "服务列表",
+			Leftsubtitle:  "service_list",
+			Righttitle:    "FloatTech",
+			Rightsubtitle: "ZeroBot-Plugin",
+			Textpath:      text.SakuraFontFile,
+			Imgpath:       kanbanpath + "icon.jpg",
+		}.Drawtitle()
+		if err != nil {
+			return
 		}
 	}
-	return one.Image(), nil
-}
-
-// 创建图片
-func (mp *menucfg) createPic2(lt *location, titlec *titleColor, info []string) (image.Image, error) {
-	fontSize := mp.fontSize
-	one := gg.NewContext(1280, 256+len(mp.info)*15)
-	if err := one.LoadFontFace(mp.font1, fontSize); err != nil { // 加载字体
-		return nil, err
-	}
-	lineTexts := make([]string, 0, 32)
-	rlx := lt.rlineX
-	rly := lt.rlineY
-	lh := lt.lastH
-	for i := 0; i < len(info); i++ { // 遍历文字切片
-		lineText, textW, textH, tmpw := "", 0.0, 0.0, 0.0
-		if mp.isDouble {
-			if strings.Contains(info[i], ": ● ") || strings.Contains(info[i], ": ○ ") {
-				titlec.randfill() // 随机一次颜色
-			}
-		}
-		for len(info[i]) > 0 {
-			lineText, tmpw = truncate(one, info[i], lt.maxTwidth)
-			lineTexts = append(lineTexts, lineText)
-			if tmpw > textW {
-				textW = tmpw
-			}
-			if len(lineText) >= len(info[i]) {
-				break // 如果写入的文本大于等于本次写入的文本 则跳出
-			}
-			textH += fontSize * 1.3           // 截断一次加一行高度
-			info[i] = info[i][len(lineText):] // 丢弃已经写入的文字并重新赋值
-		}
-		threeW, threeH := textW+fontSize, (textH + (fontSize * 1.2)) // 圆角矩形宽度和高度
-		if int(rlx+textW)+int(fontSize*2) > one.W() {                // 越界
-			rly += float64(lh) + fontSize/4              // 加一次高度
-			rlx = 5                                      // 重置宽度位置
-			if threeH+rly+fontSize >= float64(one.H()) { // 超出最大高度则进行加高
-				imgtmp := gg.NewContext(one.W(), int(rly+threeH*mp.multiple)) // 高度
-				imgtmp.DrawImage(one.Image(), 0, 0)
-				one = gg.NewContextForImage(imgtmp.Image())
-				if err := one.LoadFontFace(mp.font1, mp.fontSize); err != nil { // 加载字体
-					return nil, err
+	var card image.Image
+	for l := 0; l < page; l++ {
+		one := gg.NewContextForImage(imgtmp)
+		x, y := 30, 30+300+30
+		for j := 0; j < 9; j++ {
+			for i := 0; i < 3; i++ {
+				if k == len(plist) {
+					break
 				}
+				kstr := strconv.Itoa(k)
+				banner := ""
+				switch {
+				case strings.HasPrefix(plist[k].banner, "http"):
+					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png", true)
+					if err != nil {
+						return
+					}
+					banner = bannerpath + plist[k].name + ".png"
+				case plist[k].banner != "":
+					banner = plist[k].banner
+				default:
+					_, err = file.GetCustomLazyData(bannerurl, bannerpath+plist[k].name+".png")
+					if err != nil {
+						err = errors.New("ERROR: 插件背景图下载失败或是自定义插件")
+						return
+					}
+					banner = bannerpath + plist[k].name + ".png"
+				}
+				card, err = rendercard.Titleinfo{
+					Lefttitle:     plist[k].name,
+					Leftsubtitle:  plist[k].brief,
+					Rightsubtitle: kstr,
+					Imgpath:       banner,
+					Textpath:      text.SakuraFontFile,
+					Textpath2:     text.BoldFontFile,
+					Status:        plist[k].status,
+				}.Drawcard()
+				if err != nil {
+					return
+				}
+				one.DrawImage(card, x, y)
+				k++
+				x += 384 + 30
 			}
-			dx := rlx + 13                                          // 圆角矩形位置宽度
-			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
-			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
-			rlx += threeW + fontSize/2 // 添加后加一次宽度
-			lh = int(threeH)
-		} else {
-			dx := rlx + 13                                          // 圆角矩形位置宽度
-			one.DrawRoundedRectangle(dx, rly, threeW, threeH, 20.0) // 创建圆角矩形
-			titlec.drawsc(one, fontSize, dx, rly, lineTexts)
-			rlx += threeW + fontSize/2 // 添加后加一次宽度
-			lh = int(threeH)
+			x = 30
+			y += 256 + 30
 		}
-		lineTexts = lineTexts[:0]
+		data, cl := writer.ToBytes(one.Image()) // 生成图片
+		imgs[l] = data
+		cl()
 	}
-	return one.Image(), nil
-}
-
-// 绘制文字
-func (titlec *titleColor) drawsc(one *gg.Context, fontSize, drawX, rlineY float64, lineTexts []string) {
-	if titlec.isRandom {
-		titlec.randfill()
-	}
-	one.SetRGBA255(titlec.r, titlec.g, titlec.b, 85)
-	one.Fill() // 填充颜色
-	one.SetRGBA255(55, 55, 55, 255)
-	h := fontSize + rlineY - 3
-	for i := range lineTexts { // 逐行绘制文字
-		one.DrawString(lineTexts[i], drawX+fontSize/2, h)
-		h += fontSize + (fontSize / 4)
-	}
-}
-
-// 填充颜色
-func (titlec *titleColor) randfill() {
-	titlec.r = rand.Intn(245) // 随机颜色
-	titlec.g = rand.Intn(245)
-	titlec.b = rand.Intn(245)
-	for titlec.r < 15 || titlec.r > 210 {
-		titlec.r = rand.Intn(245)
-	}
-	for titlec.g < 15 || titlec.g > 210 {
-		titlec.g = rand.Intn(245)
-	}
-	for titlec.b < 15 || titlec.b > 210 {
-		titlec.b = rand.Intn(245)
-	}
+	return
 }
 
 // 截断文字
@@ -334,48 +141,11 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 		tmp.WriteRune(r)
 		width, _ := one.MeasureString(tmp.String()) // 获取文字宽度
 		if width > maxW {                           // 如果宽度大于文字边距
-			break //跳出
+			break // 跳出
 		} else {
 			w = width
 			res = append(res, r) // 写入
 		}
 	}
 	return string(res), w
-}
-
-// 编码看板娘图片和加载字体
-func (mp *menucfg) loadpic() error {
-	mp.mu.RLock()
-	if mp.im != nil {
-		mp.mu.RUnlock()
-		return nil
-	}
-	if !file.IsExist(mp.font1) { // 获取字体
-		mp.mu.RUnlock()
-		return errors.New("文件 " + mp.font1 + " 不存在")
-	}
-	if !file.IsExist(mp.font2) { // 获取字体
-		mp.mu.RUnlock()
-		return errors.New("文件 " + mp.font2 + " 不存在")
-	}
-	if mp.isDisplay {
-		f, err := os.Open(mp.path)
-		mp.mu.RUnlock()
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		mp.mu.Lock()
-		defer mp.mu.Unlock()
-		mp.im, _, err = image.Decode(f)
-		if err != nil {
-			return err
-		}
-		mp.im = img.Limit(mp.im, 1280, 1280)
-		b := mp.im.Bounds().Size()
-		mp.w, mp.h = b.X, b.Y
-		return nil
-	}
-	mp.mu.RUnlock()
-	return nil
 }
