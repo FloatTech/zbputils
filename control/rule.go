@@ -441,16 +441,16 @@ func init() {
 					}
 				}
 			})
-		zero.OnCommand("设置列表显示行数", zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+		zero.OnCommand("设置服务列表显示行数", zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)
 			mun, err := strconv.Atoi(model.Args)
 			if err != nil {
 				ctx.SendChain(message.Text("请输入正确的数字"))
 			}
-			lineOfPage = mun
+			lnperpg = mun
 			imgtmp = nil // 清除缓存
-			ctx.SendChain(message.Text("已设置列表单页显示行数为 " + strconv.Itoa(lineOfPage)))
+			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
 	})
 }
