@@ -9,6 +9,7 @@ import (
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
+	"github.com/FloatTech/floatbox/math"
 	ctrl "github.com/FloatTech/zbpctrl"
 	zero "github.com/wdvxdr1123/ZeroBot"
 
@@ -30,11 +31,11 @@ type plugininfo struct {
 	status bool
 }
 
-// 底图缓存
 var (
+	// 底图缓存
 	imgtmp image.Image
-	// lineOfPage 每页行数
-	lineOfPage = 9
+	// lnperpg 每页行数
+	lnperpg = 9
 )
 
 func init() {
@@ -61,15 +62,15 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 	})
 	k := 0
 	// 分页
-	if len(plist) < 3*lineOfPage {
+	if len(plist) < 3*lnperpg {
 		// 如果单页显示数量超出了总数量
-		lineOfPage = ceilFor(len(plist), 3)
+		lnperpg = math.Ceil(len(plist), 3)
 	}
-	page := ceilFor(len(plist), 3*lineOfPage)
+	page := math.Ceil(len(plist), 3*lnperpg)
 	imgs = make([][]byte, page)
 	if imgtmp == nil {
 		imgtmp, err = rendercard.Titleinfo{
-			Line:          lineOfPage,
+			Line:          lnperpg,
 			Lefttitle:     "服务列表",
 			Leftsubtitle:  "service_list",
 			Righttitle:    "FloatTech",
@@ -85,7 +86,7 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 	for l := 0; l < page; l++ { // 页数
 		one := gg.NewContextForImage(imgtmp)
 		x, y := 30, 30+300+30
-		for j := 0; j < lineOfPage; j++ { // 行数
+		for j := 0; j < lnperpg; j++ { // 行数
 			for i := 0; i < 3; i++ { // 列数
 				if k == len(plist) {
 					break
@@ -131,15 +132,6 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 		cl()
 	}
 	return
-}
-
-// ceilFor 整数类型的向上整除(除数,被除数)
-func ceilFor(dividend, divisor int) int {
-	result := dividend / divisor
-	if dividend%divisor != 0 {
-		result++
-	}
-	return result
 }
 
 // 截断文字
