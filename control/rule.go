@@ -334,6 +334,14 @@ func init() {
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
 				if !ok {
+					for _, controlinfo := range managers.M {
+						if controlinfo.Options.Brief == model.Args {
+							service = controlinfo
+							break
+						}
+					}
+				}
+				if service == nil {
 					ctx.SendChain(message.Text("没有找到指定服务!"))
 					return
 				}
@@ -419,13 +427,30 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				msg := make(message.Message, len(imgs))
-				for i := 0; i < len(imgs); i++ {
-					msg[i] = ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs[i]))
-				}
-				if id := ctx.Send(msg); id.ID() == 0 {
-					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+				if len(imgs) > 1 {
+					msg := make(message.Message, len(imgs))
+					for i := 0; i < len(imgs); i++ {
+						msg[i] = ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs[i]))
+					}
+					if id := ctx.Send(msg); id.ID() == 0 {
+						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+					}
+				} else {
+					if id := ctx.SendChain(message.ImageBytes(imgs[0])); id.ID() == 0 {
+						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+					}
 				}
 			})
+		zero.OnCommand("设置服务列表显示行数", zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			model := extension.CommandModel{}
+			_ = ctx.Parse(&model)
+			mun, err := strconv.Atoi(model.Args)
+			if err != nil {
+				ctx.SendChain(message.Text("请输入正确的数字"))
+			}
+			lnperpg = mun
+			imgtmp = nil // 清除缓存
+			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
+		})
 	})
 }
