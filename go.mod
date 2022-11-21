@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4
-	github.com/FloatTech/floatbox v0.0.0-20221121105530-7707db99d240
+	github.com/FloatTech/floatbox v0.0.0-20221121111851-ec537e731ff3
 	github.com/FloatTech/rendercard v0.0.2-0.20221116145901-79858ddd4cad
 	github.com/FloatTech/sqlite v0.5.1
 	github.com/FloatTech/zbpctrl v1.5.3-0.20221110070900-b2888434e9fc

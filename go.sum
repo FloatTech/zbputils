@@ -1,7 +1,7 @@
 github.com/Coloured-glaze/gg v1.3.4 h1:l31zIF/HaVwkzjrj+A56RGQoSKyKuR1IWtIrqXGFStI=
 github.com/Coloured-glaze/gg v1.3.4/go.mod h1:Ih5NLNNDHOy3RJbB0EPqGTreIzq/H02TGThIagh8HJg=
-github.com/FloatTech/floatbox v0.0.0-20221121105530-7707db99d240 h1:EZnPtrSLAY0Rvar25K+Wfx9W3/2H/raosAqCarmh/xU=
-github.com/FloatTech/floatbox v0.0.0-20221121105530-7707db99d240/go.mod h1:o++SAnZq+KpGC5gZmYd02H3Msr6Q2Qpoz3pC3ebbJaE=
+github.com/FloatTech/floatbox v0.0.0-20221121111851-ec537e731ff3 h1:XJsQ8u3RCjZkc+hhVad4CyG8eJvrFmRKG+YWnASQVak=
+github.com/FloatTech/floatbox v0.0.0-20221121111851-ec537e731ff3/go.mod h1:RW+fMQIKzCz53o8c7q93KNrnpvB5+cX1wZo3vW3Db4U=
 github.com/FloatTech/rendercard v0.0.2-0.20221116145901-79858ddd4cad h1:Bidfkufddy52ywvjCpXwSnZqgcQgv7xF1rBDZYhbSOc=
 github.com/FloatTech/rendercard v0.0.2-0.20221116145901-79858ddd4cad/go.mod h1:e2M5OWspdblwq182zbVgRefiOc+gXtB1XzTW/2z86/I=
 github.com/FloatTech/sqlite v0.5.1 h1:IjTdnqMVIVIoIEFXhvh/KKBfYxFvG0tk7Rghz65/DAU=
