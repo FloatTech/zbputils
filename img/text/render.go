@@ -40,7 +40,7 @@ func RenderToBase64(text, font string, width, fontSize int) (base64Bytes []byte,
 
 // Render 文字转图片 width 是图片宽度
 func Render(text, font string, width, fontSize int) (txtc Text, err error) {
-	_, err = file.GetLazyData(font, true)
+	_, err = file.GetLazyData(font, "data/control/stor.spb", true)
 	if err != nil {
 		return
 	}

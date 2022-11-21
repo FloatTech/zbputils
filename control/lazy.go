@@ -17,7 +17,7 @@ func (e *Engine) GetLazyData(filename string, isDataMustEqual bool) ([]byte, err
 	if !strings.HasSuffix(e.datafolder, "/") || !strings.HasPrefix(e.datafolder, "data/") || !unicode.IsUpper(rune(e.datafolder[5])) {
 		return nil, errors.New("invalid datafolder")
 	}
-	return file.GetLazyData(e.datafolder+filename, isDataMustEqual)
+	return file.GetLazyData(e.datafolder+filename, Md5File, isDataMustEqual)
 }
 
 // GetCustomLazyData 下载并获取本 engine 文件夹下的自动定义懒加载数据

@@ -23,9 +23,15 @@ import (
 	"github.com/FloatTech/zbputils/img/text"
 )
 
+const (
+	StorageFolder = "data/control/"
+	Md5File       = StorageFolder + "stor.spb"
+	dbfile        = StorageFolder + "plugins.db"
+)
+
 var (
 	// managers 每个插件对应的管理
-	managers = ctrl.NewManager[*zero.Ctx]("data/control/plugins.db")
+	managers = ctrl.NewManager[*zero.Ctx](dbfile)
 )
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
@@ -44,6 +50,10 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
 		err := os.MkdirAll("data/Control", 0755)
+		if err != nil {
+			panic(err)
+		}
+		err = os.MkdirAll("data/control", 0755)
 		if err != nil {
 			panic(err)
 		}
@@ -349,12 +359,12 @@ func init() {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 					return
 				}
-				_, err := file.GetLazyData(text.BoldFontFile, true)
+				_, err := file.GetLazyData(text.BoldFontFile, Md5File, true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -407,12 +417,12 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				_, err := file.GetLazyData(text.BoldFontFile, true)
+				_, err := file.GetLazyData(text.BoldFontFile, Md5File, true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				_, err = file.GetLazyData(text.SakuraFontFile, true)
+				_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return

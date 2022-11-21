@@ -43,7 +43,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = file.GetLazyData(kanbanpath+"icon.jpg", true)
+	_, err = file.GetLazyData(kanbanpath+"icon.jpg", Md5File, true)
 	if err != nil {
 		panic(err)
 	}
