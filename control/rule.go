@@ -2,6 +2,7 @@
 package control
 
 import (
+	"image"
 	"os"
 	"strconv"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 
 	"github.com/FloatTech/floatbox/file"
+	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
 
 	"github.com/FloatTech/rendercard"
@@ -395,24 +397,26 @@ func init() {
 						plugininfo[i] = plugininfo[i][len(newlinetext):]
 					}
 				}
-				var imgs []byte
+				var imgs image.Image
 				imgs, err = rendercard.Titleinfo{
 					Lefttitle:     service.Service,
 					Leftsubtitle:  service.Options.Brief,
 					Righttitle:    "FloatTech",
 					Rightsubtitle: "ZeroBot-Plugin",
 					Imgpath:       kanbanpath + "icon.jpg",
-					Textpath:      text.SakuraFontFile,
-					Textpath2:     text.BoldFontFile,
+					Fontpath:      text.SakuraFontFile,
+					Fontpath2:     text.BoldFontFile,
 					Status:        service.IsEnabledIn(gid),
 				}.Drawtitledtext(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				if id := ctx.SendChain(message.ImageBytes(imgs)); id.ID() == 0 {
+				data, cl := writer.ToBytes(imgs) // 生成图片
+				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
+				cl()
 			})
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
