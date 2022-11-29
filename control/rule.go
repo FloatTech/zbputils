@@ -25,9 +25,9 @@ import (
 )
 
 const (
-	// Storagefolder 插件控制数据目录
+	// StorageFolder 插件控制数据目录
 	StorageFolder = "data/control/"
-	// Md5file ...
+	// Md5File ...
 	Md5File = StorageFolder + "stor.spb"
 	dbfile  = StorageFolder + "plugins.db"
 )
