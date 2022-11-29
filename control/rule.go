@@ -15,7 +15,6 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
-	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
 
@@ -26,9 +25,11 @@ import (
 )
 
 const (
+	// Storagefolder 插件控制数据目录
 	StorageFolder = "data/control/"
-	Md5File       = StorageFolder + "stor.spb"
-	dbfile        = StorageFolder + "plugins.db"
+	// Md5file ...
+	Md5File = StorageFolder + "stor.spb"
+	dbfile  = StorageFolder + "plugins.db"
 )
 
 var (
@@ -361,12 +362,7 @@ func init() {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 					return
 				}
-				_, err := file.GetLazyData(text.BoldFontFile, Md5File, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
+				err := geticonandfont()
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -381,6 +377,7 @@ func init() {
 				font := gg.NewContext(1, 1)
 				err = font.LoadFontFace(text.BoldFontFile, 38)
 				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				for i := 0; i < len(plugininfo); i++ {
@@ -421,12 +418,7 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				_, err := file.GetLazyData(text.BoldFontFile, Md5File, true)
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
+				err := geticonandfont()
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -455,6 +447,7 @@ func init() {
 					}
 				}
 			})
+
 		zero.OnCommand("设置服务列表显示行数", zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
 			_ = ctx.Parse(&model)

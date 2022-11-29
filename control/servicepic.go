@@ -148,3 +148,20 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 	}
 	return string(res), w
 }
+
+// 获取字体和头像
+func geticonandfont() (err error) {
+	_, err = file.GetLazyData(text.BoldFontFile, Md5File, true)
+	if err != nil {
+		return
+	}
+	_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
+	if err != nil {
+		return
+	}
+	_, err = file.GetLazyData(kanbanpath+"icon.jpg", Md5File, true)
+	if err != nil {
+		return
+	}
+	return
+}
