@@ -3,7 +3,6 @@ package control
 import (
 	"image"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/Coloured-glaze/gg"
@@ -75,7 +74,7 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 			Leftsubtitle:  "service_list",
 			Righttitle:    "FloatTech",
 			Rightsubtitle: "ZeroBot-Plugin",
-			Textpath:      text.SakuraFontFile,
+			Fontpath:      text.SakuraFontFile,
 			Imgpath:       kanbanpath + "icon.jpg",
 		}.Drawtitle()
 		if err != nil {
@@ -91,7 +90,6 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 				if k == len(plist) {
 					break
 				}
-				kstr := strconv.Itoa(k)
 				banner := ""
 				switch {
 				case strings.HasPrefix(plist[k].banner, "http"):
@@ -109,13 +107,12 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 					}
 				}
 				card, err = rendercard.Titleinfo{
-					Lefttitle:     plist[k].name,
-					Leftsubtitle:  plist[k].brief,
-					Rightsubtitle: kstr,
-					Imgpath:       banner,
-					Textpath:      text.SakuraFontFile,
-					Textpath2:     text.BoldFontFile,
-					Status:        plist[k].status,
+					Lefttitle:    plist[k].name,
+					Leftsubtitle: plist[k].brief,
+					Imgpath:      banner,
+					Fontpath:     text.SakuraFontFile,
+					Fontpath2:    text.BoldFontFile,
+					Status:       plist[k].status,
 				}.Drawcard()
 				if err != nil {
 					return
@@ -150,4 +147,21 @@ func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
 		}
 	}
 	return string(res), w
+}
+
+// 获取字体和头像
+func geticonandfont() (err error) {
+	_, err = file.GetLazyData(text.BoldFontFile, Md5File, true)
+	if err != nil {
+		return
+	}
+	_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
+	if err != nil {
+		return
+	}
+	_, err = file.GetLazyData(kanbanpath+"icon.jpg", Md5File, true)
+	if err != nil {
+		return
+	}
+	return
 }
