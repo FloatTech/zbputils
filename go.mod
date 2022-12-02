@@ -6,8 +6,8 @@ require (
 	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/floatbox v0.0.0-20221202084309-ad154513ab2f
 	github.com/FloatTech/rendercard v0.0.2-0.20221128165614-a41216d2422e
-	github.com/FloatTech/sqlite v1.5.5
-	github.com/FloatTech/zbpctrl v1.5.3-0.20221202100520-b030b5c74ec0
+	github.com/FloatTech/sqlite v1.5.6
+	github.com/FloatTech/zbpctrl v1.5.3-0.20221202101407-4c36e54759bc
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0

@@ -4,12 +4,12 @@ github.com/FloatTech/floatbox v0.0.0-20221202084309-ad154513ab2f h1:fh4BuiOY+rDU
 github.com/FloatTech/floatbox v0.0.0-20221202084309-ad154513ab2f/go.mod h1:m5Mp6l0BgwiM9u1EyT4p1bu7zRdKQLOHtgr8xSP2Uw8=
 github.com/FloatTech/rendercard v0.0.2-0.20221128165614-a41216d2422e h1:7bF01RHsYS99Zp+OWfob1W/Cymho6fcggoRSpiuiYB8=
 github.com/FloatTech/rendercard v0.0.2-0.20221128165614-a41216d2422e/go.mod h1:e2M5OWspdblwq182zbVgRefiOc+gXtB1XzTW/2z86/I=
-github.com/FloatTech/sqlite v1.5.5 h1:SmGE2MC2W7RQOYfWTau9ZdrfwUflOiLdobi9QgTiL0Y=
-github.com/FloatTech/sqlite v1.5.5/go.mod h1:ItKoTpmEE2cYQ/hGrC02W+BBYE/tlUjlVGSTiM6ewFM=
+github.com/FloatTech/sqlite v1.5.6 h1:Ws4uiN5AjjGV+ikM/cL8eOHHeYvX390srv8SaqPQ5Ok=
+github.com/FloatTech/sqlite v1.5.6/go.mod h1:ItKoTpmEE2cYQ/hGrC02W+BBYE/tlUjlVGSTiM6ewFM=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
-github.com/FloatTech/zbpctrl v1.5.3-0.20221202100520-b030b5c74ec0 h1:lI/8CaHgzYiib9NsT+e+6Bi4abAQWcnfGNPfFMaYHpc=
-github.com/FloatTech/zbpctrl v1.5.3-0.20221202100520-b030b5c74ec0/go.mod h1:U7gl4gfT0vrYL0gKuSUwnrUaoNO8O2goKx/2ggw76JM=
+github.com/FloatTech/zbpctrl v1.5.3-0.20221202101407-4c36e54759bc h1:zL0z/LT8cfS6PJjGnk6aDE4J8H4nntMNGdGaRIimjHY=
+github.com/FloatTech/zbpctrl v1.5.3-0.20221202101407-4c36e54759bc/go.mod h1:mtiGAVKZokFr9p8hrpyIHpGatEZ3Qda8ltuymUbMQVQ=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e h1:wR3MXQ3VbUlPKOOUwLOYgh/QaJThBTYtsl673O3lqSA=
 github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e/go.mod h1:vD7Ra3Q9onRtojoY5sMCLQ7JBgjUsrXDnDKyFxqpf9w=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
