@@ -6,8 +6,8 @@ require (
 	github.com/Coloured-glaze/gg v1.3.4
 	github.com/FloatTech/floatbox v0.0.0-20221202084309-ad154513ab2f
 	github.com/FloatTech/rendercard v0.0.2-0.20221128165614-a41216d2422e
-	github.com/FloatTech/sqlite v1.5.2
-	github.com/FloatTech/zbpctrl v1.5.3-0.20221202072935-cef111dfc99b
+	github.com/FloatTech/sqlite v1.5.4
+	github.com/FloatTech/zbpctrl v1.5.3-0.20221202094638-d701a364e4a2
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
@@ -24,7 +24,6 @@ require (
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
-	github.com/fumiama/sqlite3 v1.20.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.16 // indirect
@@ -37,4 +36,9 @@ require (
 	modernc.org/libc v1.21.5 // indirect
 	modernc.org/mathutil v1.5.0 // indirect
 	modernc.org/memory v1.4.0 // indirect
+	modernc.org/sqlite v1.20.0 // indirect
 )
+
+replace modernc.org/sqlite => github.com/fumiama/sqlite3 v1.20.0-simp
+
+replace github.com/remyoudompheng/bigfft => github.com/fumiama/bigfft v0.0.0-20211011143303-6e0bfa3c836b
