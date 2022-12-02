@@ -48,8 +48,7 @@ func init() {
 	go func() {
 		process.GlobalInitMutex.Lock()
 		process.SleepAbout1sTo2s()
-		for _, drv := range zero.BotConfig.Driver {
-			id := drv.SelfID()
+		zero.RangeBot(func(id int64, _ *zero.Ctx) bool {
 			ids := strconv.FormatInt(id, 36)
 			c := &cmd{}
 			err := db.Create(ids, c)
@@ -138,7 +137,8 @@ func init() {
 			if err != nil && err != sql.ErrNullResult {
 				panic(err)
 			}
-		}
+			return true
+		})
 		logrus.Infoln("[job]本地环回初始化完成")
 		process.GlobalInitMutex.Unlock()
 	}()
