@@ -35,7 +35,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	e.en.UsePreHandler(
 		func(ctx *zero.Ctx) bool {
 			// 防止自触发
-			return ctx.Event.UserID != ctx.Event.SelfID
+			return ctx.Event.UserID != ctx.Event.SelfID || ctx.Event.PostType != "message"
 		},
 		newctrl(service, o),
 	)
