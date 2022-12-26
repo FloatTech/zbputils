@@ -400,7 +400,7 @@ func init() {
 					Leftsubtitle:  service.Options.Brief,
 					Righttitle:    "FloatTech",
 					Rightsubtitle: "ZeroBot-Plugin",
-					Imgpath:       kanbanpath + "icon.jpg",
+					Imgpath:       kanbanpath + "kanban.png",
 					Fontpath:      text.SakuraFontFile,
 					Fontpath2:     text.BoldFontFile,
 					Status:        service.IsEnabledIn(gid),

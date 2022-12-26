@@ -9,6 +9,7 @@ import (
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
 	zero "github.com/wdvxdr1123/ZeroBot"
 
@@ -42,7 +43,7 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = file.GetLazyData(kanbanpath+"icon.jpg", Md5File, true)
+	_, err = file.GetLazyData(kanbanpath+"kanban.png", Md5File, true)
 	if err != nil {
 		panic(err)
 	}
@@ -75,7 +76,7 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 			Righttitle:    "FloatTech",
 			Rightsubtitle: "ZeroBot-Plugin",
 			Fontpath:      text.SakuraFontFile,
-			Imgpath:       kanbanpath + "icon.jpg",
+			Imgpath:       kanbanpath + "kanban.png",
 		}.Drawtitle()
 		if err != nil {
 			return
@@ -93,10 +94,11 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 				banner := ""
 				switch {
 				case strings.HasPrefix(plist[k].banner, "http"):
-					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png", true)
+					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png")
 					if err != nil {
 						return
 					}
+					process.SleepAbout1sTo2s()
 					banner = bannerpath + plist[k].name + ".png"
 				case plist[k].banner != "":
 					banner = plist[k].banner
@@ -159,7 +161,7 @@ func geticonandfont() (err error) {
 	if err != nil {
 		return
 	}
-	_, err = file.GetLazyData(kanbanpath+"icon.jpg", Md5File, true)
+	_, err = file.GetLazyData(kanbanpath+"kanban.png", Md5File, true)
 	if err != nil {
 		return
 	}
