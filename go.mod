@@ -1,6 +1,6 @@
 module github.com/FloatTech/zbputils
 
-go 1.18
+go 1.19
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4
