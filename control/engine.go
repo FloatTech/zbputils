@@ -91,6 +91,18 @@ func (e *Engine) Delete() {
 	e.en.Delete()
 }
 
+func (e *Engine) UsePreHandler(rules ...zero.Rule) {
+	e.en.UsePreHandler(rules...)
+}
+
+func (e *Engine) UseMidHandler(rules ...zero.Rule) {
+	e.en.UseMidHandler(rules...)
+}
+
+func (e *Engine) UsePostHandler(handler ...zero.Handler) {
+	e.en.UsePostHandler(handler...)
+}
+
 // On 添加新的指定消息类型的匹配器
 func (e *Engine) On(typ string, rules ...zero.Rule) *Matcher {
 	return (*Matcher)(e.en.On(typ, rules...).SetPriority(e.prio))
