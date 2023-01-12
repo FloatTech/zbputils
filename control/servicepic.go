@@ -180,6 +180,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 			go drawcard(pluginlist[a:b], cardlist[a:b])
 		}
 		if batchsize*n < len(pluginlist) {
+			wg.Add(1)
 			d := len(pluginlist) - batchsize*n
 			go drawcard(pluginlist[d:], cardlist[d:])
 		}
