@@ -139,15 +139,15 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 			limit <- struct{}{}
 			defer func() { <-limit }()
 
-			x, y := 30, 30+300+30+16
+			x, y := 30+2, 30+300+30+6+4
 			shadow := gg.NewContextForImage(rendercard.Transparency(imgtmp, 0))
-			shadow.SetRGBA255(0, 0, 0, 153)
+			shadow.SetRGBA255(0, 0, 0, 192)
 			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
-				shadow.DrawRoundedRectangle(float64(x), float64(y), 384, 256, 0)
+				shadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
 				shadow.Fill()
 				x += 384 + 30
 				if (i+1)%3 == 0 {
-					x = 30
+					x = 30 + 2
 					y += 256 + 30
 				}
 			}
@@ -162,9 +162,9 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 
 			one := gg.NewContextForImage(imgtmp)
 			x, y := 30, 30+300+30
-			one.DrawImage(imaging.Blur(shadowimg, 16), 0, 0)
+			one.DrawImage(imaging.Blur(shadowimg, 7), 0, 0)
 			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
-				one.DrawImage(cardlist[(cardnum*l)+i], x, y)
+				one.DrawImage(rendercard.Fillet(cardlist[(cardnum*l)+i], 8), x, y)
 				x += 384 + 30
 				if (i+1)%3 == 0 {
 					x = 30

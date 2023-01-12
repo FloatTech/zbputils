@@ -91,14 +91,20 @@ func (e *Engine) Delete() {
 	e.en.Delete()
 }
 
+// UsePreHandler 向该 Engine 添加新 PreHandler(Rule), 会在 Rule 判断前触发，如果 preHandler 没有通过，则 Rule, Matcher 不会触发
+// 可用于分群组管理插件等
 func (e *Engine) UsePreHandler(rules ...zero.Rule) {
 	e.en.UsePreHandler(rules...)
 }
 
+// UseMidHandler 向该 Engine 添加新 MidHandler(Rule), 会在 Rule 判断后， Matcher 触发前触发，如果 midHandler 没有通过，则 Matcher 不会触发
+// 可用于速率限制等
 func (e *Engine) UseMidHandler(rules ...zero.Rule) {
 	e.en.UseMidHandler(rules...)
 }
 
+// UsePostHandler 向该 Engine 添加新 PostHandler(Rule), 会在 Matcher 触发后触发，如果 PostHandler 返回 false, 则后续的 post handler 不会触发
+// 可用于反并发等
 func (e *Engine) UsePostHandler(handler ...zero.Handler) {
 	e.en.UsePostHandler(handler...)
 }
