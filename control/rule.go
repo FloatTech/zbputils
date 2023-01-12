@@ -2,9 +2,13 @@
 package control
 
 import (
+	"encoding/base64"
+	"image"
+	"image/jpeg"
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -13,6 +17,7 @@ import (
 
 	ctrl "github.com/FloatTech/zbpctrl"
 
+	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
 
@@ -408,22 +413,43 @@ func init() {
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
-				var imgs [][]byte
+				var imgs []image.Image
 				imgs, err = drawservicesof(gid)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				if len(imgs) > 1 {
+					wg := sync.WaitGroup{}
 					msg := make(message.Message, len(imgs))
+					wg.Add(len(imgs))
 					for i := 0; i < len(imgs); i++ {
-						msg[i] = ctxext.FakeSenderForwardNode(ctx, message.ImageBytes(imgs[i]))
+						go func(i int) {
+							defer wg.Done()
+							msg[i] = ctxext.FakeSenderForwardNode(ctx, message.Image(binary.BytesToString(binary.NewWriterF(func(w *binary.Writer) {
+								w.WriteString("base64://")
+								encoder := base64.NewEncoder(base64.StdEncoding, w)
+								var opt jpeg.Options
+								opt.Quality = 70
+								if err1 := jpeg.Encode(encoder, imgs[i], &opt); err1 != nil {
+									err = err1
+									return
+								}
+								_ = encoder.Close()
+							}))))
+						}(i)
 					}
+					wg.Wait()
 					if id := ctx.Send(msg); id.ID() == 0 {
 						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 					}
 				} else {
-					if id := ctx.SendChain(message.ImageBytes(imgs[0])); id.ID() == 0 {
+					b64, err := writer.ToBase64(imgs[0])
+					if err != nil {
+						ctx.SendChain(message.Text("ERROR: ", err))
+						return
+					}
+					if id := ctx.SendChain(message.Image("base64://" + binary.BytesToString(b64))); id.ID() == 0 {
 						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 					}
 				}
@@ -437,7 +463,7 @@ func init() {
 				ctx.SendChain(message.Text("请输入正确的数字"))
 			}
 			lnperpg = mun
-			imgtmp = nil // 清除缓存
+			titlecache = nil // 清除缓存
 			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
 	})

@@ -2,8 +2,8 @@ github.com/Coloured-glaze/gg v1.3.4 h1:l31zIF/HaVwkzjrj+A56RGQoSKyKuR1IWtIrqXGFS
 github.com/Coloured-glaze/gg v1.3.4/go.mod h1:Ih5NLNNDHOy3RJbB0EPqGTreIzq/H02TGThIagh8HJg=
 github.com/FloatTech/floatbox v0.0.0-20230111053652-a03d6334fadf h1:aVmgzw9hJA39/2iR800qq1dU682LpW9/czIkoshDzKw=
 github.com/FloatTech/floatbox v0.0.0-20230111053652-a03d6334fadf/go.mod h1:0+3iDgifrdiEoEsmYe+yiAlUQcmnudhTiiBdSkam2XY=
-github.com/FloatTech/rendercard v0.0.8-0.20230112124424-7fcf4689593a h1:3YZuHOboLQdEJF9sxkHBzBLVv4QxTZoIVbjpoBv2Rko=
-github.com/FloatTech/rendercard v0.0.8-0.20230112124424-7fcf4689593a/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
+github.com/FloatTech/rendercard v0.0.8 h1:IOZ757RKJGj4EAQj7XoW8iSNl6yVS98z0DK9LDup+Yo=
+github.com/FloatTech/rendercard v0.0.8/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
 github.com/FloatTech/sqlite v1.5.7 h1:Bvo4LSojcZ6dVtbHrkqvt6z4v8e+sj0G5PSUIvdawsk=
 github.com/FloatTech/sqlite v1.5.7/go.mod h1:zFbHzRfB+CJ+VidfjuVbrcin3DAz283F7hF1hIeHzpY=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=

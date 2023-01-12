@@ -6,12 +6,12 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/math"
-	"github.com/FloatTech/floatbox/process"
+	"github.com/FloatTech/ttl"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/disintegration/imaging"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -35,8 +35,12 @@ type plugininfo struct {
 }
 
 var (
-	// 底图缓存
-	imgtmp image.Image
+	// 标题缓存
+	titlecache image.Image
+	// 卡片缓存
+	cardcache = ttl.NewCache[uint64, image.Image](time.Hour * 12)
+	// 阴影缓存
+	fullpageshadow *gg.Context
 	// lnperpg 每页行数
 	lnperpg = 9
 )
@@ -52,12 +56,10 @@ func init() {
 	}
 }
 
-func drawservicesof(gid int64) (imgs [][]byte, err error) {
-	limit := make(chan struct{}, runtime.NumCPU())
-	pluginlen := len(priomap)
-	pluginlist := make([]*plugininfo, pluginlen)
+func drawservicesof(gid int64) (imgs []image.Image, err error) {
+	pluginlist := make([]plugininfo, len(priomap))
 	ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		pluginlist[i] = &plugininfo{
+		pluginlist[i] = plugininfo{
 			name:   manager.Service,
 			brief:  manager.Options.Brief,
 			banner: manager.Options.Banner,
@@ -65,16 +67,13 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 		}
 		return true
 	})
-	cardnum := lnperpg * 3
 	// 分页
-	if pluginlen < cardnum {
+	if len(pluginlist) < lnperpg*3 {
 		// 如果单页显示数量超出了总数量
-		lnperpg = math.Ceil(pluginlen, 3)
+		lnperpg = math.Ceil(len(pluginlist), 3)
 	}
-	page := math.Ceil(pluginlen, cardnum)
-	imgs = make([][]byte, page)
-	if imgtmp == nil {
-		imgtmp, err = (&rendercard.Title{
+	if titlecache == nil {
+		titlecache, err = (&rendercard.Title{
 			Line:          lnperpg,
 			LeftTitle:     "服务列表",
 			LeftSubtitle:  "service_list",
@@ -88,17 +87,12 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 			return
 		}
 	}
-	var wg, cwg, swg sync.WaitGroup
-	cardlist := make([]image.Image, pluginlen)
-	wg.Add(page)
-	cwg.Add(pluginlen)
-	for k, info := range pluginlist {
-		go func(k int, info *plugininfo) {
-			defer cwg.Done()
 
-			limit <- struct{}{}
-			defer func() { <-limit }()
+	cardlist := make([]image.Image, len(pluginlist))
+	n := runtime.NumCPU()
 
+	if len(pluginlist) <= n {
+		for k, info := range pluginlist {
 			banner := ""
 			switch {
 			case strings.HasPrefix(info.banner, "http"):
@@ -106,7 +100,6 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 				if err != nil {
 					return
 				}
-				process.SleepAbout1sTo2s()
 				banner = bannerpath + info.name + ".png"
 			case info.banner != "":
 				banner = info.banner
@@ -116,54 +109,122 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 					banner = bannerpath + info.name + ".png"
 				}
 			}
-			cardlist[k], err = (&rendercard.Title{
+			c := &rendercard.Title{
 				IsEnabled:    info.status,
 				LeftTitle:    info.name,
 				LeftSubtitle: info.brief,
 				ImagePath:    banner,
 				TitleFont:    text.ImpactFontFile,
 				TextFont:     text.GlowSansFontFile,
-			}).DrawCard()
-			if err != nil {
-				return
 			}
-		}(k, info)
-	}
-	cwg.Wait()
-	for l := 0; l < page; l++ { // 页数
-		swg.Add(1)
-		var shadowimg image.Image
-		go func() {
-			defer swg.Done()
-
-			limit <- struct{}{}
-			defer func() { <-limit }()
-
-			x, y := 30+2, 30+300+30+6+4
-			shadow := gg.NewContextForImage(rendercard.Transparency(imgtmp, 0))
-			shadow.SetRGBA255(0, 0, 0, 192)
-			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
-				shadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
-				shadow.Fill()
-				x += 384 + 30
-				if (i+1)%3 == 0 {
-					x = 30 + 2
-					y += 256 + 30
+			h := c.Sum64()
+			card := cardcache.Get(h)
+			if card == nil {
+				card, err = c.DrawCard()
+				if err != nil {
+					return
 				}
+				cardcache.Set(h, card)
 			}
-			shadowimg = shadow.Image()
-		}()
-		swg.Wait()
-		go func(l int) {
+			cardlist[k] = card
+		}
+	} else {
+		batchsize := len(pluginlist) / n
+		wg := sync.WaitGroup{}
+		wg.Add(n)
+		for i := 0; i < n; i++ {
+			a := i * batchsize
+			b := (i + 1) * batchsize
+			if b > len(pluginlist) {
+				b = len(pluginlist)
+			}
+			go func(info []plugininfo, cards []image.Image) {
+				defer wg.Done()
+				for k, info := range info {
+					banner := ""
+					switch {
+					case strings.HasPrefix(info.banner, "http"):
+						err = file.DownloadTo(info.banner, bannerpath+info.name+".png")
+						if err != nil {
+							return
+						}
+						banner = bannerpath + info.name + ".png"
+					case info.banner != "":
+						banner = info.banner
+					default:
+						_, err = file.GetCustomLazyData(bannerurl, bannerpath+info.name+".png")
+						if err == nil {
+							banner = bannerpath + info.name + ".png"
+						}
+					}
+					c := &rendercard.Title{
+						IsEnabled:    info.status,
+						LeftTitle:    info.name,
+						LeftSubtitle: info.brief,
+						ImagePath:    banner,
+						TitleFont:    text.ImpactFontFile,
+						TextFont:     text.GlowSansFontFile,
+					}
+					h := c.Sum64()
+					card := cardcache.Get(h)
+					if card == nil {
+						card, err = c.DrawCard()
+						if err != nil {
+							return
+						}
+						cardcache.Set(h, card)
+					}
+					cardlist[k] = card
+				}
+			}(pluginlist[a:b], cardlist[a:b])
+		}
+		wg.Wait()
+	}
+
+	wg := sync.WaitGroup{}
+	cardnum := lnperpg * 3
+	page := math.Ceil(len(pluginlist), cardnum)
+	imgs = make([]image.Image, page)
+	x, y := 30+2, 30+300+30+6+4
+	if fullpageshadow == nil {
+		fullpageshadow = gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
+		fullpageshadow.SetRGBA255(0, 0, 0, 192)
+		for i := 0; i < cardnum; i++ {
+			fullpageshadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
+			fullpageshadow.Fill()
+			x += 384 + 30
+			if (i+1)%3 == 0 {
+				x = 30 + 2
+				y += 256 + 30
+			}
+		}
+
+	}
+	wg.Add(page)
+	for l := 0; l < page; l++ { // 页数
+		go func(l int, islast bool) {
 			defer wg.Done()
-
-			limit <- struct{}{}
-			defer func() { <-limit }()
-
-			one := gg.NewContextForImage(imgtmp)
-			x, y := 30, 30+300+30
-			one.DrawImage(imaging.Blur(shadowimg, 7), 0, 0)
-			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
+			x, y := 30+2, 30+300+30+6+4
+			var shadow *gg.Context
+			if islast && len(pluginlist)-cardnum*l < cardnum {
+				shadow = gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
+				shadow.SetRGBA255(0, 0, 0, 192)
+				for i := 0; i < len(pluginlist)-cardnum*l; i++ {
+					shadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
+					shadow.Fill()
+					x += 384 + 30
+					if (i+1)%3 == 0 {
+						x = 30 + 2
+						y += 256 + 30
+					}
+				}
+			} else {
+				shadow = fullpageshadow
+			}
+			one := gg.NewContextForImage(titlecache)
+			x, y = 30, 30+300+30
+			one.DrawImage(imaging.Blur(shadow.Image(), 7), 0, 0)
+			for i := 0; i < math.Min(cardnum, len(pluginlist)-cardnum*l); i++ {
 				one.DrawImage(rendercard.Fillet(cardlist[(cardnum*l)+i], 8), x, y)
 				x += 384 + 30
 				if (i+1)%3 == 0 {
@@ -171,10 +232,8 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 					y += 256 + 30
 				}
 			}
-			data, cl := writer.ToBytes(one.Image()) // 生成图片
-			imgs[l] = data
-			cl()
-		}(l)
+			imgs[l] = one.Image()
+		}(l, l == page-1)
 	}
 	wg.Wait()
 	return
