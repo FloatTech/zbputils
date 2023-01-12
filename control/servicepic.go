@@ -89,7 +89,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 	}
 
 	cardlist := make([]image.Image, len(pluginlist))
-	n := runtime.NumCPU() * 2
+	n := runtime.NumCPU()
 
 	if len(pluginlist) <= n {
 		for k, info := range pluginlist {
@@ -168,6 +168,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 						err = err1
 						return
 					}
+					card = rendercard.Fillet(card, 8)
 					cardcache.Set(h, card)
 				}
 				cards[k] = card
@@ -235,7 +236,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 			x, y = 30, 30+300+30
 			one.DrawImage(imaging.Blur(shadowimg, 7), 0, 0)
 			for i := 0; i < math.Min(cardnum, len(pluginlist)-cardnum*l); i++ {
-				one.DrawImage(rendercard.Fillet(cardlist[(cardnum*l)+i], 8), x, y)
+				one.DrawImage(cardlist[(cardnum*l)+i], x, y)
 				x += 384 + 30
 				if (i+1)%3 == 0 {
 					x = 30
