@@ -248,11 +248,11 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 
 // 获取字体和头像
 func geticonandfont() (err error) {
-	_, err = file.GetLazyData(text.BoldFontFile, Md5File, true)
+	_, err = file.GetLazyData(text.ImpactFontFile, Md5File, true)
 	if err != nil {
 		return
 	}
-	_, err = file.GetLazyData(text.SakuraFontFile, Md5File, true)
+	_, err = file.GetLazyData(text.GlowSansFontFile, Md5File, true)
 	if err != nil {
 		return
 	}
