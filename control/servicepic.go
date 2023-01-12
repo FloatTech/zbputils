@@ -177,7 +177,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 						}
 						cardcache.Set(h, card)
 					}
-					cardlist[k] = card
+					cards[k] = card
 				}
 			}(pluginlist[a:b], cardlist[a:b])
 		}
