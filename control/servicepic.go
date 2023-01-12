@@ -208,7 +208,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 				y += 256 + 30
 			}
 		}
-		fullpageshadowcache = fullpageshadow.Image()
+		fullpageshadowcache = imaging.Blur(fullpageshadow.Image(), 7)
 	}
 	wg.Add(page)
 	for l := 0; l < page; l++ { // 页数
@@ -228,13 +228,13 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 						y += 256 + 30
 					}
 				}
-				shadowimg = shadow.Image()
+				shadowimg = imaging.Blur(shadow.Image(), 7)
 			} else {
 				shadowimg = fullpageshadowcache
 			}
 			one := gg.NewContextForImage(titlecache)
 			x, y = 30, 30+300+30
-			one.DrawImage(imaging.Blur(shadowimg, 7), 0, 0)
+			one.DrawImage(shadowimg, 0, 0)
 			for i := 0; i < math.Min(cardnum, len(pluginlist)-cardnum*l); i++ {
 				one.DrawImage(cardlist[(cardnum*l)+i], x, y)
 				x += 384 + 30
