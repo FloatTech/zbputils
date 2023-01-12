@@ -89,7 +89,7 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 	}
 
 	cardlist := make([]image.Image, len(pluginlist))
-	n := runtime.NumCPU()
+	n := runtime.NumCPU() * 2
 
 	if len(pluginlist) <= n {
 		for k, info := range pluginlist {
