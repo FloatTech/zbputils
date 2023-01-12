@@ -3,7 +3,9 @@ package control
 import (
 	"image"
 	"os"
+	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
@@ -11,6 +13,7 @@ import (
 	"github.com/FloatTech/floatbox/math"
 	"github.com/FloatTech/floatbox/process"
 	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/disintegration/imaging"
 	zero "github.com/wdvxdr1123/ZeroBot"
 
 	"github.com/FloatTech/rendercard"
@@ -50,9 +53,11 @@ func init() {
 }
 
 func drawservicesof(gid int64) (imgs [][]byte, err error) {
-	plist := make([]*plugininfo, len(priomap))
+	limit := make(chan struct{}, runtime.NumCPU())
+	pluginlen := len(priomap)
+	pluginlist := make([]*plugininfo, pluginlen)
 	ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		plist[i] = &plugininfo{
+		pluginlist[i] = &plugininfo{
 			name:   manager.Service,
 			brief:  manager.Options.Brief,
 			banner: manager.Options.Banner,
@@ -60,95 +65,119 @@ func drawservicesof(gid int64) (imgs [][]byte, err error) {
 		}
 		return true
 	})
-	k := 0
+	cardnum := lnperpg * 3
 	// 分页
-	if len(plist) < 3*lnperpg {
+	if pluginlen < cardnum {
 		// 如果单页显示数量超出了总数量
-		lnperpg = math.Ceil(len(plist), 3)
+		lnperpg = math.Ceil(pluginlen, 3)
 	}
-	page := math.Ceil(len(plist), 3*lnperpg)
+	page := math.Ceil(pluginlen, cardnum)
 	imgs = make([][]byte, page)
 	if imgtmp == nil {
-		imgtmp, err = rendercard.Titleinfo{
+		imgtmp, err = (&rendercard.Title{
 			Line:          lnperpg,
-			Lefttitle:     "服务列表",
-			Leftsubtitle:  "service_list",
-			Righttitle:    "FloatTech",
-			Rightsubtitle: "ZeroBot-Plugin",
-			Fontpath:      text.SakuraFontFile,
-			Imgpath:       kanbanpath + "kanban.png",
-		}.Drawtitle()
+			LeftTitle:     "服务列表",
+			LeftSubtitle:  "service_list",
+			RightTitle:    "FloatTech",
+			RightSubtitle: "ZeroBot-Plugin",
+			TitleFont:     text.GlowSansFontFile,
+			TextFont:      text.ImpactFontFile,
+			ImagePath:     kanbanpath + "kanban.png",
+		}).DrawTitle()
 		if err != nil {
 			return
 		}
 	}
-	var card image.Image
-	for l := 0; l < page; l++ { // 页数
-		one := gg.NewContextForImage(imgtmp)
-		x, y := 30, 30+300+30
-		for j := 0; j < lnperpg; j++ { // 行数
-			for i := 0; i < 3; i++ { // 列数
-				if k == len(plist) {
-					break
-				}
-				banner := ""
-				switch {
-				case strings.HasPrefix(plist[k].banner, "http"):
-					err = file.DownloadTo(plist[k].banner, bannerpath+plist[k].name+".png")
-					if err != nil {
-						return
-					}
-					process.SleepAbout1sTo2s()
-					banner = bannerpath + plist[k].name + ".png"
-				case plist[k].banner != "":
-					banner = plist[k].banner
-				default:
-					_, err = file.GetCustomLazyData(bannerurl, bannerpath+plist[k].name+".png")
-					if err == nil {
-						banner = bannerpath + plist[k].name + ".png"
-					}
-				}
-				card, err = rendercard.Titleinfo{
-					Lefttitle:    plist[k].name,
-					Leftsubtitle: plist[k].brief,
-					Imgpath:      banner,
-					Fontpath:     text.SakuraFontFile,
-					Fontpath2:    text.BoldFontFile,
-					Status:       plist[k].status,
-				}.Drawcard()
+	var wg, cwg, swg sync.WaitGroup
+	cardlist := make([]image.Image, pluginlen)
+	wg.Add(page)
+	cwg.Add(pluginlen)
+	for k, info := range pluginlist {
+		go func(k int, info *plugininfo) {
+			defer cwg.Done()
+
+			limit <- struct{}{}
+			defer func() { <-limit }()
+
+			banner := ""
+			switch {
+			case strings.HasPrefix(info.banner, "http"):
+				err = file.DownloadTo(info.banner, bannerpath+info.name+".png")
 				if err != nil {
 					return
 				}
-				one.DrawImage(card, x, y)
-				k++
-				x += 384 + 30
+				process.SleepAbout1sTo2s()
+				banner = bannerpath + info.name + ".png"
+			case info.banner != "":
+				banner = info.banner
+			default:
+				_, err = file.GetCustomLazyData(bannerurl, bannerpath+info.name+".png")
+				if err == nil {
+					banner = bannerpath + info.name + ".png"
+				}
 			}
-			x = 30
-			y += 256 + 30
-		}
-		data, cl := writer.ToBytes(one.Image()) // 生成图片
-		imgs[l] = data
-		cl()
+			cardlist[k], err = (&rendercard.Title{
+				IsEnabled:    info.status,
+				LeftTitle:    info.name,
+				LeftSubtitle: info.brief,
+				ImagePath:    banner,
+				TitleFont:    text.ImpactFontFile,
+				TextFont:     text.GlowSansFontFile,
+			}).DrawCard()
+			if err != nil {
+				return
+			}
+		}(k, info)
 	}
-	return
-}
+	cwg.Wait()
+	for l := 0; l < page; l++ { // 页数
+		swg.Add(1)
+		var shadowimg image.Image
+		go func() {
+			defer swg.Done()
 
-// 截断文字
-func truncate(one *gg.Context, text string, maxW float64) (string, float64) {
-	var tmp strings.Builder
-	tmp.Grow(len(text))
-	res, w := make([]rune, 0, len(text)), 0.0
-	for _, r := range text {
-		tmp.WriteRune(r)
-		width, _ := one.MeasureString(tmp.String()) // 获取文字宽度
-		if width > maxW {                           // 如果宽度大于文字边距
-			break // 跳出
-		} else {
-			w = width
-			res = append(res, r) // 写入
-		}
+			limit <- struct{}{}
+			defer func() { <-limit }()
+
+			x, y := 30, 30+300+30+16
+			shadow := gg.NewContextForImage(rendercard.Transparency(imgtmp, 0))
+			shadow.SetRGBA255(0, 0, 0, 153)
+			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
+				shadow.DrawRoundedRectangle(float64(x), float64(y), 384, 256, 0)
+				shadow.Fill()
+				x += 384 + 30
+				if (i+1)%3 == 0 {
+					x = 30
+					y += 256 + 30
+				}
+			}
+			shadowimg = shadow.Image()
+		}()
+		swg.Wait()
+		go func(l int) {
+			defer wg.Done()
+
+			limit <- struct{}{}
+			defer func() { <-limit }()
+
+			one := gg.NewContextForImage(imgtmp)
+			x, y := 30, 30+300+30
+			one.DrawImage(imaging.Blur(shadowimg, 16), 0, 0)
+			for i := 0; i < math.Min(cardnum, pluginlen-cardnum*l); i++ {
+				one.DrawImage(cardlist[(cardnum*l)+i], x, y)
+				x += 384 + 30
+				if (i+1)%3 == 0 {
+					x = 30
+					y += 256 + 30
+				}
+			}
+			data, cl := writer.ToBytes(one.Image()) // 生成图片
+			imgs[l] = data
+			cl()
+		}(l)
 	}
-	return string(res), w
+	wg.Wait()
+	return
 }
 
 // 获取字体和头像

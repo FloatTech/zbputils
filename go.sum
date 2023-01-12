@@ -2,8 +2,14 @@ github.com/Coloured-glaze/gg v1.3.4 h1:l31zIF/HaVwkzjrj+A56RGQoSKyKuR1IWtIrqXGFS
 github.com/Coloured-glaze/gg v1.3.4/go.mod h1:Ih5NLNNDHOy3RJbB0EPqGTreIzq/H02TGThIagh8HJg=
 github.com/FloatTech/floatbox v0.0.0-20230111053652-a03d6334fadf h1:aVmgzw9hJA39/2iR800qq1dU682LpW9/czIkoshDzKw=
 github.com/FloatTech/floatbox v0.0.0-20230111053652-a03d6334fadf/go.mod h1:0+3iDgifrdiEoEsmYe+yiAlUQcmnudhTiiBdSkam2XY=
-github.com/FloatTech/rendercard v0.0.3 h1:eKOKlmotlDq/YbAcJKe0GMzBjGTsT5eSsyEfjT+hy10=
-github.com/FloatTech/rendercard v0.0.3/go.mod h1:FwwKoWpv1fW7AZ1mwBVWF8GCH9mEqYYIE9LzdmozCZQ=
+github.com/FloatTech/rendercard v0.0.7-0.20230112074833-8d8b9f4dfe1c h1:+hp/WI/sqmE/xI6T6dgNRy9uvc85Jxvz3kaFAim7myY=
+github.com/FloatTech/rendercard v0.0.7-0.20230112074833-8d8b9f4dfe1c/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
+github.com/FloatTech/rendercard v0.0.7-0.20230112083949-6bda948ce9c7 h1:33rut2vaTmY4M20vCIPUnT/Yov8HFObCBJ3sjopzOyc=
+github.com/FloatTech/rendercard v0.0.7-0.20230112083949-6bda948ce9c7/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
+github.com/FloatTech/rendercard v0.0.7-0.20230112092217-732aae34da4c h1:6Dag7tq8wDHk/UCFDVDcg/AiILQ1OZA6kM8Ee9+RoqQ=
+github.com/FloatTech/rendercard v0.0.7-0.20230112092217-732aae34da4c/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
+github.com/FloatTech/rendercard v0.0.7 h1:85pRB+pOpGJi6N30A89NWh8BE++rf+3cMBqnqkHc83Q=
+github.com/FloatTech/rendercard v0.0.7/go.mod h1:hDqmlGgXBPI3QAvkE2kKjdPFAIB5cFQ55QnmXapAr3I=
 github.com/FloatTech/sqlite v1.5.7 h1:Bvo4LSojcZ6dVtbHrkqvt6z4v8e+sj0G5PSUIvdawsk=
 github.com/FloatTech/sqlite v1.5.7/go.mod h1:zFbHzRfB+CJ+VidfjuVbrcin3DAz283F7hF1hIeHzpY=
 github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b h1:tvciXWq2nuvTbFeJGLDNIdRX3BI546D3O7k7vrVueZw=
