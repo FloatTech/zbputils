@@ -463,7 +463,9 @@ func init() {
 				ctx.SendChain(message.Text("请输入正确的数字"))
 			}
 			lnperpg = mun
-			titlecache = nil // 清除缓存
+			// 清除缓存
+			titlecache = nil
+			fullpageshadowcache = nil
 			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
 	})

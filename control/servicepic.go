@@ -40,7 +40,7 @@ var (
 	// 卡片缓存
 	cardcache = ttl.NewCache[uint64, image.Image](time.Hour * 12)
 	// 阴影缓存
-	fullpageshadow *gg.Context
+	fullpageshadowcache image.Image
 	// lnperpg 每页行数
 	lnperpg = 9
 )
@@ -186,8 +186,8 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 	page := math.Ceil(len(pluginlist), cardnum)
 	imgs = make([]image.Image, page)
 	x, y := 30+2, 30+300+30+6+4
-	if fullpageshadow == nil {
-		fullpageshadow = gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
+	if fullpageshadowcache == nil {
+		fullpageshadow := gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
 		fullpageshadow.SetRGBA255(0, 0, 0, 192)
 		for i := 0; i < cardnum; i++ {
 			fullpageshadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
@@ -198,16 +198,16 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 				y += 256 + 30
 			}
 		}
-
+		fullpageshadowcache = fullpageshadow.Image()
 	}
 	wg.Add(page)
 	for l := 0; l < page; l++ { // 页数
 		go func(l int, islast bool) {
 			defer wg.Done()
 			x, y := 30+2, 30+300+30+6+4
-			var shadow *gg.Context
+			var shadowimg image.Image
 			if islast && len(pluginlist)-cardnum*l < cardnum {
-				shadow = gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
+				shadow := gg.NewContextForImage(rendercard.Transparency(titlecache, 0))
 				shadow.SetRGBA255(0, 0, 0, 192)
 				for i := 0; i < len(pluginlist)-cardnum*l; i++ {
 					shadow.DrawRoundedRectangle(float64(x), float64(y), 384-4, 256-4, 0)
@@ -218,12 +218,13 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 						y += 256 + 30
 					}
 				}
+				shadowimg = shadow.Image()
 			} else {
-				shadow = fullpageshadow
+				shadowimg = fullpageshadowcache
 			}
 			one := gg.NewContextForImage(titlecache)
 			x, y = 30, 30+300+30
-			one.DrawImage(imaging.Blur(shadow.Image(), 7), 0, 0)
+			one.DrawImage(imaging.Blur(shadowimg, 7), 0, 0)
 			for i := 0; i < math.Min(cardnum, len(pluginlist)-cardnum*l); i++ {
 				one.DrawImage(rendercard.Fillet(cardlist[(cardnum*l)+i], 8), x, y)
 				x += 384 + 30
