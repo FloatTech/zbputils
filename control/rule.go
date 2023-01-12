@@ -2,13 +2,11 @@
 package control
 
 import (
-	"image"
 	"os"
 	"strconv"
 	"strings"
 	"unsafe"
 
-	"github.com/Coloured-glaze/gg"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -373,38 +371,21 @@ func init() {
 				}
 				// 处理插件帮助并且计算图像高
 				plugininfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
-				newplugininfo := make([]string, 0, len(plugininfo)*2)
-				font := gg.NewContext(1, 1)
-				err = font.LoadFontFace(text.BoldFontFile, 38)
+				newplugininfo, err := rendercard.Truncate(text.GlowSansFontFile, plugininfo, 1272-50, 38)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				for i := 0; i < len(plugininfo); i++ {
-					newlinetext, textw, tmpw := "", 0.0, 0.0
-					for len(plugininfo[i]) > 0 {
-						newlinetext, tmpw = truncate(font, plugininfo[i], 1272-50)
-						newplugininfo = append(newplugininfo, newlinetext)
-						if tmpw > textw {
-							textw = tmpw
-						}
-						if len(newlinetext) >= len(plugininfo[i]) {
-							break
-						}
-						plugininfo[i] = plugininfo[i][len(newlinetext):]
-					}
-				}
-				var imgs image.Image
-				imgs, err = rendercard.Titleinfo{
-					Lefttitle:     service.Service,
-					Leftsubtitle:  service.Options.Brief,
-					Righttitle:    "FloatTech",
-					Rightsubtitle: "ZeroBot-Plugin",
-					Imgpath:       kanbanpath + "kanban.png",
-					Fontpath:      text.SakuraFontFile,
-					Fontpath2:     text.BoldFontFile,
-					Status:        service.IsEnabledIn(gid),
-				}.Drawtitledtext(newplugininfo)
+				imgs, err := (&rendercard.Title{
+					LeftTitle:     service.Service,
+					LeftSubtitle:  service.Options.Brief,
+					RightTitle:    "FloatTech",
+					RightSubtitle: "ZeroBot-Plugin",
+					ImagePath:     kanbanpath + "kanban.png",
+					TitleFont:     text.ImpactFontFile,
+					TextFont:      text.GlowSansFontFile,
+					IsEnabled:     service.IsEnabledIn(gid),
+				}).DrawTitleWithText(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return

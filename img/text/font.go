@@ -17,4 +17,8 @@ const (
 	NisiFontFile = FontPath + "Nisi-Regular.ttf"
 	// VioletEvergardenFontFile 紫罗兰永恒花园字体 https://github.com/kagurazakayashi/EvergardenConverter
 	VioletEvergardenFontFile = FontPath + "VioletEvergardenFont.ttf"
+	// GlowSansFontFile 未来荧黑 https://github.com/welai/glow-sans
+	GlowSansFontFile = FontPath + "GlowSansSC-Normal-ExtraBold.ttf"
+	// ImpactFontFile ...
+	ImpactFontFile = FontPath + "Impact.ttf"
 )
