@@ -144,16 +144,17 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 					banner := ""
 					switch {
 					case strings.HasPrefix(info.banner, "http"):
-						err = file.DownloadTo(info.banner, bannerpath+info.name+".png")
-						if err != nil {
+						err1 := file.DownloadTo(info.banner, bannerpath+info.name+".png")
+						if err1 != nil {
+							err = err1
 							return
 						}
 						banner = bannerpath + info.name + ".png"
 					case info.banner != "":
 						banner = info.banner
 					default:
-						_, err = file.GetCustomLazyData(bannerurl, bannerpath+info.name+".png")
-						if err == nil {
+						_, err1 := file.GetCustomLazyData(bannerurl, bannerpath+info.name+".png")
+						if err1 == nil {
 							banner = bannerpath + info.name + ".png"
 						}
 					}
@@ -168,8 +169,10 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 					h := c.Sum64()
 					card := cardcache.Get(h)
 					if card == nil {
-						card, err = c.DrawCard()
-						if err != nil {
+						var err1 error
+						card, err1 = c.DrawCard()
+						if err1 != nil {
+							err = err1
 							return
 						}
 						cardcache.Set(h, card)
@@ -179,6 +182,9 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 			}(pluginlist[a:b], cardlist[a:b])
 		}
 		wg.Wait()
+		if err != nil {
+			return
+		}
 	}
 
 	wg := sync.WaitGroup{}
