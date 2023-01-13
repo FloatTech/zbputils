@@ -64,6 +64,8 @@ func Render(text, font string, width, fontSize int) (txtPic image.Image, err err
 	}
 	_, h := canvas.MeasureString("好")
 	canvas = gg.NewContext(width+int(h*2+0.5), int(float64(len(buff)*3+1)/2*h+0.5))
+	canvas.SetRGB(1, 1, 1)
+	canvas.Clear()
 	canvas.SetRGB(0, 0, 0)
 	if err = canvas.LoadFontFace(font, float64(fontSize)); err != nil {
 		return
