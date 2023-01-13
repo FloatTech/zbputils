@@ -22,7 +22,7 @@ func NewAPICallerHook(ctx *zero.Ctx, callback func(rsp zero.APIResponse, err err
 }
 
 // CallApi call original caller and pass rsp to callback
-//nolint: stylecheck, revive
+// nolint: stylecheck, revive
 func (v *APICallerHook) CallApi(request zero.APIRequest) (rsp zero.APIResponse, err error) {
 	rsp, err = v.caller.CallApi(request)
 	go v.callback(rsp, err)
