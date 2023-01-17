@@ -153,6 +153,32 @@ func init() {
 		})
 
 		zero.OnCommandGroup([]string{
+			"此处启用所有插件", "adhocenableall", "此处禁用所有插件", "adhocdisableall",
+		}, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
+			gid := ctx.Event.GroupID
+			if gid == 0 {
+				gid = -ctx.Event.UserID
+			}
+			condition := ctx.Event.RawMessage == "此处启用所有插件" || ctx.Event.RawMessage == "adhocenableall"
+			if condition {
+				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+					if manager.Options.DisableOnDefault != condition {
+						return true
+					}
+					manager.Enable(gid)
+					return true
+				})
+				ctx.SendChain(message.Text("此处启用所有插件成功"))
+			} else {
+				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+					manager.Disable(gid)
+					return true
+				})
+				ctx.SendChain(message.Text("此处禁用所有插件成功"))
+			}
+		})
+
+		zero.OnCommandGroup([]string{
 			"全局启用", "allenable", "全局禁用", "alldisable",
 		}, zero.OnlyToMe, zero.SuperUserPermission).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
 			model := extension.CommandModel{}
