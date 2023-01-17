@@ -1,5 +1,6 @@
 // Package pool 图片缓存池
-// nolint: revive
+//
+//nolint:revive
 package pool
 
 import (

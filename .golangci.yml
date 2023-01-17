@@ -18,7 +18,6 @@ linters:
   fast: false
   enable:
     - bodyclose
-    - deadcode
     - depguard
     - dogsled
     - errcheck
@@ -37,15 +36,12 @@ linters:
     - ineffassign
     #- misspell
     - nolintlint
-    - rowserrcheck
     - staticcheck
-    - structcheck
     - stylecheck
     - typecheck
     - unconvert
     - unparam
     - unused
-    - varcheck
     - whitespace
     - prealloc
     - predeclared
@@ -62,7 +58,7 @@ run:
   tests: false
   skip-dirs:
     - order
-  go: '1.18'
+  go: '1.19'
 
 # output configuration options
 output:
