@@ -36,6 +36,7 @@ linters:
     - ineffassign
     #- misspell
     - nolintlint
+    - rowserrcheck
     - staticcheck
     - stylecheck
     - typecheck
