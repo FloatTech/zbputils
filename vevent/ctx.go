@@ -9,7 +9,8 @@ import (
 
 // Ctx represents the Context which hold the event.
 // 代表上下文
-//nolint: unused
+//
+//nolint:unused
 type Ctx struct {
 	ma     *zero.Matcher
 	Event  *zero.Event

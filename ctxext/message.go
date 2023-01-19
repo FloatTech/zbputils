@@ -10,7 +10,7 @@ import (
 	"github.com/FloatTech/floatbox/binary"
 )
 
-//nolint: revive
+//nolint:revive
 type (
 	NoCtxGetMsg  func(int64) zero.Message
 	NoCtxSendMsg func(any) int64
