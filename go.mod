@@ -4,11 +4,11 @@ go 1.19
 
 require (
 	github.com/Coloured-glaze/gg v1.3.4
-	github.com/FloatTech/floatbox v0.0.0-20230111053652-a03d6334fadf
+	github.com/FloatTech/floatbox v0.0.0-20230130095057-3d1da721425e
 	github.com/FloatTech/rendercard v0.0.8
 	github.com/FloatTech/sqlite v1.5.7
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
-	github.com/FloatTech/zbpctrl v1.5.3-0.20230109124217-41203036b80a
+	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/disintegration/imaging v1.6.2
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
@@ -17,7 +17,7 @@ require (
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.7
+	github.com/wdvxdr1123/ZeroBot v1.6.8
 )
 
 require (
