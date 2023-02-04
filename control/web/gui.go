@@ -14,13 +14,13 @@ import (
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
 
-	// 前端静态文件
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/control/web/controller"
 )
 
 var (
@@ -58,7 +58,7 @@ func InitGui(addr string) {
 	writer := io.MultiWriter(l, os.Stdout)
 	log.SetOutput(writer)
 	// 监听后端
-	go controller(addr)
+	go run(addr)
 	// 注册消息handle
 	messageHandle()
 }
@@ -70,7 +70,7 @@ var upGrader = websocket.Upgrader{
 	},
 }
 
-func controller(addr string) {
+func run(addr string) {
 	defer func() {
 		err := recover()
 		if err != nil {
@@ -79,14 +79,15 @@ func controller(addr string) {
 		}
 	}()
 
+	zbputilsController := &ZbputilsController{}
 	r := gin.New()
 	engine := r.Group("/api")
 	// 支持跨域
 	engine.Use(cors())
 	// 注册静态文件
 	// engine.StaticFS("/dist", http.FS(manager.Dist))
-	engine.POST("/getBots", getBots)
-	engine.POST("/getGroupList", getGroupList)
+	engine.POST("/getBots", zbputilsController.GetBots)
+	engine.POST("/getGroupList", zbputilsController.GetGroupList)
 	engine.POST("/getFriendList", getFriendList)
 	// 注册主路径路由，使其跳转到主页面
 	// engine.GET("/", func(context *gin.Context) {
@@ -99,7 +100,7 @@ func controller(addr string) {
 	// 更改所有插件状态
 	engine.POST("/update_all_plugin_status", updateAllPluginStatus)
 	// 获取所有插件
-	engine.POST("/getPlugins", getPlugins)
+	engine.POST("/getPlugins", zbputilsController.GetPlugins)
 	// 获取一个插件
 	engine.POST("/getPlugin", getPlugin)
 	// 获取所有请求
@@ -121,6 +122,11 @@ func controller(addr string) {
 	if err := r.Run(addr); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}
+}
+
+// ZbputilsController 主控制类
+type ZbputilsController struct {
+	controller.BaseController
 }
 
 // handelRequest
@@ -275,13 +281,13 @@ func getPlugin(context *gin.Context) {
 	context.JSON(200, gin.H{"enable": con.IsEnabledIn(groupID)})
 }
 
-// getPlugins
+// GetPlugins
 /**
  * @Description: 获取所有插件的状态
  * @param context
  * example
  */
-func getPlugins(context *gin.Context) {
+func (c *ZbputilsController) GetPlugins(context *gin.Context) {
 	groupID, err := strconv.ParseInt(context.PostForm("group_id"), 10, 64)
 	if err != nil {
 		var parse map[string]interface{}
@@ -297,12 +303,7 @@ func getPlugins(context *gin.Context) {
 		datas = append(datas, map[string]interface{}{"id": i, "name": manager.Service, "brief": manager.Options.Brief, "usage": manager.String(), "banner": "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + manager.Service + ".png", "status": manager.IsEnabledIn(groupID)})
 		return true
 	})
-	context.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"result":  datas,
-		"message": "ok",
-		"type":    "success",
-	})
+	c.OkWithData(datas, context)
 }
 
 // getLogs
@@ -349,13 +350,13 @@ func getFriendList(context *gin.Context) {
 	context.JSON(200, resp)
 }
 
-// getGroupList
+// GetGroupList
 /**
  * @Description: 获取群列表
  * @param context
  * example
  */
-func getGroupList(context *gin.Context) {
+func (c *ZbputilsController) GetGroupList(context *gin.Context) {
 	selfID, err := strconv.Atoi(context.PostForm("self_id"))
 	if err != nil {
 		var data map[string]interface{}
@@ -374,28 +375,23 @@ func getGroupList(context *gin.Context) {
 	if err != nil {
 		log.Errorln("[gui]" + err.Error())
 	}
-	context.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"result":  resp,
-		"message": "ok",
-		"type":    "success",
-	})
+	c.OkWithData(resp, context)
 }
 
-// getBots
+// GetBots
 /**
  * @Description: 获取机器人qq号
  * @param context
  * example
  */
-func getBots(context *gin.Context) {
+func (c *ZbputilsController) GetBots(context *gin.Context) {
 	var bots []int64
 
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
 		bots = append(bots, id)
 		return true
 	})
-	context.JSON(200, bots)
+	c.OkWithData(bots, context)
 }
 
 // MessageHandle
