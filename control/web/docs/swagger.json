@@ -1,0 +1,83 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "zbp restful api document",
+        "title": "zbp api",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "127.0.0.1:3000",
+    "basePath": "/",
+    "paths": {
+        "/api/getBotList": {
+            "post": {
+                "description": "获取机器人qq号",
+                "responses": {}
+            }
+        },
+        "/api/getGroupList": {
+            "post": {
+                "description": "获取群列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 123456,
+                        "description": "机器人qq号",
+                        "name": "self_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/getPluginList": {
+            "post": {
+                "description": "获取所有插件的状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "group_id",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/updatePluginStatus": {
+            "post": {
+                "description": "更改某一个插件状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "group_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "aireply",
+                        "description": "插件名",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "插件状态",
+                        "name": "status",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        }
+    }
+}

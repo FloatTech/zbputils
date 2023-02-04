@@ -1,0 +1,58 @@
+basePath: /
+host: 127.0.0.1:3000
+info:
+  contact: {}
+  description: zbp restful api document
+  title: zbp api
+  version: "1.0"
+paths:
+  /api/getBotList:
+    post:
+      description: 获取机器人qq号
+      responses: {}
+  /api/getGroupList:
+    post:
+      description: 获取群列表
+      parameters:
+      - default: 123456
+        description: 机器人qq号
+        in: formData
+        name: self_id
+        required: true
+        type: integer
+      responses: {}
+  /api/getPluginList:
+    post:
+      description: 获取所有插件的状态
+      parameters:
+      - default: 0
+        description: 群号
+        in: formData
+        name: group_id
+        required: true
+        type: integer
+      responses: {}
+  /api/updatePluginStatus:
+    post:
+      description: 更改某一个插件状态
+      parameters:
+      - default: 0
+        description: 群号
+        in: formData
+        name: group_id
+        required: true
+        type: integer
+      - default: aireply
+        description: 插件名
+        in: formData
+        name: name
+        required: true
+        type: string
+      - default: true
+        description: 插件状态
+        in: formData
+        name: status
+        required: true
+        type: boolean
+      responses: {}
+swagger: "2.0"

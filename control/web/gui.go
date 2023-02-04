@@ -3,7 +3,6 @@ package webctrl
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +12,8 @@ import (
 	// 依赖gin监听server
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -21,6 +22,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/controller"
+	_ "github.com/FloatTech/zbputils/control/web/docs"
 )
 
 var (
@@ -70,6 +72,11 @@ var upGrader = websocket.Upgrader{
 	},
 }
 
+// @title zbp api
+// @version 1.0
+// @description zbp restful api document
+// @host 127.0.0.1:3000
+// @BasePath /
 func run(addr string) {
 	defer func() {
 		err := recover()
@@ -79,28 +86,28 @@ func run(addr string) {
 		}
 	}()
 
-	zbputilsController := &ZbputilsController{}
+	magageController := &controller.ManageController{}
 	r := gin.New()
 	engine := r.Group("/api")
 	// 支持跨域
 	engine.Use(cors())
 	// 注册静态文件
 	// engine.StaticFS("/dist", http.FS(manager.Dist))
-	engine.POST("/getBots", zbputilsController.GetBots)
-	engine.POST("/getGroupList", zbputilsController.GetGroupList)
+	engine.POST("/getBotList", magageController.GetBotList)
+	engine.POST("/getGroupList", magageController.GetGroupList)
 	engine.POST("/getFriendList", getFriendList)
 	// 注册主路径路由，使其跳转到主页面
 	// engine.GET("/", func(context *gin.Context) {
 	// 	context.Redirect(http.StatusMovedPermanently, "/dist/dist/default.html")
 	// })
 	// 更改某个插件状态
-	engine.POST("/update_plugin_status", updatePluginStatus)
+	engine.POST("/updatePluginStatus", magageController.UpdatePluginStatus)
 	// 更改某一个插件在所有群的状态
 	engine.POST("/update_plugin_all_group_status", updatePluginAllGroupStatus)
 	// 更改所有插件状态
 	engine.POST("/update_all_plugin_status", updateAllPluginStatus)
 	// 获取所有插件
-	engine.POST("/getPlugins", zbputilsController.GetPlugins)
+	engine.POST("/getPluginList", magageController.GetPluginList)
 	// 获取一个插件
 	engine.POST("/getPlugin", getPlugin)
 	// 获取所有请求
@@ -119,14 +126,11 @@ func run(addr string) {
 	engine.GET("/data", upgrade)
 	log.Infoln("[gui] the webui is running on", addr)
 	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
+	log.Infoln("[gui] ", "you can see api by", "http://"+addr+"/swagger/index.html")
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if err := r.Run(addr); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}
-}
-
-// ZbputilsController 主控制类
-type ZbputilsController struct {
-	controller.BaseController
 }
 
 // handelRequest
@@ -224,36 +228,6 @@ func updatePluginAllGroupStatus(context *gin.Context) {
 	context.JSON(200, nil)
 }
 
-// updatePluginStatus
-/**
- * @Description: 更改某一个插件状态
- * @param context
- * example
- */
-func updatePluginStatus(context *gin.Context) {
-	var parse map[string]interface{}
-	err := context.BindJSON(&parse)
-	if err != nil {
-		log.Errorln("[gui] ", err)
-		return
-	}
-	groupID := int64(parse["group_id"].(float64))
-	name := parse["name"].(string)
-	enable := parse["enable"].(bool)
-	fmt.Println(name)
-	con, b := control.Lookup(name)
-	if !b {
-		context.JSON(404, "服务不存在")
-		return
-	}
-	if enable {
-		con.Enable(groupID)
-	} else {
-		con.Disable(groupID)
-	}
-	context.JSON(200, nil)
-}
-
 // getPlugin
 /**
  * @Description: 获取一个插件的状态
@@ -279,31 +253,6 @@ func getPlugin(context *gin.Context) {
 		return
 	}
 	context.JSON(200, gin.H{"enable": con.IsEnabledIn(groupID)})
-}
-
-// GetPlugins
-/**
- * @Description: 获取所有插件的状态
- * @param context
- * example
- */
-func (c *ZbputilsController) GetPlugins(context *gin.Context) {
-	groupID, err := strconv.ParseInt(context.PostForm("group_id"), 10, 64)
-	if err != nil {
-		var parse map[string]interface{}
-		err := context.BindJSON(&parse)
-		if err != nil {
-			log.Errorln("[gui]" + err.Error())
-			return
-		}
-		groupID = int64(parse["group_id"].(float64))
-	}
-	var datas []map[string]interface{}
-	control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		datas = append(datas, map[string]interface{}{"id": i, "name": manager.Service, "brief": manager.Options.Brief, "usage": manager.String(), "banner": "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + manager.Service + ".png", "status": manager.IsEnabledIn(groupID)})
-		return true
-	})
-	c.OkWithData(datas, context)
 }
 
 // getLogs
@@ -348,50 +297,6 @@ func getFriendList(context *gin.Context) {
 		log.Errorln("[gui]" + "解析json错误")
 	}
 	context.JSON(200, resp)
-}
-
-// GetGroupList
-/**
- * @Description: 获取群列表
- * @param context
- * example
- */
-func (c *ZbputilsController) GetGroupList(context *gin.Context) {
-	selfID, err := strconv.Atoi(context.PostForm("self_id"))
-	if err != nil {
-		var data map[string]interface{}
-		err := context.BindJSON(&data)
-		if err != nil {
-			log.Errorln("[gui]" + err.Error())
-			return
-		}
-		selfID = int(data["self_id"].(float64))
-	}
-
-	bot := zero.GetBot(int64(selfID))
-	var resp []interface{}
-	list := bot.GetGroupList().String()
-	err = json.Unmarshal([]byte(list), &resp)
-	if err != nil {
-		log.Errorln("[gui]" + err.Error())
-	}
-	c.OkWithData(resp, context)
-}
-
-// GetBots
-/**
- * @Description: 获取机器人qq号
- * @param context
- * example
- */
-func (c *ZbputilsController) GetBots(context *gin.Context) {
-	var bots []int64
-
-	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
-		bots = append(bots, id)
-		return true
-	})
-	c.OkWithData(bots, context)
 }
 
 // MessageHandle
