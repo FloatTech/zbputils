@@ -159,7 +159,7 @@ func init() {
 			if grp == 0 {
 				grp = -ctx.Event.UserID
 			}
-			condition := ctx.Event.RawMessage == "此处启用所有插件" || ctx.Event.RawMessage == "adhocenableall"
+			condition := strings.Contains(ctx.Event.RawMessage, "启用") || strings.Contains(ctx.Event.RawMessage, "enable")
 			if condition {
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
 					if manager.Options.DisableOnDefault != condition {
