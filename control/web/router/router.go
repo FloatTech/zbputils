@@ -18,7 +18,9 @@ func SetRouters(r *gin.Engine) {
 	engine := r.Group("/api")
 	// 支持跨域
 	engine.GET("/getBotList", controller.GetBotList)
+	engine.GET("/getFriendList", controller.GetFriendList)
 	engine.GET("/getGroupList", controller.GetGroupList)
-	engine.GET("/getPluginList", controller.GetPluginList)
+	engine.GET("/getPlugin", controller.GetPlugin)
+	engine.GET("/getAllPlugin", controller.GetAllPlugin)
 	engine.POST("/updatePluginStatus", controller.UpdatePluginStatus)
 }

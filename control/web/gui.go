@@ -2,16 +2,11 @@
 package webctrl
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
 
-	// 依赖gin监听server
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
@@ -84,17 +79,10 @@ func run(addr string) {
 	r := gin.New()
 	router.SetRouters(r)
 	engine := r.Group("/api")
-	engine.POST("/getFriendList", getFriendList)
 	// 注册主路径路由，使其跳转到主页面
 	// engine.GET("/", func(context *gin.Context) {
 	// 	context.Redirect(http.StatusMovedPermanently, "/dist/dist/default.html")
 	// })
-	// 更改某一个插件在所有群的状态
-	engine.POST("/update_plugin_all_group_status", updatePluginAllGroupStatus)
-	// 更改所有插件状态
-	engine.POST("/update_all_plugin_status", updateAllPluginStatus)
-	// 获取一个插件
-	engine.POST("/getPlugin", getPlugin)
 	// 获取所有请求
 	engine.POST("/get_requests", getRequests)
 	// 执行一个请求事件
@@ -151,93 +139,6 @@ func getRequests(context *gin.Context) {
 	context.JSON(200, data)
 }
 
-// updateAllPluginStatus
-/**
- * @Description: 改变所有插件的状态
- * @param context
- * example
- */
-func updateAllPluginStatus(context *gin.Context) {
-	enable, err := strconv.ParseBool(context.PostForm("enable"))
-	if err != nil {
-		var parse map[string]interface{}
-		err := context.BindJSON(&parse)
-		if err != nil {
-			log.Errorln("[gui] " + err.Error())
-			return
-		}
-		enable = parse["enable"].(bool)
-	}
-	control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		if enable {
-			manager.Enable(0)
-		} else {
-			manager.Disable(0)
-		}
-		return true
-	})
-	context.JSON(200, nil)
-}
-
-// updatePluginAllGroupStatus
-/**
- * @Description: 改变插件在所有群的状态
- * @param context
- * example
- */
-func updatePluginAllGroupStatus(context *gin.Context) {
-	name := context.PostForm("name")
-	enable, err := strconv.ParseBool(context.PostForm("enable"))
-	if err != nil {
-		var parse map[string]interface{}
-		err := context.BindJSON(&parse)
-		if err != nil {
-			log.Errorln("[gui]" + err.Error())
-			return
-		}
-		name = parse["name"].(string)
-		enable = parse["enable"].(bool)
-	}
-	con, b := control.Lookup(name)
-	if !b {
-		context.JSON(404, nil)
-		return
-	}
-	if enable {
-		con.Enable(0)
-	} else {
-		con.Disable(0)
-	}
-	context.JSON(200, nil)
-}
-
-// getPlugin
-/**
- * @Description: 获取一个插件的状态
- * @param context
- * example
- */
-func getPlugin(context *gin.Context) {
-	groupID, err := strconv.ParseInt(context.PostForm("group_id"), 10, 64)
-	name := context.PostForm("name")
-	if err != nil {
-		var parse map[string]interface{}
-		err := context.BindJSON(&parse)
-		if err != nil {
-			log.Errorln("[gui]" + err.Error())
-			return
-		}
-		groupID = int64(parse["group_id"].(float64))
-		name = parse["name"].(string)
-	}
-	con, b := control.Lookup(name)
-	if !b {
-		context.JSON(404, "服务不存在")
-		return
-	}
-	context.JSON(200, gin.H{"enable": con.IsEnabledIn(groupID)})
-}
-
 // getLogs
 /**
  * @Description: 连接日志
@@ -250,36 +151,6 @@ func getLogs(context *gin.Context) {
 		return
 	}
 	logConn = con1
-}
-
-// getFriendList
-/**
- * @Description: 获取好友列表
- * @param context
- * example
- */
-func getFriendList(context *gin.Context) {
-	selfID, err := strconv.Atoi(context.PostForm("self_id"))
-	if err != nil {
-		log.Errorln("[gui]" + err.Error())
-		var data map[string]interface{}
-		err := context.BindJSON(&data)
-		if err != nil {
-			log.Errorln("[gui]" + err.Error())
-			log.Errorln("[gui]" + "绑定错误")
-			return
-		}
-		selfID = int(data["self_id"].(float64))
-	}
-	bot := zero.GetBot(int64(selfID))
-	var resp []interface{}
-	list := bot.GetFriendList().String()
-	err = json.Unmarshal([]byte(list), &resp)
-	if err != nil {
-		log.Errorln("[gui]" + err.Error())
-		log.Errorln("[gui]" + "解析json错误")
-	}
-	context.JSON(200, resp)
 }
 
 // MessageHandle

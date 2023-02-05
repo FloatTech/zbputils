@@ -15,9 +15,40 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/getAllPlugin": {
+            "get": {
+                "description": "获取所有插件的状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "group_id",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/getBotList": {
             "get": {
                 "description": "获取机器人qq号",
+                "responses": {}
+            }
+        },
+        "/api/getFriendList": {
+            "get": {
+                "description": "获取好友列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 123456,
+                        "description": "机器人qq号",
+                        "name": "self_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
                 "responses": {}
             }
         },
@@ -37,15 +68,22 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/getPluginList": {
+        "/api/getPlugin": {
             "get": {
-                "description": "获取所有插件的状态",
+                "description": "获取某个插件的状态",
                 "parameters": [
                     {
                         "type": "integer",
                         "default": 0,
                         "description": "群号",
                         "name": "group_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "antibuse",
+                        "description": "插件名",
+                        "name": "name",
                         "in": "query"
                     }
                 ],

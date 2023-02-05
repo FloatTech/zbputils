@@ -6,9 +6,30 @@ info:
   title: zbp api
   version: "1.0"
 paths:
+  /api/getAllPlugin:
+    get:
+      description: 获取所有插件的状态
+      parameters:
+      - default: 0
+        description: 群号
+        in: query
+        name: group_id
+        type: integer
+      responses: {}
   /api/getBotList:
     get:
       description: 获取机器人qq号
+      responses: {}
+  /api/getFriendList:
+    get:
+      description: 获取好友列表
+      parameters:
+      - default: 123456
+        description: 机器人qq号
+        in: query
+        name: self_id
+        required: true
+        type: integer
       responses: {}
   /api/getGroupList:
     get:
@@ -21,15 +42,20 @@ paths:
         required: true
         type: integer
       responses: {}
-  /api/getPluginList:
+  /api/getPlugin:
     get:
-      description: 获取所有插件的状态
+      description: 获取某个插件的状态
       parameters:
       - default: 0
         description: 群号
         in: query
         name: group_id
         type: integer
+      - default: antibuse
+        description: 插件名
+        in: query
+        name: name
+        type: string
       responses: {}
   /api/updatePluginStatus:
     post:
