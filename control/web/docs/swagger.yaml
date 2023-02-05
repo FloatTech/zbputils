@@ -59,19 +59,13 @@ paths:
       responses: {}
   /api/updatePluginStatus:
     post:
-      description: 更改某一个插件状态
+      description: 更改某群所有插件状态
       parameters:
       - default: 0
         description: 群号
         in: formData
         name: group_id
         type: integer
-      - default: aireply
-        description: 插件名
-        in: formData
-        name: name
-        required: true
-        type: string
       - default: true
         description: 插件状态
         in: formData

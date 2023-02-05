@@ -2,14 +2,60 @@ package controller
 
 import (
 	"encoding/json"
+	"io"
+	"net/http"
+	"os"
+	"sync"
 
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/common"
+	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
+	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
+
+var (
+	// 向前端推送消息的ws链接
+	conn *websocket.Conn
+	// 向前端推送日志的ws链接
+	logConn *websocket.Conn
+
+	l logWriter
+	// 存储请求事件，flag作为键，一个request对象作为值
+	requestData sync.Map
+	upGrader    = websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+)
+
+func init() {
+	writer := io.MultiWriter(l, os.Stdout)
+	log.SetOutput(writer)
+}
+
+// logWriter
+// @Description:
+type logWriter struct {
+}
+
+// request
+// @Description: 一个请求事件的结构体
+type request struct {
+	RequestType string `json:"request_type"`
+	SubType     string `json:"sub_type"`
+	Type        string `json:"type"`
+	Comment     string `json:"comment"`
+	GroupID     int64  `json:"group_id"`
+	UserID      int64  `json:"user_id"`
+	Flag        string `json:"flag"`
+	SelfID      int64  `json:"self_id"`
+}
 
 // BotRequest GetGroupList,GetFriendList的入参
 type BotRequest struct {
@@ -32,6 +78,12 @@ type PluginStatusDto struct {
 	GroupID int64  `json:"group_id" form:"group_id"`
 	Name    string `json:"name" form:"name" validate:"required"`
 	Status  bool   `json:"status" form:"status"`
+}
+
+// AllPluginStatusDto UpdateAllPluginStatus的入参
+type AllPluginStatusDto struct {
+	GroupID int64 `json:"group_id" form:"group_id"`
+	Status  bool  `json:"status" form:"status"`
 }
 
 // GetBotList
@@ -155,4 +207,166 @@ func UpdatePluginStatus(context *gin.Context) {
 		con.Disable(d.GroupID)
 	}
 	common.Ok(context)
+}
+
+// UpdateAllPluginStatus
+// @Description 更改某群所有插件状态
+// @Router /api/updatePluginStatus [post]
+// @Param group_id formData integer false "群号" default(0)
+// @Param status formData boolean false "插件状态" default(true)
+func UpdateAllPluginStatus(context *gin.Context) {
+	var d AllPluginStatusDto
+	err := common.Bind(&d, context)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	if d.Status {
+		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+			manager.Enable(d.GroupID)
+			return true
+		})
+	} else {
+		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+			manager.Disable(d.GroupID)
+			return true
+		})
+	}
+	common.Ok(context)
+}
+
+// HandelRequest 处理一个请求
+func HandelRequest(context *gin.Context) {
+	var data map[string]interface{}
+	err := context.BindJSON(&data)
+	if err != nil {
+		context.JSON(404, nil)
+		return
+	}
+	r, ok := requestData.LoadAndDelete(data["flag"].(string))
+	if !ok {
+		context.JSON(404, "flag not found")
+	}
+	r2 := r.(*request)
+	r2.handle(data["approve"].(bool), data["reason"].(string))
+	context.JSON(200, "操作成功")
+}
+
+// GetRequests 获取所有的请求
+func GetRequests(context *gin.Context) {
+	var data []interface{}
+	requestData.Range(func(key, value interface{}) bool {
+		data = append(data, value)
+		return true
+	})
+	context.JSON(200, data)
+}
+
+// GetLogs 连接日志
+func GetLogs(context *gin.Context) {
+	con1, err := upGrader.Upgrade(context.Writer, context.Request, nil)
+	if err != nil {
+		return
+	}
+	logConn = con1
+}
+
+// MessageHandle 定义一个向前端发送信息的handle
+func MessageHandle() {
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Errorln("[gui]" + "bot-manager出现不可恢复的错误")
+			log.Errorln("[gui] ", err)
+		}
+	}()
+
+	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+		if conn != nil {
+			err := conn.WriteJSON(ctx.Event)
+			if err != nil {
+				log.Debugln("[gui] " + "向发送错误")
+				return
+			}
+		}
+	})
+	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
+	zero.OnRequest(func(ctx *zero.Ctx) bool {
+		if ctx.Event.RequestType == "friend" {
+			ctx.State["type_name"] = "好友添加"
+		} else {
+			if ctx.Event.SubType == "add" {
+				ctx.State["type_name"] = "加群请求"
+			} else {
+				ctx.State["type_name"] = "群邀请"
+			}
+		}
+		return true
+	}).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+		r := &request{
+			RequestType: ctx.Event.RequestType,
+			SubType:     ctx.Event.SubType,
+			Type:        ctx.State["type_name"].(string),
+			GroupID:     ctx.Event.GroupID,
+			UserID:      ctx.Event.UserID,
+			Flag:        ctx.Event.Flag,
+			Comment:     ctx.Event.Comment,
+			SelfID:      ctx.Event.SelfID,
+		}
+		requestData.Store(ctx.Event.Flag, r)
+	})
+}
+
+// Upgrade 连接ws，向前端推送message
+func Upgrade(context *gin.Context) {
+	con, err := upGrader.Upgrade(context.Writer, context.Request, nil)
+	if err != nil {
+		return
+	}
+	conn = con
+}
+
+// SendMsg 前端调用发送信息
+func SendMsg(context *gin.Context) {
+	var data map[string]interface{}
+	err := context.BindJSON(&data)
+	if err != nil {
+		context.JSON(404, nil)
+		return
+	}
+	selfID := int64(data["self_id"].(float64))
+	id := int64(data["id"].(float64))
+	message1 := data["message"].(string)
+	messageType := data["message_type"].(string)
+
+	bot := zero.GetBot(selfID)
+	var msgID int64
+	if messageType == "group" {
+		msgID = bot.SendGroupMessage(id, message.ParseMessageFromString(message1))
+	} else {
+		msgID = bot.SendPrivateMessage(id, message.ParseMessageFromString(message1))
+	}
+	context.JSON(200, msgID)
+}
+
+// Handle 提交一个请求
+func (r *request) handle(approve bool, reason string) {
+	bot := zero.GetBot(r.SelfID)
+	if r.RequestType == "friend" {
+		bot.SetFriendAddRequest(r.Flag, approve, "")
+	} else {
+		bot.SetGroupAddRequest(r.Flag, r.SubType, approve, reason)
+	}
+	log.Debugln("[gui] ", "已处理", r.UserID, "的"+r.Type)
+}
+
+// Write 写入日志
+func (l logWriter) Write(p []byte) (n int, err error) {
+	if logConn != nil {
+		err := logConn.WriteMessage(websocket.TextMessage, p)
+		if err != nil {
+			return len(p), nil
+		}
+	}
+	return len(p), nil
 }

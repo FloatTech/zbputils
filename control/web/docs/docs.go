@@ -92,7 +92,7 @@ const docTemplate = `{
         },
         "/api/updatePluginStatus": {
             "post": {
-                "description": "更改某一个插件状态",
+                "description": "更改某群所有插件状态",
                 "parameters": [
                     {
                         "type": "integer",
@@ -100,14 +100,6 @@ const docTemplate = `{
                         "description": "群号",
                         "name": "group_id",
                         "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "default": "aireply",
-                        "description": "插件名",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
                     },
                     {
                         "type": "boolean",
