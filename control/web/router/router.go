@@ -32,5 +32,4 @@ func SetRouters(r *gin.Engine) {
 	})
 	engine.POST("/sendMsg", controller.SendMsg)
 	engine.GET("/data", controller.Upgrade)
-	controller.MessageHandle()
 }

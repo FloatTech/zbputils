@@ -37,6 +37,41 @@ var (
 func init() {
 	writer := io.MultiWriter(l, os.Stdout)
 	log.SetOutput(writer)
+
+	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+		if conn != nil {
+			err := conn.WriteJSON(ctx.Event)
+			if err != nil {
+				log.Debugln("[gui] " + "向发送错误")
+				return
+			}
+		}
+	})
+	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
+	zero.OnRequest(func(ctx *zero.Ctx) bool {
+		if ctx.Event.RequestType == "friend" {
+			ctx.State["type_name"] = "好友添加"
+		} else {
+			if ctx.Event.SubType == "add" {
+				ctx.State["type_name"] = "加群请求"
+			} else {
+				ctx.State["type_name"] = "群邀请"
+			}
+		}
+		return true
+	}).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+		r := &request{
+			RequestType: ctx.Event.RequestType,
+			SubType:     ctx.Event.SubType,
+			Type:        ctx.State["type_name"].(string),
+			GroupID:     ctx.Event.GroupID,
+			UserID:      ctx.Event.UserID,
+			Flag:        ctx.Event.Flag,
+			Comment:     ctx.Event.Comment,
+			SelfID:      ctx.Event.SelfID,
+		}
+		requestData.Store(ctx.Event.Flag, r)
+	})
 }
 
 // logWriter
@@ -269,52 +304,6 @@ func GetLogs(context *gin.Context) {
 		return
 	}
 	logConn = con1
-}
-
-// MessageHandle 定义一个向前端发送信息的handle
-func MessageHandle() {
-	defer func() {
-		err := recover()
-		if err != nil {
-			log.Errorln("[gui]" + "bot-manager出现不可恢复的错误")
-			log.Errorln("[gui] ", err)
-		}
-	}()
-
-	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
-		if conn != nil {
-			err := conn.WriteJSON(ctx.Event)
-			if err != nil {
-				log.Debugln("[gui] " + "向发送错误")
-				return
-			}
-		}
-	})
-	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
-	zero.OnRequest(func(ctx *zero.Ctx) bool {
-		if ctx.Event.RequestType == "friend" {
-			ctx.State["type_name"] = "好友添加"
-		} else {
-			if ctx.Event.SubType == "add" {
-				ctx.State["type_name"] = "加群请求"
-			} else {
-				ctx.State["type_name"] = "群邀请"
-			}
-		}
-		return true
-	}).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
-		r := &request{
-			RequestType: ctx.Event.RequestType,
-			SubType:     ctx.Event.SubType,
-			Type:        ctx.State["type_name"].(string),
-			GroupID:     ctx.Event.GroupID,
-			UserID:      ctx.Event.UserID,
-			Flag:        ctx.Event.Flag,
-			Comment:     ctx.Event.Comment,
-			SelfID:      ctx.Event.SelfID,
-		}
-		requestData.Store(ctx.Event.Flag, r)
-	})
 }
 
 // Upgrade 连接ws，向前端推送message
