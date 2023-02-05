@@ -10,19 +10,14 @@ import (
 	"sync"
 
 	// 依赖gin监听server
+	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
-
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/control/web/controller"
-	_ "github.com/FloatTech/zbputils/control/web/docs"
 )
 
 var (
@@ -86,28 +81,18 @@ func run(addr string) {
 		}
 	}()
 
-	magageController := &controller.ManageController{}
 	r := gin.New()
+	router.SetRouters(r)
 	engine := r.Group("/api")
-	// 支持跨域
-	engine.Use(cors())
-	// 注册静态文件
-	// engine.StaticFS("/dist", http.FS(manager.Dist))
-	engine.POST("/getBotList", magageController.GetBotList)
-	engine.POST("/getGroupList", magageController.GetGroupList)
 	engine.POST("/getFriendList", getFriendList)
 	// 注册主路径路由，使其跳转到主页面
 	// engine.GET("/", func(context *gin.Context) {
 	// 	context.Redirect(http.StatusMovedPermanently, "/dist/dist/default.html")
 	// })
-	// 更改某个插件状态
-	engine.POST("/updatePluginStatus", magageController.UpdatePluginStatus)
 	// 更改某一个插件在所有群的状态
 	engine.POST("/update_plugin_all_group_status", updatePluginAllGroupStatus)
 	// 更改所有插件状态
 	engine.POST("/update_all_plugin_status", updateAllPluginStatus)
-	// 获取所有插件
-	engine.POST("/getPluginList", magageController.GetPluginList)
 	// 获取一个插件
 	engine.POST("/getPlugin", getPlugin)
 	// 获取所有请求
@@ -120,14 +105,12 @@ func run(addr string) {
 	engine.GET("/get_label", func(context *gin.Context) {
 		context.JSON(200, "ZeroBot-Plugin")
 	})
-
 	// 发送信息
 	engine.POST("/send_msg", sendMsg)
 	engine.GET("/data", upgrade)
 	log.Infoln("[gui] the webui is running on", addr)
 	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
 	log.Infoln("[gui] ", "you can see api by", "http://"+addr+"/swagger/index.html")
-	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if err := r.Run(addr); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}
@@ -389,46 +372,6 @@ func sendMsg(context *gin.Context) {
 		msgID = bot.SendPrivateMessage(id, message.ParseMessageFromString(message1))
 	}
 	context.JSON(200, msgID)
-}
-
-// cors
-/**
- * @Description: 支持跨域访问
- * @return gin.HandlerFunc
- * example
- */
-func cors() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		method := c.Request.Method
-		origin := c.Request.Header.Get("Origin") // 请求头部
-		if origin != "" {
-			// 接收客户端发送的origin （重要！）
-			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
-			// 服务器支持的所有跨域请求的方法
-			c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE,UPDATE")
-			// 允许跨域设置可以返回其他子段，可以自定义字段
-			c.Header("Access-Control-Allow-Headers", "Authorization, Content-Length, X-CSRF-Token, Token,session, Content-Type")
-			// 允许浏览器（客户端）可以解析的头部 （重要）
-			c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers")
-			// 设置缓存时间
-			c.Header("Access-Control-Max-Age", "172800")
-			// 允许客户端传递校验信息比如 cookie (重要)
-			c.Header("Access-Control-Allow-Credentials", "true")
-		}
-
-		// 允许类型校验
-		if method == "OPTIONS" {
-			c.JSON(http.StatusOK, "ok!")
-		}
-
-		defer func() {
-			if err := recover(); err != nil {
-				log.Printf("Panic info is: %v", err)
-			}
-		}()
-
-		c.Next()
-	}
 }
 
 // handle

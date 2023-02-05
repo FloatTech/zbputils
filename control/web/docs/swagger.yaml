@@ -7,29 +7,28 @@ info:
   version: "1.0"
 paths:
   /api/getBotList:
-    post:
+    get:
       description: 获取机器人qq号
       responses: {}
   /api/getGroupList:
-    post:
+    get:
       description: 获取群列表
       parameters:
       - default: 123456
         description: 机器人qq号
-        in: formData
+        in: query
         name: self_id
         required: true
         type: integer
       responses: {}
   /api/getPluginList:
-    post:
+    get:
       description: 获取所有插件的状态
       parameters:
       - default: 0
         description: 群号
-        in: formData
+        in: query
         name: group_id
-        required: true
         type: integer
       responses: {}
   /api/updatePluginStatus:
@@ -40,7 +39,6 @@ paths:
         description: 群号
         in: formData
         name: group_id
-        required: true
         type: integer
       - default: aireply
         description: 插件名
@@ -52,7 +50,6 @@ paths:
         description: 插件状态
         in: formData
         name: status
-        required: true
         type: boolean
       responses: {}
 swagger: "2.0"

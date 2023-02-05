@@ -16,13 +16,13 @@ const docTemplate = `{
     "basePath": "{{.BasePath}}",
     "paths": {
         "/api/getBotList": {
-            "post": {
+            "get": {
                 "description": "获取机器人qq号",
                 "responses": {}
             }
         },
         "/api/getGroupList": {
-            "post": {
+            "get": {
                 "description": "获取群列表",
                 "parameters": [
                     {
@@ -30,7 +30,7 @@ const docTemplate = `{
                         "default": 123456,
                         "description": "机器人qq号",
                         "name": "self_id",
-                        "in": "formData",
+                        "in": "query",
                         "required": true
                     }
                 ],
@@ -38,7 +38,7 @@ const docTemplate = `{
             }
         },
         "/api/getPluginList": {
-            "post": {
+            "get": {
                 "description": "获取所有插件的状态",
                 "parameters": [
                     {
@@ -46,8 +46,7 @@ const docTemplate = `{
                         "default": 0,
                         "description": "群号",
                         "name": "group_id",
-                        "in": "formData",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {}
@@ -62,8 +61,7 @@ const docTemplate = `{
                         "default": 0,
                         "description": "群号",
                         "name": "group_id",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     },
                     {
                         "type": "string",
@@ -78,8 +76,7 @@ const docTemplate = `{
                         "default": true,
                         "description": "插件状态",
                         "name": "status",
-                        "in": "formData",
-                        "required": true
+                        "in": "formData"
                     }
                 ],
                 "responses": {}
