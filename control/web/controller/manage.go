@@ -35,14 +35,16 @@ var (
 )
 
 func init() {
+	// 日志设置
 	writer := io.MultiWriter(l, os.Stdout)
 	log.SetOutput(writer)
+	log.SetFormatter(&log.TextFormatter{DisableColors: true})
 
 	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
 		if conn != nil {
 			err := conn.WriteJSON(ctx.Event)
 			if err != nil {
-				log.Debugln("[gui] " + "向发送错误")
+				log.Errorln("[gui] " + "向发送错误")
 				return
 			}
 		}
@@ -75,12 +77,10 @@ func init() {
 }
 
 // logWriter
-// @Description:
 type logWriter struct {
 }
 
 // request
-// @Description: 一个请求事件的结构体
 type request struct {
 	RequestType string `json:"request_type"`
 	SubType     string `json:"sub_type"`
@@ -119,6 +119,21 @@ type PluginStatusDto struct {
 type AllPluginStatusDto struct {
 	GroupID int64 `json:"group_id" form:"group_id"`
 	Status  bool  `json:"status" form:"status"`
+}
+
+// HandleRequestDto 处理事件的入参
+type HandleRequestDto struct {
+	Flag    string `json:"flag" form:"flag"`
+	Reason  string `json:"reason" form:"reason"`
+	Approve bool   `json:"approve" form:"approve"`
+}
+
+// SendMsgDto 发送消息的入参
+type SendMsgDto struct {
+	SelfID      int64  `json:"self_id" form:"self_id"`
+	ID          int64  `json:"id" form:"id"`
+	Message     string `json:"message" form:"message"`
+	MessageType string `json:"message_type" form:"message_type"`
 }
 
 // GetBotList
@@ -270,35 +285,43 @@ func UpdateAllPluginStatus(context *gin.Context) {
 	common.Ok(context)
 }
 
-// HandelRequest 处理一个请求
-func HandelRequest(context *gin.Context) {
-	var data map[string]interface{}
-	err := context.BindJSON(&data)
+// HandleRequest 处理一个请求
+// @Description 处理一个请求
+// @Router /api/handleRequest [post]
+// @Param flag formData string true "事件id" default(abc)
+// @Param reason formData string false "原因" default(abc)
+// @Param approve formData bool false "是否同意" default(true)
+func HandleRequest(context *gin.Context) {
+	var d HandleRequestDto
+	err := common.Bind(&d, context)
 	if err != nil {
-		context.JSON(404, nil)
+		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	r, ok := requestData.LoadAndDelete(data["flag"].(string))
+	r, ok := requestData.LoadAndDelete(d.Flag)
 	if !ok {
-		context.JSON(404, "flag not found")
+		common.FailWithMessage("flag not found", context)
+		return
 	}
 	r2 := r.(*request)
-	r2.handle(data["approve"].(bool), data["reason"].(string))
-	context.JSON(200, "操作成功")
+	r2.handle(d.Approve, d.Reason)
+	common.Ok(context)
 }
 
-// GetRequests 获取所有的请求
+// GetRequests
+// @Description 获取所有的请求
+// @Router /api/getRequests [get]
 func GetRequests(context *gin.Context) {
 	var data []interface{}
 	requestData.Range(func(key, value interface{}) bool {
 		data = append(data, value)
 		return true
 	})
-	context.JSON(200, data)
+	common.OkWithData(data, context)
 }
 
-// GetLogs 连接日志
-func GetLogs(context *gin.Context) {
+// GetLog 连接日志
+func GetLog(context *gin.Context) {
 	con1, err := upGrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return
@@ -316,29 +339,30 @@ func Upgrade(context *gin.Context) {
 }
 
 // SendMsg 前端调用发送信息
+// @Description 前端调用发送信息
+// @Router /api/sendMsg [post]
+// @Param self_id formData int64 true "bot的QQ号" default(abc)
+// @Param id formData int64 true "群号" default(123456)
+// @Param message formData string true "消息文本" default(HelloWorld)
+// @Param message_type formData string false "消息类型" default(group)
 func SendMsg(context *gin.Context) {
-	var data map[string]interface{}
-	err := context.BindJSON(&data)
+	var d SendMsgDto
+	err := common.Bind(&d, context)
 	if err != nil {
-		context.JSON(404, nil)
+		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	selfID := int64(data["self_id"].(float64))
-	id := int64(data["id"].(float64))
-	message1 := data["message"].(string)
-	messageType := data["message_type"].(string)
-
-	bot := zero.GetBot(selfID)
+	bot := zero.GetBot(d.SelfID)
 	var msgID int64
-	if messageType == "group" {
-		msgID = bot.SendGroupMessage(id, message.ParseMessageFromString(message1))
+	if d.MessageType == "group" {
+		msgID = bot.SendGroupMessage(d.ID, message.ParseMessageFromString(d.Message))
 	} else {
-		msgID = bot.SendPrivateMessage(id, message.ParseMessageFromString(message1))
+		msgID = bot.SendPrivateMessage(d.ID, message.ParseMessageFromString(d.Message))
 	}
-	context.JSON(200, msgID)
+	common.OkWithData(msgID, context)
 }
 
-// Handle 提交一个请求
+// handle 提交一个请求
 func (r *request) handle(approve bool, reason string) {
 	bot := zero.GetBot(r.SelfID)
 	if r.RequestType == "friend" {

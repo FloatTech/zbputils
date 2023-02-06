@@ -57,6 +57,58 @@ paths:
         name: name
         type: string
       responses: {}
+  /api/getRequests:
+    get:
+      description: 获取所有的请求
+      responses: {}
+  /api/handleRequest:
+    post:
+      description: 处理一个请求
+      parameters:
+      - default: abc
+        description: 事件id
+        in: formData
+        name: flag
+        required: true
+        type: string
+      - default: abc
+        description: 原因
+        in: formData
+        name: reason
+        type: string
+      - default: true
+        description: 是否同意
+        in: formData
+        name: approve
+        type: boolean
+      responses: {}
+  /api/sendMsg:
+    post:
+      description: 前端调用发送信息
+      parameters:
+      - description: bot的QQ号
+        in: formData
+        name: self_id
+        required: true
+        type: integer
+      - default: 123456
+        description: 群号
+        in: formData
+        name: id
+        required: true
+        type: integer
+      - default: HelloWorld
+        description: 消息文本
+        in: formData
+        name: message
+        required: true
+        type: string
+      - default: group
+        description: 消息类型
+        in: formData
+        name: message_type
+        type: string
+      responses: {}
   /api/updateAllPluginStatus:
     post:
       description: 更改某群所有插件状态

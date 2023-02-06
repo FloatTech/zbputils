@@ -90,6 +90,80 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/api/getRequests": {
+            "get": {
+                "description": "获取所有的请求",
+                "responses": {}
+            }
+        },
+        "/api/handleRequest": {
+            "post": {
+                "description": "处理一个请求",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "abc",
+                        "description": "事件id",
+                        "name": "flag",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "abc",
+                        "description": "原因",
+                        "name": "reason",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "是否同意",
+                        "name": "approve",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/sendMsg": {
+            "post": {
+                "description": "前端调用发送信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "bot的QQ号",
+                        "name": "self_id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 123456,
+                        "description": "群号",
+                        "name": "id",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "HelloWorld",
+                        "description": "消息文本",
+                        "name": "message",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "group",
+                        "description": "消息类型",
+                        "name": "message_type",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/updateAllPluginStatus": {
             "post": {
                 "description": "更改某群所有插件状态",

@@ -24,12 +24,9 @@ func SetRouters(r *gin.Engine) {
 	engine.GET("/getAllPlugin", controller.GetAllPlugin)
 	engine.POST("/updatePluginStatus", controller.UpdatePluginStatus)
 	engine.POST("/updateAllPluginStatus", controller.UpdateAllPluginStatus)
-	engine.POST("/getRequests", controller.GetRequests)
-	engine.POST("/handleRequest", controller.HandelRequest)
-	engine.GET("/getLog", controller.GetLogs)
-	engine.GET("/getLabel", func(context *gin.Context) {
-		context.JSON(200, "ZeroBot-Plugin")
-	})
+	engine.GET("/getRequests", controller.GetRequests)
+	engine.POST("/handleRequest", controller.HandleRequest)
+	engine.GET("/getLog", controller.GetLog)
 	engine.POST("/sendMsg", controller.SendMsg)
 	engine.GET("/data", controller.Upgrade)
 }

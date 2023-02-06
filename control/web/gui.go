@@ -24,7 +24,7 @@ func run(addr string) {
 	defer func() {
 		err := recover()
 		if err != nil {
-			log.Errorln("[gui]" + "bot-manager出现不可恢复的错误")
+			log.Errorln("[gui] ZeroBot-Plugin-Webui出现不可恢复的错误")
 			log.Errorln("[gui]", err)
 		}
 	}()

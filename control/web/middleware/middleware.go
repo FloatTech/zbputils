@@ -6,6 +6,7 @@ import (
 	"runtime/debug"
 
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/zbputils/control/web/common"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -37,12 +38,18 @@ func Cors() gin.HandlerFunc {
 
 		// 允许类型校验
 		if method == "OPTIONS" {
-			c.JSON(http.StatusOK, "ok!")
+			common.Ok(c)
 		}
 
 		defer func() {
 			if err := recover(); err != nil {
 				log.Errorf("[bot] execute rule err: %v\n%v", err, binary.BytesToString(debug.Stack()))
+				c.AbortWithStatusJSON(http.StatusOK, gin.H{
+					"code":    -1,
+					"message": err,
+					"type":    "error",
+					"result":  nil,
+				})
 			}
 		}()
 
