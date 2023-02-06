@@ -90,7 +90,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/updatePluginStatus": {
+        "/api/updateAllPluginStatus": {
             "post": {
                 "description": "更改某群所有插件状态",
                 "parameters": [
@@ -100,6 +100,36 @@ const docTemplate = `{
                         "description": "群号",
                         "name": "group_id",
                         "in": "formData"
+                    },
+                    {
+                        "type": "boolean",
+                        "default": true,
+                        "description": "插件状态",
+                        "name": "status",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/updatePluginStatus": {
+            "post": {
+                "description": "更改某一个插件状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "group_id",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "default": "aireply",
+                        "description": "插件名",
+                        "name": "name",
+                        "in": "formData",
+                        "required": true
                     },
                     {
                         "type": "boolean",

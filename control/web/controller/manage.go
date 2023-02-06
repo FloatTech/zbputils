@@ -246,7 +246,7 @@ func UpdatePluginStatus(context *gin.Context) {
 
 // UpdateAllPluginStatus
 // @Description 更改某群所有插件状态
-// @Router /api/updatePluginStatus [post]
+// @Router /api/updateAllPluginStatus [post]
 // @Param group_id formData integer false "群号" default(0)
 // @Param status formData boolean false "插件状态" default(true)
 func UpdateAllPluginStatus(context *gin.Context) {
