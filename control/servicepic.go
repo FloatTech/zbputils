@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/gg"
 	"github.com/FloatTech/ttl"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/disintegration/imaging"

@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Coloured-glaze/gg"
+	"github.com/FloatTech/gg"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/FloatTech/floatbox/file"

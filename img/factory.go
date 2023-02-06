@@ -5,7 +5,7 @@ import (
 	"image/color"
 	"image/draw"
 
-	"github.com/Coloured-glaze/gg"
+	"github.com/FloatTech/gg"
 	"github.com/disintegration/imaging"
 )
 

@@ -11,7 +11,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Coloured-glaze/gg"
+	"github.com/FloatTech/gg"
 	"github.com/disintegration/imaging"
 )
 
