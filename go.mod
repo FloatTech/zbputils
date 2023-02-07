@@ -3,14 +3,14 @@ module github.com/FloatTech/zbputils
 go 1.19
 
 require (
-	github.com/FloatTech/floatbox v0.0.0-20230130095057-3d1da721425e
+	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
 	github.com/FloatTech/gg v1.1.0
-	github.com/FloatTech/rendercard v0.0.9-0.20230206125820-929cee91387c
+	github.com/FloatTech/imgfactory v0.2.1
+	github.com/FloatTech/rendercard v0.0.9
 	github.com/FloatTech/sqlite v1.5.7
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
 	github.com/disintegration/imaging v1.6.2
-	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-base16384 v1.6.4
 	github.com/fumiama/go-registry v0.2.5
@@ -22,6 +22,7 @@ require (
 
 require (
 	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e // indirect
+	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/imgsz v0.0.2 // indirect

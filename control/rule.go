@@ -16,13 +16,10 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	ctrl "github.com/FloatTech/zbpctrl"
-
 	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
-
 	"github.com/FloatTech/rendercard"
-
+	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/zbputils/ctxext"
 	"github.com/FloatTech/zbputils/img/text"
 )
@@ -421,11 +418,14 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				data, cl := writer.ToBytes(imgs) // 生成图片
+				data, err := imgfactory.ToBytes(imgs) // 生成图片
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
 				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
 					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 				}
-				cl()
 			})
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
@@ -470,7 +470,7 @@ func init() {
 						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 					}
 				} else {
-					b64, err := writer.ToBase64(imgs[0])
+					b64, err := imgfactory.ToBase64(imgs[0])
 					if err != nil {
 						ctx.SendChain(message.Text("ERROR: ", err))
 						return
