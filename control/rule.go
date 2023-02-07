@@ -162,7 +162,7 @@ func init() {
 			condition := strings.Contains(ctx.Event.RawMessage, "启用") || strings.Contains(ctx.Event.RawMessage, "enable")
 			if condition {
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.Options.DisableOnDefault != condition {
+					if manager.Options.DisableOnDefault == condition {
 						return true
 					}
 					manager.Enable(grp)
