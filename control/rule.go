@@ -15,13 +15,12 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/process"
-	"github.com/FloatTech/rendercard"
 	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/rendercard"
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/img/text"
 )
 
 const (
@@ -388,18 +387,13 @@ func init() {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 					return
 				}
-				err := geticonandfont()
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
 				// 处理插件帮助并且计算图像高
 				plugininfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
-				newplugininfo, err := rendercard.Truncate(text.GlowSansFontFile, plugininfo, 1272-50, 38)
+				newplugininfo, err := rendercard.Truncate(glowsd, plugininfo, 1272-50, 38)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -410,8 +404,8 @@ func init() {
 					RightTitle:    "FloatTech",
 					RightSubtitle: "ZeroBot-Plugin",
 					ImagePath:     kanbanpath + "kanban.png",
-					TitleFont:     text.ImpactFontFile,
-					TextFont:      text.GlowSansFontFile,
+					TitleFontData: impactd,
+					TextFontData:  glowsd,
 					IsEnabled:     service.IsEnabledIn(gid),
 				}).DrawTitleWithText(newplugininfo)
 				if err != nil {
@@ -430,11 +424,6 @@ func init() {
 
 		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
-				err := geticonandfont()
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID

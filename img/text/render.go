@@ -33,10 +33,10 @@ func RenderToBase64(text, font string, width, fontSize int) (base64Bytes []byte,
 
 // Render 文字转图片 width 是图片宽度
 func Render(text, font string, width, fontSize int) (txtPic image.Image, err error) {
-	_, err = file.GetLazyData(font, "data/control/stor.spb", true)
+	data, err := file.GetLazyData(font, "data/control/stor.spb", true)
 	if err != nil {
 		return
 	}
 
-	return imgfactory.RenderText(text, font, width, fontSize)
+	return imgfactory.RenderTextWith(text, data, width, fontSize)
 }
