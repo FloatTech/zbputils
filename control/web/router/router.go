@@ -29,4 +29,8 @@ func SetRouters(r *gin.Engine) {
 	engine.GET("/getLog", controller.GetLog)
 	engine.POST("/sendMsg", controller.SendMsg)
 	engine.GET("/data", controller.Upgrade)
+	engine.POST("/login", controller.Login)
+	engine.GET("/getUserInfo", controller.GetUserInfo)
+	engine.GET("/logout", controller.Logout)
+	engine.GET("/getPermCode", controller.GetPermCode)
 }

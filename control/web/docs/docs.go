@@ -23,7 +23,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 0,
                         "description": "群号",
-                        "name": "group_id",
+                        "name": "groupId",
                         "in": "query"
                     }
                 ],
@@ -44,7 +44,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 123456,
                         "description": "机器人qq号",
-                        "name": "self_id",
+                        "name": "selfId",
                         "in": "query",
                         "required": true
                     }
@@ -60,11 +60,17 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 123456,
                         "description": "机器人qq号",
-                        "name": "self_id",
+                        "name": "selfId",
                         "in": "query",
                         "required": true
                     }
                 ],
+                "responses": {}
+            }
+        },
+        "/api/getPermCode": {
+            "get": {
+                "description": "授权码",
                 "responses": {}
             }
         },
@@ -76,7 +82,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 0,
                         "description": "群号",
-                        "name": "group_id",
+                        "name": "groupId",
                         "in": "query"
                     },
                     {
@@ -93,6 +99,12 @@ const docTemplate = `{
         "/api/getRequests": {
             "get": {
                 "description": "获取所有的请求",
+                "responses": {}
+            }
+        },
+        "/api/getUserInfo": {
+            "get": {
+                "description": "获得用户信息",
                 "responses": {}
             }
         },
@@ -126,6 +138,36 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/api/login": {
+            "post": {
+                "description": "前端登录",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "default": "xiaoguofan",
+                        "description": "用户名",
+                        "name": "username",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "default": "123456",
+                        "description": "密码",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/logout": {
+            "get": {
+                "description": "登出",
+                "responses": {}
+            }
+        },
         "/api/sendMsg": {
             "post": {
                 "description": "前端调用发送信息",
@@ -133,7 +175,7 @@ const docTemplate = `{
                     {
                         "type": "integer",
                         "description": "bot的QQ号",
-                        "name": "self_id",
+                        "name": "selfId",
                         "in": "formData",
                         "required": true
                     },
@@ -172,7 +214,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 0,
                         "description": "群号",
-                        "name": "group_id",
+                        "name": "groupId",
                         "in": "formData"
                     },
                     {
@@ -194,7 +236,7 @@ const docTemplate = `{
                         "type": "integer",
                         "default": 0,
                         "description": "群号",
-                        "name": "group_id",
+                        "name": "groupId",
                         "in": "formData"
                     },
                     {

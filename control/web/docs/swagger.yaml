@@ -13,7 +13,7 @@ paths:
       - default: 0
         description: 群号
         in: query
-        name: group_id
+        name: groupId
         type: integer
       responses: {}
   /api/getBotList:
@@ -27,7 +27,7 @@ paths:
       - default: 123456
         description: 机器人qq号
         in: query
-        name: self_id
+        name: selfId
         required: true
         type: integer
       responses: {}
@@ -38,9 +38,13 @@ paths:
       - default: 123456
         description: 机器人qq号
         in: query
-        name: self_id
+        name: selfId
         required: true
         type: integer
+      responses: {}
+  /api/getPermCode:
+    get:
+      description: 授权码
       responses: {}
   /api/getPlugin:
     get:
@@ -49,7 +53,7 @@ paths:
       - default: 0
         description: 群号
         in: query
-        name: group_id
+        name: groupId
         type: integer
       - default: antibuse
         description: 插件名
@@ -60,6 +64,10 @@ paths:
   /api/getRequests:
     get:
       description: 获取所有的请求
+      responses: {}
+  /api/getUserInfo:
+    get:
+      description: 获得用户信息
       responses: {}
   /api/handleRequest:
     post:
@@ -82,13 +90,34 @@ paths:
         name: approve
         type: boolean
       responses: {}
+  /api/login:
+    post:
+      description: 前端登录
+      parameters:
+      - default: xiaoguofan
+        description: 用户名
+        in: formData
+        name: username
+        required: true
+        type: string
+      - default: "123456"
+        description: 密码
+        in: formData
+        name: password
+        required: true
+        type: string
+      responses: {}
+  /api/logout:
+    get:
+      description: 登出
+      responses: {}
   /api/sendMsg:
     post:
       description: 前端调用发送信息
       parameters:
       - description: bot的QQ号
         in: formData
-        name: self_id
+        name: selfId
         required: true
         type: integer
       - default: 123456
@@ -116,7 +145,7 @@ paths:
       - default: 0
         description: 群号
         in: formData
-        name: group_id
+        name: groupId
         type: integer
       - default: true
         description: 插件状态
@@ -131,7 +160,7 @@ paths:
       - default: 0
         description: 群号
         in: formData
-        name: group_id
+        name: groupId
         type: integer
       - default: aireply
         description: 插件名

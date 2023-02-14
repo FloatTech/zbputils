@@ -11,6 +11,7 @@ import (
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/common"
+	"github.com/FloatTech/zbputils/control/web/types"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -92,50 +93,6 @@ type request struct {
 	SelfID      int64  `json:"self_id"`
 }
 
-// BotRequest GetGroupList,GetFriendList的入参
-type BotRequest struct {
-	SelfID int64 `json:"self_id" form:"self_id" validate:"required"`
-}
-
-// AllPluginDto GetAllPlugin的入参
-type AllPluginDto struct {
-	GroupID int64 `json:"group_id" form:"group_id"`
-}
-
-// PluginDto GetPlugin的入参
-type PluginDto struct {
-	GroupID int64  `json:"group_id" form:"group_id"`
-	Name    string `json:"name" form:"name"`
-}
-
-// PluginStatusDto UpdatePluginStatus的入参
-type PluginStatusDto struct {
-	GroupID int64  `json:"group_id" form:"group_id"`
-	Name    string `json:"name" form:"name" validate:"required"`
-	Status  bool   `json:"status" form:"status"`
-}
-
-// AllPluginStatusDto UpdateAllPluginStatus的入参
-type AllPluginStatusDto struct {
-	GroupID int64 `json:"group_id" form:"group_id"`
-	Status  bool  `json:"status" form:"status"`
-}
-
-// HandleRequestDto 处理事件的入参
-type HandleRequestDto struct {
-	Flag    string `json:"flag" form:"flag"`
-	Reason  string `json:"reason" form:"reason"`
-	Approve bool   `json:"approve" form:"approve"`
-}
-
-// SendMsgDto 发送消息的入参
-type SendMsgDto struct {
-	SelfID      int64  `json:"self_id" form:"self_id"`
-	ID          int64  `json:"id" form:"id"`
-	Message     string `json:"message" form:"message"`
-	MessageType string `json:"message_type" form:"message_type"`
-}
-
 // GetBotList
 // @Description 获取机器人qq号
 // @Router /api/getBotList [get]
@@ -152,9 +109,9 @@ func GetBotList(context *gin.Context) {
 // GetFriendList
 // @Description 获取好友列表
 // @Router /api/getFriendList [get]
-// @Param self_id query integer true "机器人qq号" default(123456)
+// @Param selfId query integer true "机器人qq号" default(123456)
 func GetFriendList(context *gin.Context) {
-	var d BotRequest
+	var d types.BotParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -174,9 +131,9 @@ func GetFriendList(context *gin.Context) {
 // GetGroupList
 // @Description 获取群列表
 // @Router /api/getGroupList [get]
-// @Param self_id query integer true "机器人qq号" default(123456)
+// @Param selfId query integer true "机器人qq号" default(123456)
 func GetGroupList(context *gin.Context) {
-	var d BotRequest
+	var d types.BotParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -196,9 +153,9 @@ func GetGroupList(context *gin.Context) {
 // GetAllPlugin
 // @Description 获取所有插件的状态
 // @Router /api/getAllPlugin [get]
-// @Param group_id query integer false "群号" default(0)
+// @Param groupId query integer false "群号" default(0)
 func GetAllPlugin(context *gin.Context) {
-	var d AllPluginDto
+	var d types.AllPluginParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -215,10 +172,10 @@ func GetAllPlugin(context *gin.Context) {
 // GetPlugin
 // @Description 获取某个插件的状态
 // @Router /api/getPlugin [get]
-// @Param group_id query integer false "群号" default(0)
+// @Param groupId query integer false "群号" default(0)
 // @Param name query string false "插件名" default(antibuse)
 func GetPlugin(context *gin.Context) {
-	var d PluginDto
+	var d types.PluginParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -236,11 +193,11 @@ func GetPlugin(context *gin.Context) {
 // UpdatePluginStatus
 // @Description 更改某一个插件状态
 // @Router /api/updatePluginStatus [post]
-// @Param group_id formData integer false "群号" default(0)
+// @Param groupId formData integer false "群号" default(0)
 // @Param name formData string true "插件名" default(aireply)
 // @Param status formData boolean false "插件状态" default(true)
 func UpdatePluginStatus(context *gin.Context) {
-	var d PluginStatusDto
+	var d types.PluginStatusParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -262,10 +219,10 @@ func UpdatePluginStatus(context *gin.Context) {
 // UpdateAllPluginStatus
 // @Description 更改某群所有插件状态
 // @Router /api/updateAllPluginStatus [post]
-// @Param group_id formData integer false "群号" default(0)
+// @Param groupId formData integer false "群号" default(0)
 // @Param status formData boolean false "插件状态" default(true)
 func UpdateAllPluginStatus(context *gin.Context) {
-	var d AllPluginStatusDto
+	var d types.AllPluginStatusParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -292,7 +249,7 @@ func UpdateAllPluginStatus(context *gin.Context) {
 // @Param reason formData string false "原因" default(abc)
 // @Param approve formData bool false "是否同意" default(true)
 func HandleRequest(context *gin.Context) {
-	var d HandleRequestDto
+	var d types.HandleRequestParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -341,12 +298,12 @@ func Upgrade(context *gin.Context) {
 // SendMsg 前端调用发送信息
 // @Description 前端调用发送信息
 // @Router /api/sendMsg [post]
-// @Param self_id formData int64 true "bot的QQ号" default(abc)
+// @Param selfId formData int64 true "bot的QQ号" default(abc)
 // @Param id formData int64 true "群号" default(123456)
 // @Param message formData string true "消息文本" default(HelloWorld)
 // @Param message_type formData string false "消息类型" default(group)
 func SendMsg(context *gin.Context) {
-	var d SendMsgDto
+	var d types.SendMsgParams
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -382,4 +339,78 @@ func (l logWriter) Write(p []byte) (n int, err error) {
 		}
 	}
 	return len(p), nil
+}
+
+// Login 登录接口
+// @Description 前端登录
+// @Router /api/login [post]
+// @Param username formData string true "用户名" default(xiaoguofan)
+// @Param password formData string true "密码" default(123456)
+func Login(context *gin.Context) {
+	var d types.LoginParams
+	err := common.Bind(&d, context)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	// 先写死接口
+	if d.Username != "xiaoguofan" || d.Password != "123456" {
+		common.FailWithMessage("用户名或密码错误", context)
+		return
+	}
+	r := types.LoginResultVo{
+		Desc:     "manager",
+		RealName: "小锅饭",
+		Roles: []types.RoleInfo{
+			types.RoleInfo{
+				RoleName: "Super Admin",
+				Value:    "super",
+			},
+		},
+		Token:    "fakeToken1",
+		UserID:   1,
+		Username: "xiaoguofan",
+	}
+	common.OkWithData(r, context)
+}
+
+// GetUserInfo 获得用户信息
+// @Description 获得用户信息
+// @Router /api/getUserInfo [get]
+func GetUserInfo(context *gin.Context) {
+	// 先写死接口
+	r := types.UserInfoVo{
+		Desc:     "manager",
+		RealName: "小锅饭",
+		Roles: []types.RoleInfo{
+			types.RoleInfo{
+				RoleName: "Super Admin",
+				Value:    "super",
+			},
+		},
+		Token:    "fakeToken1",
+		UserID:   1,
+		Username: "xiaoguofan",
+		HomePath: "/bot",
+		Password: "123456",
+		Avatar:   "https://q1.qlogo.cn/g?b=qq&nk=1156544355&s=640",
+	}
+	common.OkWithData(r, context)
+}
+
+// Logout 登出
+// @Description 登出
+// @Router /api/logout [get]
+func Logout(context *gin.Context) {
+	// 先写死接口
+	common.Ok(context)
+}
+
+// GetPermCode 授权码
+// @Description 授权码
+// @Router /api/getPermCode [get]
+func GetPermCode(context *gin.Context) {
+	r := []string{"1000", "3000", "5000"}
+	// 先写死接口
+	common.OkWithData(r, context)
 }
