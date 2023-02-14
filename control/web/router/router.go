@@ -2,13 +2,10 @@
 package router
 
 import (
-	"net/http"
-
 	"github.com/FloatTech/zbputils/control/web/controller"
 	_ "github.com/FloatTech/zbputils/control/web/docs"
 	"github.com/FloatTech/zbputils/control/web/middleware"
 	"github.com/gin-gonic/gin"
-	webui "github.com/guohuiyuan/ZeroBot-Plugin-Webui"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
@@ -16,7 +13,7 @@ import (
 // SetRouters 创建路由
 func SetRouters(engine *gin.Engine) {
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	engine.StaticFS("/dist", http.FS(webui.Dist))
+
 	// 支持跨域
 	engine.Use(middleware.Cors())
 	engine.Use(gin.Logger())

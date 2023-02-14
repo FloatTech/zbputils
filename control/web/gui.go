@@ -2,8 +2,13 @@
 package webctrl
 
 import (
+	"io/fs"
+	"net/http"
+	"strings"
+
 	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/gin-gonic/gin"
+	webui "github.com/guohuiyuan/ZeroBot-Plugin-Webui"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,10 +36,27 @@ func run(addr string) {
 
 	engine := gin.New()
 	router.SetRouters(engine)
+
+	staticEngine := gin.New()
+	fp, _ := fs.Sub(webui.Dist, "dist")
+	staticEngine.StaticFS("/", http.FS(fp))
+
 	log.Infoln("[gui] the webui is running on", "http://"+addr)
 	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
 	log.Infoln("[gui] ", "you can see api by", "http://"+addr+"/swagger/index.html")
-	if err := engine.Run(addr); err != nil {
+	server := &http.Server{
+		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+			// 如果 URL 以 /api, /swagger 开头, 走后端路由
+			if strings.HasPrefix(request.URL.Path, "/api") || strings.HasPrefix(request.URL.Path, "/swagger") {
+				engine.ServeHTTP(writer, request)
+				return
+			}
+			// 否则，走前端路由
+			staticEngine.ServeHTTP(writer, request)
+		}),
+		Addr: addr,
+	}
+	if err := server.ListenAndServe(); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}
 }
