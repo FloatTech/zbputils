@@ -29,16 +29,12 @@ func run(addr string) {
 		}
 	}()
 
-	r := gin.New()
-	router.SetRouters(r)
-	// 注册主路径路由，使其跳转到主页面
-	// engine.GET("/", func(context *gin.Context) {
-	// 	context.Redirect(http.StatusMovedPermanently, "/dist/dist/default.html")
-	// })
-	log.Infoln("[gui] the webui is running on", addr)
+	engine := gin.New()
+	router.SetRouters(engine)
+	log.Infoln("[gui] the webui is running on", "http://"+addr)
 	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
 	log.Infoln("[gui] ", "you can see api by", "http://"+addr+"/swagger/index.html")
-	if err := r.Run(addr); err != nil {
+	if err := engine.Run(addr); err != nil {
 		log.Debugln("[gui] ", err.Error())
 	}
 }
