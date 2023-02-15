@@ -5,8 +5,8 @@ go 1.19
 require (
 	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
 	github.com/FloatTech/gg v1.1.2
-	github.com/FloatTech/imgfactory v0.2.2-0.20230210061338-8185b8d2530d
-	github.com/FloatTech/rendercard v0.0.10-0.20230210063120-3f20c031c9c7
+	github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9
+	github.com/FloatTech/rendercard v0.0.10-0.20230215092509-ff0745852f23
 	github.com/FloatTech/sqlite v1.5.7
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
 	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
