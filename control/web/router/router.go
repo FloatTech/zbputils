@@ -26,7 +26,7 @@ func SetRouters(engine *gin.Engine) {
 	apiRoute.GET("/getAllPlugin", controller.GetAllPlugin)
 	apiRoute.POST("/updatePluginStatus", controller.UpdatePluginStatus)
 	apiRoute.POST("/updateAllPluginStatus", controller.UpdateAllPluginStatus)
-	apiRoute.GET("/getRequests", controller.GetRequests)
+	apiRoute.GET("/getRequestList", controller.GetRequestList)
 	apiRoute.POST("/handleRequest", controller.HandleRequest)
 	apiRoute.GET("/getLog", controller.GetLog)
 	apiRoute.POST("/sendMsg", controller.SendMsg)

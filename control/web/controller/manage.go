@@ -265,10 +265,10 @@ func HandleRequest(context *gin.Context) {
 	common.Ok(context)
 }
 
-// GetRequests
+// GetRequestList
 // @Description 获取所有的请求
-// @Router /api/getRequests [get]
-func GetRequests(context *gin.Context) {
+// @Router /api/getRequestList [get]
+func GetRequestList(context *gin.Context) {
 	var data []interface{}
 	requestData.Range(func(key, value interface{}) bool {
 		data = append(data, value)

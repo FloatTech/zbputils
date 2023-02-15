@@ -96,7 +96,7 @@ const docTemplate = `{
                 "responses": {}
             }
         },
-        "/api/getRequests": {
+        "/api/getRequestList": {
             "get": {
                 "description": "获取所有的请求",
                 "responses": {}
