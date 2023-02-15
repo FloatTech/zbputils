@@ -2,13 +2,8 @@
 package middleware
 
 import (
-	"net/http"
-	"runtime/debug"
-
-	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/zbputils/control/web/common"
 	"github.com/gin-gonic/gin"
-	log "github.com/sirupsen/logrus"
 )
 
 // Cors
@@ -40,18 +35,6 @@ func Cors() gin.HandlerFunc {
 		if method == "OPTIONS" {
 			common.Ok(c)
 		}
-
-		defer func() {
-			if err := recover(); err != nil {
-				log.Errorf("[bot] execute rule err: %v\n%v", err, binary.BytesToString(debug.Stack()))
-				c.AbortWithStatusJSON(http.StatusOK, gin.H{
-					"code":    -1,
-					"message": err,
-					"type":    "error",
-					"result":  nil,
-				})
-			}
-		}()
 
 		c.Next()
 	}

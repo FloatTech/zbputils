@@ -34,12 +34,12 @@ func run(addr string) {
 		}
 	}()
 
-	engine := gin.New()
+	engine := gin.Default()
 	router.SetRouters(engine)
 
-	staticEngine := gin.New()
-	fp, _ := fs.Sub(webui.Dist, "dist")
-	staticEngine.StaticFS("/", http.FS(fp))
+	staticEngine := gin.Default()
+	df, _ := fs.Sub(webui.Dist, "dist")
+	staticEngine.StaticFS("/", http.FS(df))
 
 	log.Infoln("[gui] the webui is running on", "http://"+addr)
 	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
