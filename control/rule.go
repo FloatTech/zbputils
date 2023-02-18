@@ -15,16 +15,12 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	ctrl "github.com/FloatTech/zbpctrl"
-
 	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/floatbox/img/writer"
 	"github.com/FloatTech/floatbox/process"
-
+	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/rendercard"
-
+	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/ctxext"
-	"github.com/FloatTech/zbputils/img/text"
 )
 
 const (
@@ -159,10 +155,10 @@ func init() {
 			if grp == 0 {
 				grp = -ctx.Event.UserID
 			}
-			condition := ctx.Event.RawMessage == "此处启用所有插件" || ctx.Event.RawMessage == "adhocenableall"
+			condition := strings.Contains(ctx.Event.RawMessage, "启用") || strings.Contains(ctx.Event.RawMessage, "enable")
 			if condition {
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
-					if manager.Options.DisableOnDefault != condition {
+					if manager.Options.DisableOnDefault == condition {
 						return true
 					}
 					manager.Enable(grp)
@@ -391,18 +387,13 @@ func init() {
 					ctx.SendChain(message.Text("该服务无帮助!"))
 					return
 				}
-				err := geticonandfont()
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
 				}
 				// 处理插件帮助并且计算图像高
 				plugininfo := strings.Split(strings.Trim(service.String(), "\n"), "\n")
-				newplugininfo, err := rendercard.Truncate(text.GlowSansFontFile, plugininfo, 1272-50, 38)
+				newplugininfo, err := rendercard.Truncate(glowsd, plugininfo, 1272-50, 38)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
@@ -413,28 +404,26 @@ func init() {
 					RightTitle:    "FloatTech",
 					RightSubtitle: "ZeroBot-Plugin",
 					ImagePath:     kanbanpath + "kanban.png",
-					TitleFont:     text.ImpactFontFile,
-					TextFont:      text.GlowSansFontFile,
+					TitleFontData: impactd,
+					TextFontData:  glowsd,
 					IsEnabled:     service.IsEnabledIn(gid),
 				}).DrawTitleWithText(newplugininfo)
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				data, cl := writer.ToBytes(imgs) // 生成图片
-				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
-					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
-				}
-				cl()
-			})
-
-		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
-			Handle(func(ctx *zero.Ctx) {
-				err := geticonandfont()
+				data, err := imgfactory.ToBytes(imgs) // 生成图片
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
+				if id := ctx.SendChain(message.ImageBytes(data)); id.ID() == 0 {
+					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
+				}
+			})
+
+		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+			Handle(func(ctx *zero.Ctx) {
 				gid := ctx.Event.GroupID
 				if gid == 0 {
 					gid = -ctx.Event.UserID
@@ -470,7 +459,7 @@ func init() {
 						ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 					}
 				} else {
-					b64, err := writer.ToBase64(imgs[0])
+					b64, err := imgfactory.ToBase64(imgs[0])
 					if err != nil {
 						ctx.SendChain(message.Text("ERROR: ", err))
 						return

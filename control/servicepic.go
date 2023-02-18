@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Coloured-glaze/gg"
 	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/math"
+	"github.com/FloatTech/gg"
 	"github.com/FloatTech/ttl"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/disintegration/imaging"
@@ -43,6 +43,10 @@ var (
 	fullpageshadowcache image.Image
 	// lnperpg 每页行数
 	lnperpg = 9
+	// 字体 GlowSans 数据
+	glowsd []byte
+	// 字体 Impact 数据
+	impactd []byte
 )
 
 func init() {
@@ -51,6 +55,14 @@ func init() {
 		panic(err)
 	}
 	_, err = file.GetLazyData(kanbanpath+"kanban.png", Md5File, true)
+	if err != nil {
+		panic(err)
+	}
+	glowsd, err = file.GetLazyData(text.GlowSansFontFile, Md5File, true)
+	if err != nil {
+		panic(err)
+	}
+	impactd, err = file.GetLazyData(text.ImpactFontFile, Md5File, true)
 	if err != nil {
 		panic(err)
 	}
@@ -79,8 +91,8 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 			LeftSubtitle:  "service_list",
 			RightTitle:    "FloatTech",
 			RightSubtitle: "ZeroBot-Plugin",
-			TitleFont:     text.GlowSansFontFile,
-			TextFont:      text.ImpactFontFile,
+			TitleFontData: glowsd,
+			TextFontData:  impactd,
 			ImagePath:     kanbanpath + "kanban.png",
 		}).DrawTitle()
 		if err != nil {
@@ -110,12 +122,12 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 				}
 			}
 			c := &rendercard.Title{
-				IsEnabled:    info.status,
-				LeftTitle:    info.name,
-				LeftSubtitle: info.brief,
-				ImagePath:    banner,
-				TitleFont:    text.ImpactFontFile,
-				TextFont:     text.GlowSansFontFile,
+				IsEnabled:     info.status,
+				LeftTitle:     info.name,
+				LeftSubtitle:  info.brief,
+				ImagePath:     banner,
+				TitleFontData: impactd,
+				TextFontData:  glowsd,
 			}
 			h := c.Sum64()
 			card := cardcache.Get(h)
@@ -152,12 +164,12 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 					}
 				}
 				c := &rendercard.Title{
-					IsEnabled:    info.status,
-					LeftTitle:    info.name,
-					LeftSubtitle: info.brief,
-					ImagePath:    banner,
-					TitleFont:    text.ImpactFontFile,
-					TextFont:     text.GlowSansFontFile,
+					IsEnabled:     info.status,
+					LeftTitle:     info.name,
+					LeftSubtitle:  info.brief,
+					ImagePath:     banner,
+					TitleFontData: impactd,
+					TextFontData:  glowsd,
 				}
 				h := c.Sum64()
 				card := cardcache.Get(h)
@@ -247,22 +259,5 @@ func drawservicesof(gid int64) (imgs []image.Image, err error) {
 		}(l, l == page-1)
 	}
 	wg.Wait()
-	return
-}
-
-// 获取字体和头像
-func geticonandfont() (err error) {
-	_, err = file.GetLazyData(text.ImpactFontFile, Md5File, true)
-	if err != nil {
-		return
-	}
-	_, err = file.GetLazyData(text.GlowSansFontFile, Md5File, true)
-	if err != nil {
-		return
-	}
-	_, err = file.GetLazyData(kanbanpath+"kanban.png", Md5File, true)
-	if err != nil {
-		return
-	}
 	return
 }
