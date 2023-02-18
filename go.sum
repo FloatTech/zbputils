@@ -89,8 +89,8 @@ github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
-github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230215014135-082262d767f3 h1:SHuWAkSzIxFR6mSVh07u6NINOFN+Unbun2N93ZqQo88=
-github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230215014135-082262d767f3/go.mod h1:IFNo5TfPM0+KY/MJISfcD6O/SrnmcmPPACPJ+qosPH4=
+github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230218181958-ff4c4ea664c5 h1:njSuiNgZJI73ZIatQi8wLfJngM+dR7cKRwuMeAsM1WU=
+github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230218181958-ff4c4ea664c5/go.mod h1:IFNo5TfPM0+KY/MJISfcD6O/SrnmcmPPACPJ+qosPH4=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=

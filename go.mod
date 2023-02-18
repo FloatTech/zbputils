@@ -18,7 +18,7 @@ require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230215014135-082262d767f3
+	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230218181958-ff4c4ea664c5
 	github.com/sirupsen/logrus v1.9.0
 	github.com/swaggo/files v1.0.0
 	github.com/swaggo/gin-swagger v1.5.3
