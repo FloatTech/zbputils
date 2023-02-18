@@ -4,6 +4,7 @@ package webctrl
 import (
 	"io/fs"
 	"net/http"
+	"runtime/debug"
 	"strings"
 
 	"github.com/FloatTech/zbputils/control/web/router"
@@ -30,7 +31,7 @@ func run(addr string) {
 		err := recover()
 		if err != nil {
 			log.Errorln("[gui] ZeroBot-Plugin-Webui出现不可恢复的错误")
-			log.Errorln("[gui]", err)
+			log.Errorln("[gui] err:", err, ",stack:", debug.Stack())
 		}
 	}()
 
