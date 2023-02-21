@@ -353,8 +353,12 @@ func Login(context *gin.Context) {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	// 先写死接口
-	if d.Username != "xiaoguofan" || d.Password != "123456" {
+	loginFlag, err := control.CanFindUser(d.Username, d.Password)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	if !loginFlag {
 		common.FailWithMessage("用户名或密码错误", context)
 		return
 	}

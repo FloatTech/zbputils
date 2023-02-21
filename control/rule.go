@@ -49,6 +49,11 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
 }
 
+// CanFindUser 查找webui账号
+func CanFindUser(username, password string) (bool, error) {
+	return managers.CanFindUser(ctrl.User{Username: username, Password: password})
+}
+
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
 		err := os.MkdirAll("data/Control", 0755)
