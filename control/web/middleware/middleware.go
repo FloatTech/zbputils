@@ -2,7 +2,11 @@
 package middleware
 
 import (
+	"net/http"
+	"strings"
+
 	"github.com/FloatTech/zbputils/control/web/common"
+	"github.com/FloatTech/zbputils/control/web/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -37,5 +41,42 @@ func Cors() gin.HandlerFunc {
 		}
 
 		c.Next()
+	}
+}
+
+func TokenMiddle() gin.HandlerFunc {
+	return func(con *gin.Context) {
+		// 根据headers 中的 Authorization，判断用户是否登录
+		path := con.Request.URL.Path
+		println(strings.Index(path, "login"))
+		if strings.Index(path, "login") < 0 {
+			// 进行token验证
+			token := con.Request.Header.Get("Authorization")
+			if token == "" {
+				con.JSON(
+					http.StatusOK,
+					gin.H{
+						"code": 405,
+						"msg":  "无权访问",
+					},
+				)
+				con.Abort()
+				return
+			}
+			_, found := utils.LoginCache.Get(token)
+			if !found {
+				con.JSON(
+					http.StatusOK,
+					gin.H{
+						"code": 405,
+						"msg":  "toke无效",
+					},
+				)
+				con.Abort()
+				return
+			}
+		} else {
+			con.Next()
+		}
 	}
 }

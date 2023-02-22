@@ -19,6 +19,8 @@ require (
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230219183618-2ca7f5802aa3
+	github.com/patrickmn/go-cache v2.1.0+incompatible
+	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/swaggo/files v1.0.0
 	github.com/swaggo/gin-swagger v1.5.3

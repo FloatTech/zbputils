@@ -12,8 +12,11 @@ import (
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/common"
 	"github.com/FloatTech/zbputils/control/web/types"
+	"github.com/FloatTech/zbputils/control/web/utils"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
+	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -362,18 +365,20 @@ func Login(context *gin.Context) {
 		common.FailWithMessage("用户名或密码错误", context)
 		return
 	}
+	token := uuid.NewV4().String()
+	utils.LoginCache.Set(token, d.Username, cache.DefaultExpiration)
 	r := types.LoginResultVo{
 		Desc:     "manager",
-		RealName: "小锅饭",
+		RealName: d.Username,
 		Roles: []types.RoleInfo{
 			types.RoleInfo{
 				RoleName: "Super Admin",
 				Value:    "super",
 			},
 		},
-		Token:    "fakeToken1",
+		Token:    token,
 		UserID:   1,
-		Username: "xiaoguofan",
+		Username: d.Username,
 	}
 	common.OkWithData(r, context)
 }
@@ -406,7 +411,8 @@ func GetUserInfo(context *gin.Context) {
 // @Description 登出
 // @Router /api/logout [get]
 func Logout(context *gin.Context) {
-	// 先写死接口
+	token := context.Request.Header.Get("Authorization")
+	utils.LoginCache.Delete(token)
 	common.Ok(context)
 }
 

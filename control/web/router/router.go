@@ -15,11 +15,10 @@ func SetRouters(engine *gin.Engine) {
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// 支持跨域
-	engine.Use(middleware.Cors())
-	engine.Use(gin.Logger())
+	engine.Use(middleware.Cors(), gin.Logger())
 
 	apiRoute := engine.Group("/api")
-	apiRoute.GET("/getBotList", controller.GetBotList)
+	apiRoute.Use(middleware.TokenMiddle())
 	apiRoute.GET("/getFriendList", controller.GetFriendList)
 	apiRoute.GET("/getGroupList", controller.GetGroupList)
 	apiRoute.GET("/getPlugin", controller.GetPlugin)
@@ -28,11 +27,14 @@ func SetRouters(engine *gin.Engine) {
 	apiRoute.POST("/updateAllPluginStatus", controller.UpdateAllPluginStatus)
 	apiRoute.GET("/getRequestList", controller.GetRequestList)
 	apiRoute.POST("/handleRequest", controller.HandleRequest)
-	apiRoute.GET("/getLog", controller.GetLog)
 	apiRoute.POST("/sendMsg", controller.SendMsg)
-	apiRoute.GET("/data", controller.Upgrade)
-	apiRoute.POST("/login", controller.Login)
-	apiRoute.GET("/getUserInfo", controller.GetUserInfo)
-	apiRoute.GET("/logout", controller.Logout)
-	apiRoute.GET("/getPermCode", controller.GetPermCode)
+
+	noverifyRoute := engine.Group("/api")
+	noverifyRoute.POST("/login", controller.Login)
+	noverifyRoute.GET("/getUserInfo", controller.GetUserInfo)
+	noverifyRoute.GET("/logout", controller.Logout)
+	noverifyRoute.GET("/getPermCode", controller.GetPermCode)
+	noverifyRoute.GET("/getBotList", controller.GetBotList)
+	noverifyRoute.GET("/getLog", controller.GetLog)
+	noverifyRoute.GET("/data", controller.Upgrade)
 }
