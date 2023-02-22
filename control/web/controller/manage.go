@@ -48,7 +48,7 @@ func init() {
 		if conn != nil {
 			err := conn.WriteJSON(ctx.Event)
 			if err != nil {
-				log.Errorln("[gui] " + "向发送错误")
+				log.Errorln("[gui] 推送消息发送错误")
 				return
 			}
 		}
@@ -356,20 +356,16 @@ func Login(context *gin.Context) {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	loginFlag, err := control.CanFindUser(d.Username, d.Password)
+	user, err := control.FindUser(d.Username, d.Password)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	if !loginFlag {
-		common.FailWithMessage("用户名或密码错误", context)
-		return
-	}
 	token := uuid.NewV4().String()
-	utils.LoginCache.Set(token, d.Username, cache.DefaultExpiration)
+	utils.LoginCache.Set(token, user, cache.DefaultExpiration)
 	r := types.LoginResultVo{
 		Desc:     "manager",
-		RealName: d.Username,
+		RealName: user.Username,
 		Roles: []types.RoleInfo{
 			types.RoleInfo{
 				RoleName: "Super Admin",
@@ -377,8 +373,8 @@ func Login(context *gin.Context) {
 			},
 		},
 		Token:    token,
-		UserID:   1,
-		Username: d.Username,
+		UserID:   int(user.ID),
+		Username: user.Username,
 	}
 	common.OkWithData(r, context)
 }
@@ -387,21 +383,20 @@ func Login(context *gin.Context) {
 // @Description 获得用户信息
 // @Router /api/getUserInfo [get]
 func GetUserInfo(context *gin.Context) {
-	// 先写死接口
+	token := context.Request.Header.Get("Authorization")
+	i, _ := utils.LoginCache.Get(token)
+	user := i.(ctrl.User)
 	r := types.UserInfoVo{
 		Desc:     "manager",
-		RealName: "小锅饭",
+		RealName: user.Username,
 		Roles: []types.RoleInfo{
 			types.RoleInfo{
 				RoleName: "Super Admin",
 				Value:    "super",
 			},
 		},
-		Token:    "fakeToken1",
-		UserID:   1,
-		Username: "xiaoguofan",
-		HomePath: "/bot",
-		Password: "123456",
+		UserID:   int(user.ID),
+		Username: user.Username,
 		Avatar:   "https://q1.qlogo.cn/g?b=qq&nk=1156544355&s=640",
 	}
 	common.OkWithData(r, context)

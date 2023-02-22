@@ -49,9 +49,9 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
 }
 
-// CanFindUser 查找webui账号
-func CanFindUser(username, password string) (bool, error) {
-	return managers.CanFindUser(ctrl.User{Username: username, Password: password})
+// FindUser 查找webui账号
+func FindUser(username, password string) (ctrl.User, error) {
+	return managers.FindUser(ctrl.User{Username: username, Password: password})
 }
 
 func init() {

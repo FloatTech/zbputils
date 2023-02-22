@@ -28,10 +28,10 @@ func SetRouters(engine *gin.Engine) {
 	apiRoute.GET("/getRequestList", controller.GetRequestList)
 	apiRoute.POST("/handleRequest", controller.HandleRequest)
 	apiRoute.POST("/sendMsg", controller.SendMsg)
+	apiRoute.GET("/getUserInfo", controller.GetUserInfo)
 
 	noverifyRoute := engine.Group("/api")
 	noverifyRoute.POST("/login", controller.Login)
-	noverifyRoute.GET("/getUserInfo", controller.GetUserInfo)
 	noverifyRoute.GET("/logout", controller.Logout)
 	noverifyRoute.GET("/getPermCode", controller.GetPermCode)
 	noverifyRoute.GET("/getBotList", controller.GetBotList)
