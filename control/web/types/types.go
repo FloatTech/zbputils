@@ -39,10 +39,9 @@ type HandleRequestParams struct {
 
 // SendMsgParams 发送消息的入参
 type SendMsgParams struct {
-	SelfID      int64  `json:"selfId" form:"selfId"`
-	ID          int64  `json:"id" form:"id"`
-	Message     string `json:"message" form:"message"`
-	MessageType string `json:"messageType" form:"messageType"`
+	SelfID  int64   `json:"selfId" form:"selfId"`
+	GIDList []int64 `json:"gidList" form:"gidList"`
+	Message string  `json:"message" form:"message"`
 }
 
 // LoginParams 登录参数
@@ -78,4 +77,15 @@ type UserInfoVo struct {
 	Avatar   string     `json:"avatar"`
 	HomePath string     `json:"homePath"`
 	Password string     `json:"password"`
+}
+
+// MessageInfo 消息信息
+type MessageInfo struct {
+	MessageType string      `json:"message_type"`
+	MessageID   interface{} `json:"message_id"`
+	GroupID     int64       `json:"group_id"`
+	GroupName   string      `json:"group_name"`
+	UserID      int64       `json:"user_id"`
+	Nickname    string      `json:"nickname"`
+	RawMessage  string      `json:"raw_message"`
 }

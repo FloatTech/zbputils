@@ -173,34 +173,12 @@ const docTemplate = `{
                 "description": "前端调用发送信息",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "bot的QQ号",
-                        "name": "selfId",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 123456,
-                        "description": "群号",
-                        "name": "id",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "HelloWorld",
-                        "description": "消息文本",
-                        "name": "message",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "group",
-                        "description": "消息类型",
-                        "name": "message_type",
-                        "in": "formData"
+                        "description": "发消息参数",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.SendMsgParams"
+                        }
                     }
                 ],
                 "responses": {}
@@ -256,6 +234,25 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {}
+            }
+        }
+    },
+    "definitions": {
+        "types.SendMsgParams": {
+            "type": "object",
+            "properties": {
+                "gidList": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "message": {
+                    "type": "string"
+                },
+                "selfId": {
+                    "type": "integer"
+                }
             }
         }
     }

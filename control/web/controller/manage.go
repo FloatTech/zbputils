@@ -42,34 +42,43 @@ func init() {
 	// 日志设置
 	writer := io.MultiWriter(l, os.Stdout)
 	log.SetOutput(writer)
-	log.SetFormatter(&log.TextFormatter{DisableColors: true})
+	log.SetFormatter(&log.TextFormatter{DisableColors: false})
 
-	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+	connHandle := func(ctx *zero.Ctx) {
 		if conn != nil {
-			err := conn.WriteJSON(ctx.Event)
+			mi := types.MessageInfo{
+				MessageType: ctx.Event.MessageType,
+				MessageID:   ctx.Event.MessageID,
+				GroupID:     ctx.Event.GroupID,
+				GroupName:   ctx.GetGroupInfo(ctx.Event.GroupID, false).Name,
+				UserID:      ctx.Event.UserID,
+				Nickname:    ctx.GetStrangerInfo(ctx.Event.UserID, false).Get("nickname").String(),
+				RawMessage:  ctx.Event.RawMessage,
+			}
+			err := conn.WriteJSON(mi)
 			if err != nil {
-				log.Errorln("[gui] 推送消息发送错误")
+				log.Errorln("[gui] 推送消息发送错误:", err)
 				return
 			}
 		}
-	})
+	}
+	zero.OnMessage().SetBlock(false).FirstPriority().Handle(connHandle)
 	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
-	zero.OnRequest(func(ctx *zero.Ctx) bool {
+	zero.OnRequest().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
+		var typeName string
 		if ctx.Event.RequestType == "friend" {
-			ctx.State["type_name"] = "好友添加"
+			typeName = "好友添加"
 		} else {
 			if ctx.Event.SubType == "add" {
-				ctx.State["type_name"] = "加群请求"
+				typeName = "加群请求"
 			} else {
-				ctx.State["type_name"] = "群邀请"
+				typeName = "群邀请"
 			}
 		}
-		return true
-	}).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
 		r := &request{
 			RequestType: ctx.Event.RequestType,
 			SubType:     ctx.Event.SubType,
-			Type:        ctx.State["type_name"].(string),
+			Type:        typeName,
 			GroupID:     ctx.Event.GroupID,
 			UserID:      ctx.Event.UserID,
 			Flag:        ctx.Event.Flag,
@@ -101,7 +110,6 @@ type request struct {
 // @Router /api/getBotList [get]
 func GetBotList(context *gin.Context) {
 	var bots []int64
-
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
 		bots = append(bots, id)
 		return true
@@ -301,23 +309,24 @@ func Upgrade(context *gin.Context) {
 // SendMsg 前端调用发送信息
 // @Description 前端调用发送信息
 // @Router /api/sendMsg [post]
-// @Param selfId formData int64 true "bot的QQ号" default(abc)
-// @Param id formData int64 true "群号" default(123456)
-// @Param message formData string true "消息文本" default(HelloWorld)
-// @Param message_type formData string false "消息类型" default(group)
+// @Param object body types.SendMsgParams false "发消息参数"
 func SendMsg(context *gin.Context) {
-	var d types.SendMsgParams
+	var (
+		d     types.SendMsgParams
+		msgID int64
+	)
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
 	bot := zero.GetBot(d.SelfID)
-	var msgID int64
-	if d.MessageType == "group" {
-		msgID = bot.SendGroupMessage(d.ID, message.ParseMessageFromString(d.Message))
-	} else {
-		msgID = bot.SendPrivateMessage(d.ID, message.ParseMessageFromString(d.Message))
+	for _, gid := range d.GIDList {
+		if gid > 0 {
+			msgID = bot.SendGroupMessage(gid, message.UnescapeCQCodeText(d.Message))
+		} else if gid < 0 {
+			msgID = bot.SendPrivateMessage(-gid, message.UnescapeCQCodeText(d.Message))
+		}
 	}
 	common.OkWithData(msgID, context)
 }

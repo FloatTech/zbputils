@@ -1,4 +1,16 @@
 basePath: /
+definitions:
+  types.SendMsgParams:
+    properties:
+      gidList:
+        items:
+          type: integer
+        type: array
+      message:
+        type: string
+      selfId:
+        type: integer
+    type: object
 host: 127.0.0.1:3000
 info:
   contact: {}
@@ -115,28 +127,11 @@ paths:
     post:
       description: 前端调用发送信息
       parameters:
-      - description: bot的QQ号
-        in: formData
-        name: selfId
-        required: true
-        type: integer
-      - default: 123456
-        description: 群号
-        in: formData
-        name: id
-        required: true
-        type: integer
-      - default: HelloWorld
-        description: 消息文本
-        in: formData
-        name: message
-        required: true
-        type: string
-      - default: group
-        description: 消息类型
-        in: formData
-        name: message_type
-        type: string
+      - description: 发消息参数
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/types.SendMsgParams'
       responses: {}
   /api/updateAllPluginStatus:
     post:
