@@ -24,7 +24,7 @@ type PluginStatusParams struct {
 	Status  int    `json:"status" form:"status"`
 }
 
-// PluginStatusParams UpdatePluginStatus的入参, Status,0=沉默,1=响应
+// ResponseStatusParams UpdateResponseStatus的入参, Status,0=沉默,1=响应
 type ResponseStatusParams struct {
 	GroupID int64 `json:"groupId" form:"groupId"`
 	Status  int   `json:"status" form:"status"`

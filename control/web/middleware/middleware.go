@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Cors
+// Cors 跨域
 /**
  * @Description: 支持跨域访问
  * @return gin.HandlerFunc
