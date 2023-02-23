@@ -121,15 +121,25 @@ func GetBotList(context *gin.Context) {
 // GetFriendList
 // @Description 获取好友列表
 // @Router /api/getFriendList [get]
-// @Param selfId query integer true "机器人qq号" default(123456)
+// @Param selfId query integer false "机器人qq号" default(123456)
 func GetFriendList(context *gin.Context) {
-	var d types.BotParams
+	var (
+		d   types.BotParams
+		bot *zero.Ctx
+	)
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	bot := zero.GetBot(d.SelfID)
+	if d.SelfID == 0 {
+		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+			bot = ctx
+			return false
+		})
+	} else {
+		bot = zero.GetBot(d.SelfID)
+	}
 	var resp []any
 	list := bot.GetFriendList().String()
 	err = json.Unmarshal(binary.StringToBytes(list), &resp)
@@ -143,15 +153,25 @@ func GetFriendList(context *gin.Context) {
 // GetGroupList
 // @Description 获取群列表
 // @Router /api/getGroupList [get]
-// @Param selfId query integer true "机器人qq号" default(123456)
+// @Param selfId query integer false "机器人qq号" default(123456)
 func GetGroupList(context *gin.Context) {
-	var d types.BotParams
+	var (
+		d   types.BotParams
+		bot *zero.Ctx
+	)
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	bot := zero.GetBot(d.SelfID)
+	if d.SelfID == 0 {
+		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+			bot = ctx
+			return false
+		})
+	} else {
+		bot = zero.GetBot(d.SelfID)
+	}
 	var resp []any
 	list := bot.GetGroupList().String()
 	err = json.Unmarshal(binary.StringToBytes(list), &resp)

@@ -3,7 +3,7 @@ package types
 
 // BotParams GetGroupList,GetFriendList的入参
 type BotParams struct {
-	SelfID int64 `json:"selfId" form:"selfId" validate:"required"`
+	SelfID int64 `json:"selfId" form:"selfId"`
 }
 
 // AllPluginParams GetAllPlugin的入参

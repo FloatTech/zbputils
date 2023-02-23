@@ -55,7 +55,6 @@ paths:
         description: 机器人qq号
         in: query
         name: selfId
-        required: true
         type: integer
       responses: {}
   /api/getGroupList:
@@ -66,7 +65,6 @@ paths:
         description: 机器人qq号
         in: query
         name: selfId
-        required: true
         type: integer
       responses: {}
   /api/getPermCode:

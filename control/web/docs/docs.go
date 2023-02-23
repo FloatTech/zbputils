@@ -30,8 +30,7 @@ const docTemplate = `{
                         "default": 123456,
                         "description": "机器人qq号",
                         "name": "selfId",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {}
@@ -46,8 +45,7 @@ const docTemplate = `{
                         "default": 123456,
                         "description": "机器人qq号",
                         "name": "selfId",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {}
