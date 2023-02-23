@@ -17,17 +17,23 @@ type PluginParams struct {
 	Name    string `json:"name" form:"name"`
 }
 
-// PluginStatusParams UpdatePluginStatus的入参
+// PluginStatusParams UpdatePluginStatus的入参, Status,0=禁用,1=启用,2=还原
 type PluginStatusParams struct {
 	GroupID int64  `json:"groupId" form:"groupId"`
 	Name    string `json:"name" form:"name" validate:"required"`
-	Status  bool   `json:"status" form:"status"`
+	Status  int    `json:"status" form:"status"`
+}
+
+// PluginStatusParams UpdatePluginStatus的入参, Status,0=沉默,1=响应
+type ResponseStatusParams struct {
+	GroupID int64 `json:"groupId" form:"groupId"`
+	Status  int   `json:"status" form:"status"`
 }
 
 // AllPluginStatusParams UpdateAllPluginStatus的入参
 type AllPluginStatusParams struct {
 	GroupID int64 `json:"groupId" form:"groupId"`
-	Status  bool  `json:"status" form:"status"`
+	Status  int   `json:"status" form:"status"`
 }
 
 // HandleRequestParams 处理事件的入参
@@ -88,4 +94,15 @@ type MessageInfo struct {
 	UserID      int64       `json:"user_id"`
 	Nickname    string      `json:"nickname"`
 	RawMessage  string      `json:"raw_message"`
+}
+
+// PluginVo 全部插件的返回
+type PluginVo struct {
+	ID             int    `json:"id"`
+	Name           string `json:"name"`
+	Brief          string `json:"brief"`
+	Usage          string `json:"usage"`
+	Banner         string `json:"banner"`
+	PluginStatus   bool   `json:"pluginStatus"`
+	ResponseStatus bool   `json:"responseStatus"`
 }

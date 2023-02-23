@@ -80,10 +80,21 @@ func FailWithDetailed(result any, message string, ctx *gin.Context) {
 	Result(Error, result, message, ErrorMessageType, ctx)
 }
 
+// Bind 绑定结构体, 并校验
 func Bind(obj any, ctx *gin.Context) (err error) {
 	err = ctx.ShouldBind(obj)
 	if err != nil {
 		return
 	}
 	return validate.Struct(obj)
+}
+
+// NotLoggedIn 未登录
+func NotLoggedIn(code int, result any, message string, messageType string, ctx *gin.Context) {
+	ctx.JSON(http.StatusUnauthorized, Response{
+		code,
+		result,
+		message,
+		messageType,
+	})
 }

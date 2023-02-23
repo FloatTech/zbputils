@@ -15,21 +15,6 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/getAllPlugin": {
-            "get": {
-                "description": "获取所有插件的状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "query"
-                    }
-                ],
-                "responses": {}
-            }
-        },
         "/api/getBotList": {
             "get": {
                 "description": "获取机器人qq号",
@@ -71,28 +56,6 @@ const docTemplate = `{
         "/api/getPermCode": {
             "get": {
                 "description": "授权码",
-                "responses": {}
-            }
-        },
-        "/api/getPlugin": {
-            "get": {
-                "description": "获取某个插件的状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "antibuse",
-                        "description": "插件名",
-                        "name": "name",
-                        "in": "query"
-                    }
-                ],
                 "responses": {}
             }
         },
@@ -168,6 +131,91 @@ const docTemplate = `{
                 "responses": {}
             }
         },
+        "/api/manage/getAllPlugin": {
+            "get": {
+                "description": "获取所有插件的状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "groupId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/manage/getPlugin": {
+            "get": {
+                "description": "获取某个插件的状态",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "群号",
+                        "name": "groupId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "default": "antibuse",
+                        "description": "插件名",
+                        "name": "name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/manage/updateAllPluginStatus": {
+            "post": {
+                "description": "更改某群所有插件状态",
+                "parameters": [
+                    {
+                        "description": "修改插件状态入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.AllPluginStatusParams"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/manage/updatePluginStatus": {
+            "post": {
+                "description": "更改某一个插件状态",
+                "parameters": [
+                    {
+                        "description": "修改插件状态入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.PluginStatusParams"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
+        "/api/manage/updateResponseStatus": {
+            "post": {
+                "description": "更改某一个群响应",
+                "parameters": [
+                    {
+                        "description": "修改群响应入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.ResponseStatusParams"
+                        }
+                    }
+                ],
+                "responses": {}
+            }
+        },
         "/api/sendMsg": {
             "post": {
                 "description": "前端调用发送信息",
@@ -183,61 +231,48 @@ const docTemplate = `{
                 ],
                 "responses": {}
             }
-        },
-        "/api/updateAllPluginStatus": {
-            "post": {
-                "description": "更改某群所有插件状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "插件状态",
-                        "name": "status",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {}
-            }
-        },
-        "/api/updatePluginStatus": {
-            "post": {
-                "description": "更改某一个插件状态",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "string",
-                        "default": "aireply",
-                        "description": "插件名",
-                        "name": "name",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "插件状态",
-                        "name": "status",
-                        "in": "formData"
-                    }
-                ],
-                "responses": {}
-            }
         }
     },
     "definitions": {
+        "types.AllPluginStatusParams": {
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.PluginStatusParams": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "groupId": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "types.ResponseStatusParams": {
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "types.SendMsgParams": {
             "type": "object",
             "properties": {

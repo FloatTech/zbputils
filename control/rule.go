@@ -54,6 +54,21 @@ func FindUser(username, password string) (ctrl.User, error) {
 	return managers.FindUser(ctrl.User{Username: username, Password: password})
 }
 
+// Response 响应
+func Response(gid int64) error {
+	return managers.Response(gid)
+}
+
+// Silence 沉默
+func Silence(gid int64) error {
+	return managers.Silence(gid)
+}
+
+// CanResponse 响应状态
+func CanResponse(gid int64) bool {
+	return managers.CanResponse(gid)
+}
+
 func init() {
 	process.NewCustomOnce(&managers).Do(func() {
 		err := os.MkdirAll("data/Control", 0755)

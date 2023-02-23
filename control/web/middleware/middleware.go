@@ -47,13 +47,13 @@ func TokenMiddle() gin.HandlerFunc {
 		// 进行token验证
 		token := con.Request.Header.Get("Authorization")
 		if token == "" {
-			common.FailWithMessage("无权访问, 请登录", con)
+			common.NotLoggedIn(2, nil, "无权访问, 请登录", "", con)
 			con.Abort()
 			return
 		}
 		_, found := utils.LoginCache.Get(token)
 		if !found {
-			common.FailWithMessage("toke无效, 请重新登录", con)
+			common.NotLoggedIn(2, nil, "toke无效, 请重新登录", "", con)
 			con.Abort()
 			return
 		}

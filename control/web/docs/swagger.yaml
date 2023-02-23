@@ -1,5 +1,30 @@
 basePath: /
 definitions:
+  types.AllPluginStatusParams:
+    properties:
+      groupId:
+        type: integer
+      status:
+        type: integer
+    type: object
+  types.PluginStatusParams:
+    properties:
+      groupId:
+        type: integer
+      name:
+        type: string
+      status:
+        type: integer
+    required:
+    - name
+    type: object
+  types.ResponseStatusParams:
+    properties:
+      groupId:
+        type: integer
+      status:
+        type: integer
+    type: object
   types.SendMsgParams:
     properties:
       gidList:
@@ -18,16 +43,6 @@ info:
   title: zbp api
   version: "1.0"
 paths:
-  /api/getAllPlugin:
-    get:
-      description: 获取所有插件的状态
-      parameters:
-      - default: 0
-        description: 群号
-        in: query
-        name: groupId
-        type: integer
-      responses: {}
   /api/getBotList:
     get:
       description: 获取机器人qq号
@@ -57,21 +72,6 @@ paths:
   /api/getPermCode:
     get:
       description: 授权码
-      responses: {}
-  /api/getPlugin:
-    get:
-      description: 获取某个插件的状态
-      parameters:
-      - default: 0
-        description: 群号
-        in: query
-        name: groupId
-        type: integer
-      - default: antibuse
-        description: 插件名
-        in: query
-        name: name
-        type: string
       responses: {}
   /api/getRequestList:
     get:
@@ -123,6 +123,61 @@ paths:
     get:
       description: 登出
       responses: {}
+  /api/manage/getAllPlugin:
+    get:
+      description: 获取所有插件的状态
+      parameters:
+      - default: 0
+        description: 群号
+        in: query
+        name: groupId
+        type: integer
+      responses: {}
+  /api/manage/getPlugin:
+    get:
+      description: 获取某个插件的状态
+      parameters:
+      - default: 0
+        description: 群号
+        in: query
+        name: groupId
+        type: integer
+      - default: antibuse
+        description: 插件名
+        in: query
+        name: name
+        type: string
+      responses: {}
+  /api/manage/updateAllPluginStatus:
+    post:
+      description: 更改某群所有插件状态
+      parameters:
+      - description: 修改插件状态入参
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/types.AllPluginStatusParams'
+      responses: {}
+  /api/manage/updatePluginStatus:
+    post:
+      description: 更改某一个插件状态
+      parameters:
+      - description: 修改插件状态入参
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/types.PluginStatusParams'
+      responses: {}
+  /api/manage/updateResponseStatus:
+    post:
+      description: 更改某一个群响应
+      parameters:
+      - description: 修改群响应入参
+        in: body
+        name: object
+        schema:
+          $ref: '#/definitions/types.ResponseStatusParams'
+      responses: {}
   /api/sendMsg:
     post:
       description: 前端调用发送信息
@@ -132,41 +187,5 @@ paths:
         name: object
         schema:
           $ref: '#/definitions/types.SendMsgParams'
-      responses: {}
-  /api/updateAllPluginStatus:
-    post:
-      description: 更改某群所有插件状态
-      parameters:
-      - default: 0
-        description: 群号
-        in: formData
-        name: groupId
-        type: integer
-      - default: true
-        description: 插件状态
-        in: formData
-        name: status
-        type: boolean
-      responses: {}
-  /api/updatePluginStatus:
-    post:
-      description: 更改某一个插件状态
-      parameters:
-      - default: 0
-        description: 群号
-        in: formData
-        name: groupId
-        type: integer
-      - default: aireply
-        description: 插件名
-        in: formData
-        name: name
-        required: true
-        type: string
-      - default: true
-        description: 插件状态
-        in: formData
-        name: status
-        type: boolean
       responses: {}
 swagger: "2.0"

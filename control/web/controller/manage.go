@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 
 	"github.com/FloatTech/floatbox/binary"
@@ -163,7 +164,7 @@ func GetGroupList(context *gin.Context) {
 
 // GetAllPlugin
 // @Description 获取所有插件的状态
-// @Router /api/getAllPlugin [get]
+// @Router /api/manage/getAllPlugin [get]
 // @Param groupId query integer false "群号" default(0)
 func GetAllPlugin(context *gin.Context) {
 	var d types.AllPluginParams
@@ -172,17 +173,26 @@ func GetAllPlugin(context *gin.Context) {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	var datas []map[string]any
+	var pluginVoList []types.PluginVo
 	control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
-		datas = append(datas, map[string]any{"id": i, "name": manager.Service, "brief": manager.Options.Brief, "usage": manager.String(), "banner": "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + manager.Service + ".png", "status": manager.IsEnabledIn(d.GroupID)})
+		p := types.PluginVo{
+			ID:             i,
+			Name:           manager.Service,
+			Brief:          manager.Options.Brief,
+			Usage:          manager.String(),
+			Banner:         "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + manager.Service + ".png",
+			PluginStatus:   manager.IsEnabledIn(d.GroupID),
+			ResponseStatus: control.CanResponse(d.GroupID),
+		}
+		pluginVoList = append(pluginVoList, p)
 		return true
 	})
-	common.OkWithData(datas, context)
+	common.OkWithData(pluginVoList, context)
 }
 
 // GetPlugin
 // @Description 获取某个插件的状态
-// @Router /api/getPlugin [get]
+// @Router /api/manage/getPlugin [get]
 // @Param groupId query integer false "群号" default(0)
 // @Param name query string false "插件名" default(antibuse)
 func GetPlugin(context *gin.Context) {
@@ -197,16 +207,21 @@ func GetPlugin(context *gin.Context) {
 		common.FailWithMessage(d.Name+"服务不存在", context)
 		return
 	}
-	data := map[string]any{"name": con.Service, "brief": con.Options.Brief, "usage": con.String(), "banner": "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + con.Service + ".png", "status": con.IsEnabledIn(d.GroupID)}
-	common.OkWithData(data, context)
+	p := types.PluginVo{
+		Name:           con.Service,
+		Brief:          con.Options.Brief,
+		Usage:          con.String(),
+		Banner:         "https://gitcode.net/u011570312/zbpbanner/-/raw/main/" + con.Service + ".png",
+		PluginStatus:   con.IsEnabledIn(d.GroupID),
+		ResponseStatus: control.CanResponse(d.GroupID),
+	}
+	common.OkWithData(p, context)
 }
 
 // UpdatePluginStatus
 // @Description 更改某一个插件状态
-// @Router /api/updatePluginStatus [post]
-// @Param groupId formData integer false "群号" default(0)
-// @Param name formData string true "插件名" default(aireply)
-// @Param status formData boolean false "插件状态" default(true)
+// @Router /api/manage/updatePluginStatus [post]
+// @Param object body types.PluginStatusParams false "修改插件状态入参"
 func UpdatePluginStatus(context *gin.Context) {
 	var d types.PluginStatusParams
 	err := common.Bind(&d, context)
@@ -219,19 +234,39 @@ func UpdatePluginStatus(context *gin.Context) {
 		common.FailWithMessage(d.Name+"服务不存在", context)
 		return
 	}
-	if d.Status {
-		con.Enable(d.GroupID)
-	} else {
+	if d.Status == 0 {
 		con.Disable(d.GroupID)
+	} else if d.Status == 1 {
+		con.Enable(d.GroupID)
+	} else if d.Status == 2 {
+		con.Reset(d.GroupID)
+	}
+	common.Ok(context)
+}
+
+// UpdateResponseStatus
+// @Description 更改某一个群响应
+// @Router /api/manage/updateResponseStatus [post]
+// @Param object body types.ResponseStatusParams false "修改群响应入参"
+func UpdateResponseStatus(context *gin.Context) {
+	var d types.ResponseStatusParams
+	err := common.Bind(&d, context)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	if d.Status == 1 {
+		control.Response(d.GroupID)
+	} else {
+		control.Silence(d.GroupID)
 	}
 	common.Ok(context)
 }
 
 // UpdateAllPluginStatus
 // @Description 更改某群所有插件状态
-// @Router /api/updateAllPluginStatus [post]
-// @Param groupId formData integer false "群号" default(0)
-// @Param status formData boolean false "插件状态" default(true)
+// @Router /api/manage/updateAllPluginStatus [post]
+// @Param object body types.AllPluginStatusParams false "修改插件状态入参"
 func UpdateAllPluginStatus(context *gin.Context) {
 	var d types.AllPluginStatusParams
 	err := common.Bind(&d, context)
@@ -239,7 +274,7 @@ func UpdateAllPluginStatus(context *gin.Context) {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	if d.Status {
+	if d.Status == 1 {
 		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
 			manager.Enable(d.GroupID)
 			return true
@@ -395,6 +430,10 @@ func GetUserInfo(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	i, _ := utils.LoginCache.Get(token)
 	user := i.(ctrl.User)
+	var qq int64
+	if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
+		qq = zero.BotConfig.SuperUsers[0]
+	}
 	r := types.UserInfoVo{
 		Desc:     "manager",
 		RealName: user.Username,
@@ -406,7 +445,7 @@ func GetUserInfo(context *gin.Context) {
 		},
 		UserID:   int(user.ID),
 		Username: user.Username,
-		Avatar:   "https://q1.qlogo.cn/g?b=qq&nk=1156544355&s=640",
+		Avatar:   "https://q1.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(qq, 10) + "&s=640",
 	}
 	common.OkWithData(r, context)
 }
