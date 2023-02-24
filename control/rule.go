@@ -49,11 +49,6 @@ func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
 }
 
-// FindUser 查找webui账号
-func FindUser(username, password string) (ctrl.User, error) {
-	return managers.FindUser(ctrl.User{Username: username, Password: password})
-}
-
 // Response 响应
 func Response(gid int64) error {
 	return managers.Response(gid)
@@ -506,7 +501,7 @@ func init() {
 		zero.OnRegex(`^/设置webui配置\s(.*[^\s$])\s(.+)$`, zero.SuperUserPermission).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
 				regexMatched := ctx.State["regex_matched"].([]string)
-				err := managers.CreateOrUpdateUser(ctrl.User{Username: regexMatched[1], Password: regexMatched[2]})
+				err := CreateOrUpdateUser(User{Username: regexMatched[1], Password: regexMatched[2]})
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return

@@ -449,7 +449,7 @@ func Login(context *gin.Context) {
 func GetUserInfo(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	i, _ := utils.LoginCache.Get(token)
-	user := i.(ctrl.User)
+	user := i.(control.User)
 	var qq int64
 	if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
 		qq = zero.BotConfig.SuperUsers[0]
