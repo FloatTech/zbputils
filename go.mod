@@ -18,7 +18,7 @@ require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230223172639-ed3ec482fdeb
+	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230224021013-307b6b90c092
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.0
