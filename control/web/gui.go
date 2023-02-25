@@ -48,36 +48,33 @@ func RunGui(addr string) {
 		}),
 		Addr: addr,
 	}
-	for {
-		select {
-		case flag := <-control.SignChan:
-			if flag {
-				if err := server.Shutdown(context.TODO()); err != nil {
-					log.Errorln("[gui] server shutdown err: ", err.Error())
-				}
-				server = &http.Server{
-					Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-						// 如果 URL 以 /api, /swagger 开头, 走后端路由
-						if strings.HasPrefix(request.URL.Path, "/api") || strings.HasPrefix(request.URL.Path, "/swagger") {
-							engine.ServeHTTP(writer, request)
-							return
-						}
-						// 否则，走前端路由
-						staticEngine.ServeHTTP(writer, request)
-					}),
-					Addr: addr,
-				}
-				go func() {
-					log.Infoln("[gui] the webui is running on", "http://"+addr)
-					log.Infoln("[gui] you can see api by http://" + addr + "/swagger/index.html")
-					if err := server.ListenAndServe(); err != nil {
-						log.Errorln("[gui] server listen err: ", err.Error())
+	for flag := range control.SignChan {
+		if flag {
+			if err := server.Shutdown(context.TODO()); err != nil {
+				log.Errorln("[gui] server shutdown err: ", err.Error())
+			}
+			server = &http.Server{
+				Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+					// 如果 URL 以 /api, /swagger 开头, 走后端路由
+					if strings.HasPrefix(request.URL.Path, "/api") || strings.HasPrefix(request.URL.Path, "/swagger") {
+						engine.ServeHTTP(writer, request)
+						return
 					}
-				}()
-			} else {
-				if err := server.Shutdown(context.TODO()); err != nil {
-					log.Errorln("[gui] server shutdown err: ", err.Error())
+					// 否则，走前端路由
+					staticEngine.ServeHTTP(writer, request)
+				}),
+				Addr: addr,
+			}
+			go func() {
+				log.Infoln("[gui] the webui is running on", "http://"+addr)
+				log.Infoln("[gui] you can see api by http://" + addr + "/swagger/index.html")
+				if err := server.ListenAndServe(); err != nil {
+					log.Errorln("[gui] server listen err: ", err.Error())
 				}
+			}()
+		} else {
+			if err := server.Shutdown(context.TODO()); err != nil {
+				log.Errorln("[gui] server shutdown err: ", err.Error())
 			}
 		}
 	}
