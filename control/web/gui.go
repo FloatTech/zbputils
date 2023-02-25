@@ -52,6 +52,9 @@ func RunGui(addr string) {
 		select {
 		case flag := <-control.SignChan:
 			if flag {
+				if err := server.Shutdown(context.TODO()); err != nil {
+					log.Errorln("[gui] server shutdown err: ", err.Error())
+				}
 				server = &http.Server{
 					Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 						// 如果 URL 以 /api, /swagger 开头, 走后端路由
@@ -72,7 +75,7 @@ func RunGui(addr string) {
 					}
 				}()
 			} else {
-				if err := server.Shutdown(context.Background()); err != nil {
+				if err := server.Shutdown(context.TODO()); err != nil {
 					log.Errorln("[gui] server shutdown err: ", err.Error())
 				}
 			}
