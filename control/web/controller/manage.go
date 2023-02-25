@@ -1,3 +1,4 @@
+// Package controller 主要处理逻辑
 package controller
 
 import (
@@ -6,18 +7,18 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"sync"
 
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/common"
+	"github.com/FloatTech/zbputils/control/web/middleware"
 	"github.com/FloatTech/zbputils/control/web/types"
-	"github.com/FloatTech/zbputils/control/web/utils"
+	"github.com/RomiChan/syncx"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -31,8 +32,8 @@ var (
 
 	l logWriter
 	// 存储请求事件，flag作为键，一个request对象作为值
-	requestData sync.Map
-	upGrader    = websocket.Upgrader{
+	requestData syncx.Map[string, *zero.Event]
+	upgrader    = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
@@ -45,7 +46,7 @@ func init() {
 	log.SetOutput(writer)
 	log.SetFormatter(&log.TextFormatter{DisableColors: false})
 
-	connHandle := func(ctx *zero.Ctx) {
+	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
 		if conn != nil {
 			mi := types.MessageInfo{
 				MessageType: ctx.Event.MessageType,
@@ -62,31 +63,10 @@ func init() {
 				return
 			}
 		}
-	}
-	zero.OnMessage().SetBlock(false).FirstPriority().Handle(connHandle)
+	})
 	// 直接注册一个request请求监听器，优先级设置为最高，设置不阻断事件传播
 	zero.OnRequest().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
-		var typeName string
-		if ctx.Event.RequestType == "friend" {
-			typeName = "好友添加"
-		} else {
-			if ctx.Event.SubType == "add" {
-				typeName = "加群请求"
-			} else {
-				typeName = "群邀请"
-			}
-		}
-		r := &request{
-			RequestType: ctx.Event.RequestType,
-			SubType:     ctx.Event.SubType,
-			Type:        typeName,
-			GroupID:     ctx.Event.GroupID,
-			UserID:      ctx.Event.UserID,
-			Flag:        ctx.Event.Flag,
-			Comment:     ctx.Event.Comment,
-			SelfID:      ctx.Event.SelfID,
-		}
-		requestData.Store(ctx.Event.Flag, r)
+		requestData.Store(ctx.Event.Flag, ctx.Event)
 	})
 }
 
@@ -94,19 +74,7 @@ func init() {
 type logWriter struct {
 }
 
-// request
-type request struct {
-	RequestType string `json:"request_type"`
-	SubType     string `json:"sub_type"`
-	Type        string `json:"type"`
-	Comment     string `json:"comment"`
-	GroupID     int64  `json:"group_id"`
-	UserID      int64  `json:"user_id"`
-	Flag        string `json:"flag"`
-	SelfID      int64  `json:"self_id"`
-}
-
-// GetBotList
+// GetBotList 获取机器人qq号
 // @Description 获取机器人qq号
 // @Router /api/getBotList [get]
 func GetBotList(context *gin.Context) {
@@ -118,27 +86,15 @@ func GetBotList(context *gin.Context) {
 	common.OkWithData(bots, context)
 }
 
-// GetFriendList
+// GetFriendList 获取好友列表
 // @Description 获取好友列表
 // @Router /api/getFriendList [get]
 // @Param selfId query integer false "机器人qq号" default(123456)
 func GetFriendList(context *gin.Context) {
-	var (
-		d   types.BotParams
-		bot *zero.Ctx
-	)
-	err := common.Bind(&d, context)
+	_, bot, err := getBot(context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
-	}
-	if d.SelfID == 0 {
-		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
-			bot = ctx
-			return false
-		})
-	} else {
-		bot = zero.GetBot(d.SelfID)
 	}
 	var resp []any
 	list := bot.GetFriendList().String()
@@ -150,27 +106,15 @@ func GetFriendList(context *gin.Context) {
 	common.OkWithData(resp, context)
 }
 
-// GetGroupList
+// GetGroupList 获取群列表
 // @Description 获取群列表
 // @Router /api/getGroupList [get]
 // @Param selfId query integer false "机器人qq号" default(123456)
 func GetGroupList(context *gin.Context) {
-	var (
-		d   types.BotParams
-		bot *zero.Ctx
-	)
-	err := common.Bind(&d, context)
+	_, bot, err := getBot(context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
 		return
-	}
-	if d.SelfID == 0 {
-		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
-			bot = ctx
-			return false
-		})
-	} else {
-		bot = zero.GetBot(d.SelfID)
 	}
 	var resp []any
 	list := bot.GetGroupList().String()
@@ -182,7 +126,7 @@ func GetGroupList(context *gin.Context) {
 	common.OkWithData(resp, context)
 }
 
-// GetAllPlugin
+// GetAllPlugin 获取所有插件的状态
 // @Description 获取所有插件的状态
 // @Router /api/manage/getAllPlugin [get]
 // @Param groupId query integer false "群号" default(0)
@@ -210,7 +154,7 @@ func GetAllPlugin(context *gin.Context) {
 	common.OkWithData(pluginVoList, context)
 }
 
-// GetPlugin
+// GetPlugin 获取某个插件的状态
 // @Description 获取某个插件的状态
 // @Router /api/manage/getPlugin [get]
 // @Param groupId query integer false "群号" default(0)
@@ -238,7 +182,7 @@ func GetPlugin(context *gin.Context) {
 	common.OkWithData(p, context)
 }
 
-// UpdatePluginStatus
+// UpdatePluginStatus 更改某一个插件状态
 // @Description 更改某一个插件状态
 // @Router /api/manage/updatePluginStatus [post]
 // @Param object body types.PluginStatusParams false "修改插件状态入参"
@@ -254,17 +198,19 @@ func UpdatePluginStatus(context *gin.Context) {
 		common.FailWithMessage(d.Name+"服务不存在", context)
 		return
 	}
-	if d.Status == 0 {
+	switch d.Status {
+	case 0:
 		con.Disable(d.GroupID)
-	} else if d.Status == 1 {
+	case 1:
 		con.Enable(d.GroupID)
-	} else if d.Status == 2 {
+	case 2:
 		con.Reset(d.GroupID)
+	default:
 	}
 	common.Ok(context)
 }
 
-// UpdateResponseStatus
+// UpdateResponseStatus 更改某一个群响应
 // @Description 更改某一个群响应
 // @Router /api/manage/updateResponseStatus [post]
 // @Param object body types.ResponseStatusParams false "修改群响应入参"
@@ -276,14 +222,18 @@ func UpdateResponseStatus(context *gin.Context) {
 		return
 	}
 	if d.Status == 1 {
-		control.Response(d.GroupID)
+		err = control.Response(d.GroupID)
 	} else {
-		control.Silence(d.GroupID)
+		err = control.Silence(d.GroupID)
+	}
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
 	}
 	common.Ok(context)
 }
 
-// UpdateAllPluginStatus
+// UpdateAllPluginStatus 更改某群所有插件状态
 // @Description 更改某群所有插件状态
 // @Router /api/manage/updateAllPluginStatus [post]
 // @Param object body types.AllPluginStatusParams false "修改插件状态入参"
@@ -315,7 +265,10 @@ func UpdateAllPluginStatus(context *gin.Context) {
 // @Param reason formData string false "原因" default(abc)
 // @Param approve formData bool false "是否同意" default(true)
 func HandleRequest(context *gin.Context) {
-	var d types.HandleRequestParams
+	var (
+		d        types.HandleRequestParams
+		typeName string
+	)
 	err := common.Bind(&d, context)
 	if err != nil {
 		common.FailWithMessage(err.Error(), context)
@@ -326,18 +279,48 @@ func HandleRequest(context *gin.Context) {
 		common.FailWithMessage("flag not found", context)
 		return
 	}
-	r2 := r.(*request)
-	r2.handle(d.Approve, d.Reason)
+	bot := zero.GetBot(r.SelfID)
+	if r.RequestType == "friend" {
+		bot.SetFriendAddRequest(r.Flag, d.Approve, "")
+		typeName = "好友添加"
+	} else {
+		bot.SetGroupAddRequest(r.Flag, r.SubType, d.Approve, d.Reason)
+		if r.SubType == "add" {
+			typeName = "加群请求"
+		} else {
+			typeName = "群邀请"
+		}
+	}
+	log.Debugln("[gui] 已处理", r.UserID, "的"+typeName)
 	common.Ok(context)
 }
 
-// GetRequestList
+// GetRequestList 获取所有的请求
 // @Description 获取所有的请求
 // @Router /api/getRequestList [get]
+// @Param selfId query integer false "机器人qq号" default(123456)
 func GetRequestList(context *gin.Context) {
-	var data []interface{}
-	requestData.Range(func(key, value interface{}) bool {
-		data = append(data, value)
+	d, bot, err := getBot(context)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	var data []types.RequestVo
+	requestData.Range(func(key string, value *zero.Event) bool {
+		if d.SelfID != 0 && value.SelfID != d.SelfID {
+			return true
+		}
+		data = append(data, types.RequestVo{
+			Flag:        value.Flag,
+			RequestType: value.RequestType,
+			SubType:     value.SubType,
+			Comment:     value.Comment,
+			GroupID:     value.GroupID,
+			GroupName:   bot.GetGroupInfo(value.GroupID, false).Name,
+			UserID:      value.UserID,
+			Nickname:    bot.GetStrangerInfo(value.UserID, false).Get("nickname").String(),
+			SelfID:      value.SelfID,
+		})
 		return true
 	})
 	common.OkWithData(data, context)
@@ -345,7 +328,7 @@ func GetRequestList(context *gin.Context) {
 
 // GetLog 连接日志
 func GetLog(context *gin.Context) {
-	con1, err := upGrader.Upgrade(context.Writer, context.Request, nil)
+	con1, err := upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return
 	}
@@ -354,7 +337,7 @@ func GetLog(context *gin.Context) {
 
 // Upgrade 连接ws，向前端推送message
 func Upgrade(context *gin.Context) {
-	con, err := upGrader.Upgrade(context.Writer, context.Request, nil)
+	con, err := upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return
 	}
@@ -386,17 +369,6 @@ func SendMsg(context *gin.Context) {
 	common.OkWithData(msgID, context)
 }
 
-// handle 提交一个请求
-func (r *request) handle(approve bool, reason string) {
-	bot := zero.GetBot(r.SelfID)
-	if r.RequestType == "friend" {
-		bot.SetFriendAddRequest(r.Flag, approve, "")
-	} else {
-		bot.SetGroupAddRequest(r.Flag, r.SubType, approve, reason)
-	}
-	log.Debugln("[gui] ", "已处理", r.UserID, "的"+r.Type)
-}
-
 // Write 写入日志
 func (l logWriter) Write(p []byte) (n int, err error) {
 	if logConn != nil {
@@ -425,8 +397,8 @@ func Login(context *gin.Context) {
 		common.FailWithMessage(err.Error(), context)
 		return
 	}
-	token := uuid.NewV4().String()
-	utils.LoginCache.Set(token, user, cache.DefaultExpiration)
+	token := uuid.NewString()
+	middleware.LoginCache.Set(token, user, cache.DefaultExpiration)
 	r := types.LoginResultVo{
 		Desc:     "manager",
 		RealName: user.Username,
@@ -448,7 +420,7 @@ func Login(context *gin.Context) {
 // @Router /api/getUserInfo [get]
 func GetUserInfo(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
-	i, _ := utils.LoginCache.Get(token)
+	i, _ := middleware.LoginCache.Get(token)
 	user := i.(control.User)
 	var qq int64
 	if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
@@ -475,7 +447,7 @@ func GetUserInfo(context *gin.Context) {
 // @Router /api/logout [get]
 func Logout(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
-	utils.LoginCache.Delete(token)
+	middleware.LoginCache.Delete(token)
 	common.Ok(context)
 }
 
@@ -486,4 +458,21 @@ func GetPermCode(context *gin.Context) {
 	r := []string{"1000", "3000", "5000"}
 	// 先写死接口
 	common.OkWithData(r, context)
+}
+
+func getBot(context *gin.Context) (d types.BotParams, bot *zero.Ctx, err error) {
+	err = common.Bind(&d, context)
+	if err != nil {
+		common.FailWithMessage(err.Error(), context)
+		return
+	}
+	if d.SelfID == 0 {
+		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+			bot = ctx
+			return false
+		})
+	} else {
+		bot = zero.GetBot(d.SelfID)
+	}
+	return
 }

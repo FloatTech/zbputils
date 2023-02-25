@@ -498,7 +498,7 @@ func init() {
 			fullpageshadowcache = nil
 			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
-		zero.OnRegex(`^/设置webui配置\s(.*[^\s$])\s(.+)$`, zero.SuperUserPermission).SetBlock(true).
+		zero.OnRegex(`^/设置webui账号\s(.*[^\s$])\s(.+)$`, zero.SuperUserPermission).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
 				regexMatched := ctx.State["regex_matched"].([]string)
 				err := CreateOrUpdateUser(User{Username: regexMatched[1], Password: regexMatched[2]})
@@ -506,7 +506,11 @@ func init() {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
-				ctx.SendChain(message.Text("成功设置webui配置\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
+				ctx.SendChain(message.Text("设置成功"))
+				if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
+					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui配置\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
+				}
+
 			})
 	})
 }

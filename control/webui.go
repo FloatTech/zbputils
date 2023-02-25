@@ -16,13 +16,13 @@ type User struct {
 }
 
 var (
-	udb       = &sql.Sqlite{}
-	udbFolder = "data/webui/"
+	udb         = &sql.Sqlite{}
+	webuiFolder = "data/webui/"
 )
 
 func init() {
-	_ = os.MkdirAll(udbFolder, 0755)
-	udb.DBPath = udbFolder + "user.db"
+	_ = os.MkdirAll(webuiFolder, 0755)
+	udb.DBPath = webuiFolder + "user.db"
 	err := udb.Open(time.Hour * 24)
 	if err != nil {
 		panic(err)
@@ -34,6 +34,7 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+		process.GlobalInitMutex.Unlock()
 	}()
 }
 

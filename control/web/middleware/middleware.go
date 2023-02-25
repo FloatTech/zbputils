@@ -2,9 +2,16 @@
 package middleware
 
 import (
+	"time"
+
 	"github.com/FloatTech/zbputils/control/web/common"
-	"github.com/FloatTech/zbputils/control/web/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/patrickmn/go-cache"
+)
+
+var (
+	// LoginCache 登录缓存
+	LoginCache = cache.New(24*time.Hour, 12*time.Hour)
 )
 
 // Cors 跨域
@@ -51,7 +58,7 @@ func TokenMiddle() gin.HandlerFunc {
 			con.Abort()
 			return
 		}
-		_, found := utils.LoginCache.Get(token)
+		_, found := LoginCache.Get(token)
 		if !found {
 			common.NotLoggedIn(2, nil, "toke无效, 请重新登录", "", con)
 			con.Abort()

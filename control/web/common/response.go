@@ -20,12 +20,8 @@ const (
 )
 
 var (
-	validate *validator.Validate
-)
-
-func init() {
 	validate = validator.New()
-}
+)
 
 // Response 基础返回类
 type Response struct {

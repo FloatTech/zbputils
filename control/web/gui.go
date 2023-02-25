@@ -13,20 +13,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// InitGui 初始化gui
-func InitGui(addr string) {
-	// 将日志重定向到前端hook
-	// 监听后端
-	go run(addr)
-	// 注册消息handle
-}
-
+// RunGui 运行webui
 // @title zbp api
 // @version 1.0
 // @description zbp restful api document
 // @host 127.0.0.1:3000
 // @BasePath /
-func run(addr string) {
+func RunGui(addr string) {
 	defer func() {
 		err := recover()
 		if err != nil {

@@ -106,3 +106,16 @@ type PluginVo struct {
 	PluginStatus   bool   `json:"pluginStatus"`
 	ResponseStatus bool   `json:"responseStatus"`
 }
+
+// RequestVo 返回
+type RequestVo struct {
+	Flag        string `json:"flag"`
+	RequestType string `json:"requestType"`
+	SubType     string `json:"subType"`
+	Comment     string `json:"comment"`
+	GroupID     int64  `json:"groupId"`
+	GroupName   string `json:"groupName"`
+	UserID      int64  `json:"userId"`
+	Nickname    string `json:"nickname"`
+	SelfID      int64  `json:"selfId"`
+}
