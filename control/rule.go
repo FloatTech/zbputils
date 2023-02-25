@@ -34,6 +34,8 @@ const (
 var (
 	// managers 每个插件对应的管理
 	managers = ctrl.NewManager[*zero.Ctx](dbfile)
+	// 启动/停止 webui
+	SignChan = make(chan bool)
 )
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
@@ -511,6 +513,17 @@ func init() {
 					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui配置\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
 				}
 
+			})
+		zero.OnFullMatchGroup([]string{"/启动webui", "/停止webui"}, zero.SuperUserPermission).SetBlock(true).
+			Handle(func(ctx *zero.Ctx) {
+				matched := ctx.State["matched"].(string)
+				if matched == "/启动webui" {
+					SignChan <- true
+					ctx.SendChain(message.Text("启动成功"))
+				} else {
+					SignChan <- false
+					ctx.SendChain(message.Text("停止成功"))
+				}
 			})
 	})
 }

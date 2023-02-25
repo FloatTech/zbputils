@@ -2,11 +2,13 @@
 package webctrl
 
 import (
+	"context"
 	"io/fs"
 	"net/http"
 	"runtime/debug"
 	"strings"
 
+	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/gin-gonic/gin"
 	webui "github.com/guohuiyuan/ZeroBot-Plugin-Webui"
@@ -34,10 +36,6 @@ func RunGui(addr string) {
 	staticEngine := gin.Default()
 	df, _ := fs.Sub(webui.Dist, "dist")
 	staticEngine.StaticFS("/", http.FS(df))
-
-	log.Infoln("[gui] the webui is running on", "http://"+addr)
-	log.Infoln("[gui] ", "you input the `ZeroBot-Plugin.exe -g` can disable the gui")
-	log.Infoln("[gui] ", "you can see api by", "http://"+addr+"/swagger/index.html")
 	server := &http.Server{
 		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			// 如果 URL 以 /api, /swagger 开头, 走后端路由
@@ -50,7 +48,35 @@ func RunGui(addr string) {
 		}),
 		Addr: addr,
 	}
-	if err := server.ListenAndServe(); err != nil {
-		log.Debugln("[gui] ", err.Error())
+	for {
+		select {
+		case flag := <-control.SignChan:
+			if flag {
+				server = &http.Server{
+					Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+						// 如果 URL 以 /api, /swagger 开头, 走后端路由
+						if strings.HasPrefix(request.URL.Path, "/api") || strings.HasPrefix(request.URL.Path, "/swagger") {
+							engine.ServeHTTP(writer, request)
+							return
+						}
+						// 否则，走前端路由
+						staticEngine.ServeHTTP(writer, request)
+					}),
+					Addr: addr,
+				}
+				go func() {
+					log.Infoln("[gui] the webui is running on", "http://"+addr)
+					log.Infoln("[gui] you can see api by http://" + addr + "/swagger/index.html")
+					if err := server.ListenAndServe(); err != nil {
+						log.Errorln("[gui] server listen err: ", err.Error())
+					}
+				}()
+			} else {
+				if err := server.Shutdown(context.Background()); err != nil {
+					log.Errorln("[gui] server shutdown err: ", err.Error())
+				}
+			}
+		default:
+		}
 	}
 }
