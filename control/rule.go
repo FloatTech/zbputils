@@ -510,7 +510,7 @@ func init() {
 				}
 				ctx.SendChain(message.Text("设置成功"))
 				if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
-					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui配置\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
+					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
 				}
 
 			})
