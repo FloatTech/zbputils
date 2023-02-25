@@ -79,7 +79,6 @@ func RunGui(addr string) {
 					log.Errorln("[gui] server shutdown err: ", err.Error())
 				}
 			}
-		default:
 		}
 	}
 }
