@@ -44,7 +44,7 @@ func init() {
 	// 日志设置
 	writer := io.MultiWriter(l, os.Stdout)
 	log.SetOutput(writer)
-	log.SetFormatter(&log.TextFormatter{DisableColors: false})
+	log.SetFormatter(&log.TextFormatter{DisableColors: true})
 
 	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
 		if conn != nil {

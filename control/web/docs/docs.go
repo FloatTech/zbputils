@@ -60,6 +60,15 @@ const docTemplate = `{
         "/api/getRequestList": {
             "get": {
                 "description": "获取所有的请求",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 123456,
+                        "description": "机器人qq号",
+                        "name": "selfId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {}
             }
         },
