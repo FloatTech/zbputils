@@ -34,7 +34,7 @@ const (
 var (
 	// managers 每个插件对应的管理
 	managers = ctrl.NewManager[*zero.Ctx](dbfile)
-	// 启动/停止 webui
+	// SignChan 启动/停止 webui
 	SignChan = make(chan bool)
 )
 
