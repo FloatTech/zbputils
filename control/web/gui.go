@@ -48,7 +48,7 @@ func RunGui(addr string) {
 		}),
 		Addr: addr,
 	}
-	for flag := range control.SignChan {
+	for flag := range control.ListenCtrlChan {
 		if flag {
 			if err := server.Shutdown(context.TODO()); err != nil {
 				log.Errorln("[gui] server shutdown err: ", err.Error())

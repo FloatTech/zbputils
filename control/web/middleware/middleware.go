@@ -2,9 +2,9 @@
 package middleware
 
 import (
+	"net/http"
 	"time"
 
-	"github.com/FloatTech/zbputils/control/web/common"
 	"github.com/gin-gonic/gin"
 	"github.com/patrickmn/go-cache"
 )
@@ -41,7 +41,12 @@ func Cors() gin.HandlerFunc {
 
 		// 允许类型校验
 		if method == "OPTIONS" {
-			common.Ok(c)
+			c.JSON(http.StatusOK, gin.H{
+				"code":    0,
+				"result":  nil,
+				"message": "",
+				"type":    "success",
+			})
 		}
 
 		c.Next()
@@ -54,13 +59,23 @@ func TokenMiddle() gin.HandlerFunc {
 		// 进行token验证
 		token := con.Request.Header.Get("Authorization")
 		if token == "" {
-			common.NotLoggedIn(2, nil, "无权访问, 请登录", "", con)
+			con.JSON(http.StatusUnauthorized, gin.H{
+				"code":    2,
+				"result":  nil,
+				"message": "无权访问, 请登录",
+				"type":    "error",
+			})
 			con.Abort()
 			return
 		}
 		_, found := LoginCache.Get(token)
 		if !found {
-			common.NotLoggedIn(2, nil, "toke无效, 请重新登录", "", con)
+			con.JSON(http.StatusUnauthorized, gin.H{
+				"code":    2,
+				"result":  nil,
+				"message": "toke无效, 请重新登录",
+				"type":    "error",
+			})
 			con.Abort()
 			return
 		}

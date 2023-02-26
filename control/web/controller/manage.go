@@ -11,12 +11,12 @@ import (
 	"github.com/FloatTech/floatbox/binary"
 	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/control/web/common"
 	"github.com/FloatTech/zbputils/control/web/middleware"
 	"github.com/FloatTech/zbputils/control/web/types"
 	"github.com/RomiChan/syncx"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
@@ -28,8 +28,6 @@ var (
 	// 向前端推送消息的ws链接
 	conn *websocket.Conn
 	// 向前端推送日志的ws链接
-	logConn *websocket.Conn
-
 	l logWriter
 	// 存储请求事件，flag作为键，一个request对象作为值
 	requestData syncx.Map[string, *zero.Event]
@@ -38,6 +36,7 @@ var (
 			return true
 		},
 	}
+	validate = validator.New()
 )
 
 func init() {
@@ -72,6 +71,7 @@ func init() {
 
 // logWriter
 type logWriter struct {
+	logConn *websocket.Conn
 }
 
 // GetBotList 获取机器人qq号
@@ -83,7 +83,12 @@ func GetBotList(context *gin.Context) {
 		bots = append(bots, id)
 		return true
 	})
-	common.OkWithData(bots, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  bots,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetFriendList 获取好友列表
@@ -93,17 +98,32 @@ func GetBotList(context *gin.Context) {
 func GetFriendList(context *gin.Context) {
 	_, bot, err := getBot(context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	var resp []any
 	list := bot.GetFriendList().String()
 	err = json.Unmarshal(binary.StringToBytes(list), &resp)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
-	common.OkWithData(resp, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  resp,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetGroupList 获取群列表
@@ -113,17 +133,32 @@ func GetFriendList(context *gin.Context) {
 func GetGroupList(context *gin.Context) {
 	_, bot, err := getBot(context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	var resp []any
 	list := bot.GetGroupList().String()
 	err = json.Unmarshal(binary.StringToBytes(list), &resp)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
-	common.OkWithData(resp, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  resp,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetAllPlugin 获取所有插件的状态
@@ -132,9 +167,14 @@ func GetGroupList(context *gin.Context) {
 // @Param groupId query integer false "群号" default(0)
 func GetAllPlugin(context *gin.Context) {
 	var d types.AllPluginParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	var pluginVoList []types.PluginVo
@@ -151,7 +191,12 @@ func GetAllPlugin(context *gin.Context) {
 		pluginVoList = append(pluginVoList, p)
 		return true
 	})
-	common.OkWithData(pluginVoList, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  pluginVoList,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetPlugin 获取某个插件的状态
@@ -161,14 +206,24 @@ func GetAllPlugin(context *gin.Context) {
 // @Param name query string false "插件名" default(antibuse)
 func GetPlugin(context *gin.Context) {
 	var d types.PluginParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	con, b := control.Lookup(d.Name)
 	if !b {
-		common.FailWithMessage(d.Name+"服务不存在", context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": d.Name + "服务不存在",
+			"type":    "error",
+		})
 		return
 	}
 	p := types.PluginVo{
@@ -179,7 +234,12 @@ func GetPlugin(context *gin.Context) {
 		PluginStatus:   con.IsEnabledIn(d.GroupID),
 		ResponseStatus: control.CanResponse(d.GroupID),
 	}
-	common.OkWithData(p, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  p,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // UpdatePluginStatus 更改某一个插件状态
@@ -188,14 +248,24 @@ func GetPlugin(context *gin.Context) {
 // @Param object body types.PluginStatusParams false "修改插件状态入参"
 func UpdatePluginStatus(context *gin.Context) {
 	var d types.PluginStatusParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	con, b := control.Lookup(d.Name)
 	if !b {
-		common.FailWithMessage(d.Name+"服务不存在", context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": d.Name + "服务不存在",
+			"type":    "error",
+		})
 		return
 	}
 	switch d.Status {
@@ -207,7 +277,12 @@ func UpdatePluginStatus(context *gin.Context) {
 		con.Reset(d.GroupID)
 	default:
 	}
-	common.Ok(context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  nil,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // UpdateResponseStatus 更改某一个群响应
@@ -216,9 +291,14 @@ func UpdatePluginStatus(context *gin.Context) {
 // @Param object body types.ResponseStatusParams false "修改群响应入参"
 func UpdateResponseStatus(context *gin.Context) {
 	var d types.ResponseStatusParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	if d.Status == 1 {
@@ -227,10 +307,20 @@ func UpdateResponseStatus(context *gin.Context) {
 		err = control.Silence(d.GroupID)
 	}
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
-	common.Ok(context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  nil,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // UpdateAllPluginStatus 更改某群所有插件状态
@@ -239,9 +329,14 @@ func UpdateResponseStatus(context *gin.Context) {
 // @Param object body types.AllPluginStatusParams false "修改插件状态入参"
 func UpdateAllPluginStatus(context *gin.Context) {
 	var d types.AllPluginStatusParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	if d.Status == 1 {
@@ -255,7 +350,12 @@ func UpdateAllPluginStatus(context *gin.Context) {
 			return true
 		})
 	}
-	common.Ok(context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  nil,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // HandleRequest 处理一个请求
@@ -269,14 +369,24 @@ func HandleRequest(context *gin.Context) {
 		d        types.HandleRequestParams
 		typeName string
 	)
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	r, ok := requestData.LoadAndDelete(d.Flag)
 	if !ok {
-		common.FailWithMessage("flag not found", context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": "flag not found",
+			"type":    "error",
+		})
 		return
 	}
 	bot := zero.GetBot(r.SelfID)
@@ -292,7 +402,12 @@ func HandleRequest(context *gin.Context) {
 		}
 	}
 	log.Debugln("[gui] 已处理", r.UserID, "的"+typeName)
-	common.Ok(context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  nil,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetRequestList 获取所有的请求
@@ -302,7 +417,12 @@ func HandleRequest(context *gin.Context) {
 func GetRequestList(context *gin.Context) {
 	d, bot, err := getBot(context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	var data []types.RequestVo
@@ -323,16 +443,21 @@ func GetRequestList(context *gin.Context) {
 		})
 		return true
 	})
-	common.OkWithData(data, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  data,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetLog 连接日志
 func GetLog(context *gin.Context) {
-	con1, err := upgrader.Upgrade(context.Writer, context.Request, nil)
+	conn, err := upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return
 	}
-	logConn = con1
+	l.logConn = conn
 }
 
 // Upgrade 连接ws，向前端推送message
@@ -353,9 +478,14 @@ func SendMsg(context *gin.Context) {
 		d     types.SendMsgParams
 		msgID int64
 	)
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	bot := zero.GetBot(d.SelfID)
@@ -366,13 +496,18 @@ func SendMsg(context *gin.Context) {
 			msgID = bot.SendPrivateMessage(-gid, message.UnescapeCQCodeText(d.Message))
 		}
 	}
-	common.OkWithData(msgID, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  msgID,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // Write 写入日志
 func (l logWriter) Write(p []byte) (n int, err error) {
-	if logConn != nil {
-		err := logConn.WriteMessage(websocket.TextMessage, p)
+	if l.logConn != nil {
+		err := l.logConn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {
 			return len(p), nil
 		}
@@ -387,14 +522,24 @@ func (l logWriter) Write(p []byte) (n int, err error) {
 // @Param password formData string true "密码" default(123456)
 func Login(context *gin.Context) {
 	var d types.LoginParams
-	err := common.Bind(&d, context)
+	err := bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	user, err := control.FindUser(d.Username, d.Password)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	token := uuid.NewString()
@@ -412,7 +557,12 @@ func Login(context *gin.Context) {
 		UserID:   int(user.ID),
 		Username: user.Username,
 	}
-	common.OkWithData(r, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  r,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetUserInfo 获得用户信息
@@ -439,7 +589,12 @@ func GetUserInfo(context *gin.Context) {
 		Username: user.Username,
 		Avatar:   "https://q1.qlogo.cn/g?b=qq&nk=" + strconv.FormatInt(qq, 10) + "&s=640",
 	}
-	common.OkWithData(r, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  r,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // Logout 登出
@@ -448,7 +603,12 @@ func GetUserInfo(context *gin.Context) {
 func Logout(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	middleware.LoginCache.Delete(token)
-	common.Ok(context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  nil,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 // GetPermCode 授权码
@@ -457,13 +617,23 @@ func Logout(context *gin.Context) {
 func GetPermCode(context *gin.Context) {
 	r := []string{"1000", "3000", "5000"}
 	// 先写死接口
-	common.OkWithData(r, context)
+	context.JSON(http.StatusOK, gin.H{
+		"code":    0,
+		"result":  r,
+		"message": "",
+		"type":    "ok",
+	})
 }
 
 func getBot(context *gin.Context) (d types.BotParams, bot *zero.Ctx, err error) {
-	err = common.Bind(&d, context)
+	err = bind(&d, context)
 	if err != nil {
-		common.FailWithMessage(err.Error(), context)
+		context.JSON(http.StatusOK, gin.H{
+			"code":    -1,
+			"result":  nil,
+			"message": err.Error(),
+			"type":    "error",
+		})
 		return
 	}
 	if d.SelfID == 0 {
@@ -475,4 +645,13 @@ func getBot(context *gin.Context) (d types.BotParams, bot *zero.Ctx, err error) 
 		bot = zero.GetBot(d.SelfID)
 	}
 	return
+}
+
+// bind 绑定结构体, 并校验
+func bind(obj any, ctx *gin.Context) (err error) {
+	err = ctx.ShouldBind(obj)
+	if err != nil {
+		return
+	}
+	return validate.Struct(obj)
 }

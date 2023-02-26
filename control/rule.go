@@ -34,8 +34,8 @@ const (
 var (
 	// managers 每个插件对应的管理
 	managers = ctrl.NewManager[*zero.Ctx](dbfile)
-	// SignChan 启动/停止 webui
-	SignChan = make(chan bool)
+	// ListenCtrlChan 启动/停止 webui
+	ListenCtrlChan = make(chan bool)
 )
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
@@ -500,30 +500,26 @@ func init() {
 			fullpageshadowcache = nil
 			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
-		zero.OnRegex(`^/设置webui账号\s(.*[^\s$])\s(.+)$`, zero.SuperUserPermission).SetBlock(true).
+		zero.OnRegex(`^/设置webui用户名\s?(\S+)\s?密码\s?(\S+)$`, zero.SuperUserPermission).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
 				regexMatched := ctx.State["regex_matched"].([]string)
-				err := CreateOrUpdateUser(User{Username: regexMatched[1], Password: regexMatched[2]})
+				err := CreateOrUpdateUser(&User{Username: regexMatched[1], Password: regexMatched[2]})
 				if err != nil {
 					ctx.SendChain(message.Text("ERROR: ", err))
 					return
 				}
 				ctx.SendChain(message.Text("设置成功"))
 				if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
-					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\nusername: ", regexMatched[1], "\npassword: ", regexMatched[2]))
+					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\n用户名: ", regexMatched[1], "\n密码: ", regexMatched[2]))
 				}
 
 			})
-		zero.OnFullMatchGroup([]string{"/启动webui", "/停止webui"}, zero.SuperUserPermission).SetBlock(true).
+		zero.OnCommand("webui", zero.SuperUserPermission).SetBlock(true).
 			Handle(func(ctx *zero.Ctx) {
-				matched := ctx.State["matched"].(string)
-				if matched == "/启动webui" {
-					SignChan <- true
-					ctx.SendChain(message.Text("启动成功"))
-				} else {
-					SignChan <- false
-					ctx.SendChain(message.Text("停止成功"))
-				}
+				args := ctx.State["args"].(string)
+				args = strings.TrimSpace(args)
+				ListenCtrlChan <- args == "启动"
+				ctx.SendChain(message.Text("webui" + args + "成功"))
 			})
 	})
 }

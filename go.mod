@@ -20,7 +20,7 @@ require (
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/google/uuid v1.3.0
-	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230225084500-324c1ba22b99
+	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230226142052-988dacca5f95
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/swaggo/files v1.0.0

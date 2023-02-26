@@ -39,7 +39,7 @@ func init() {
 }
 
 // CreateOrUpdateUser 创建或修改用户密码
-func CreateOrUpdateUser(u User) error {
+func CreateOrUpdateUser(u *User) error {
 	var fu User
 	err := udb.Find("user", &fu, "WHERE username = '"+u.Username+"' AND password = '"+u.Password+"'")
 	canFind := err == nil && fu.Username == u.Username
@@ -49,7 +49,7 @@ func CreateOrUpdateUser(u User) error {
 			return err
 		}
 	}
-	err = udb.Insert("user", &u)
+	err = udb.Insert("user", u)
 	return err
 }
 
