@@ -1,4 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230227124824-ec26e8e62cee h1:ktfessPPoywzf5rQLaDY6Sl4W23zDa3voRPV9sB4Ako=
+github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230227124824-ec26e8e62cee/go.mod h1:Se2A9vnC4eSYF7vR2LNSayV7rvbFcpgVs1ZN4sEYMyg=
 github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d h1:vVqMO5Kejt5pueuZvBxfX+psa7UwE110TpITf5eV7Zw=
 github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d/go.mod h1:OoZE4Ra7olpFaJSrlD6mcyT4chPLg9QBRE1pzTC8R84=
 github.com/FloatTech/gg v1.1.2 h1:YolgOYg3uDHc1+g0bLtt6QuRA/pvLn+b9IBCIhOOX88=
@@ -89,8 +91,6 @@ github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/
 github.com/google/uuid v1.3.0 h1:t6JiXgmwXMjEs8VusXIJk2BXHsn+wx8BZdTaoZ5fu7I=
 github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1/go.mod h1:wJfORRmW1u3UXTncJ5qlYoELFm8eSnnEO6hX4iZ3EWY=
-github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230226142052-988dacca5f95 h1:BnfTjWU/yzYReAQvRxizYt4NC3MyFBrnGGFNFSvLyoQ=
-github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230226142052-988dacca5f95/go.mod h1:IFNo5TfPM0+KY/MJISfcD6O/SrnmcmPPACPJ+qosPH4=
 github.com/josharian/intern v1.0.0 h1:vlS4z54oSdjm0bgjRigI+G1HpF+tI+9rE5LLzOg8HmY=
 github.com/josharian/intern v1.0.0/go.mod h1:5DoeVV0s6jJacbCEi61lwdGj/aVlrQvzHFFd8Hwg//Y=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=

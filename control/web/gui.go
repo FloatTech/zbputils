@@ -8,10 +8,10 @@ import (
 	"runtime/debug"
 	"strings"
 
+	webui "github.com/FloatTech/ZeroBot-Plugin-Webui"
 	"github.com/FloatTech/zbputils/control"
 	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/gin-gonic/gin"
-	webui "github.com/guohuiyuan/ZeroBot-Plugin-Webui"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,8 +48,8 @@ func RunGui(addr string) {
 		}),
 		Addr: addr,
 	}
-	for flag := range control.ListenCtrlChan {
-		if flag {
+	for canrun := range control.ListenCtrlChan {
+		if canrun {
 			if err := server.Shutdown(context.TODO()); err != nil {
 				log.Errorln("[gui] server shutdown err: ", err.Error())
 			}

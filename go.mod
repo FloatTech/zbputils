@@ -3,6 +3,7 @@ module github.com/FloatTech/zbputils
 go 1.19
 
 require (
+	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230227124824-ec26e8e62cee
 	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9
@@ -20,7 +21,6 @@ require (
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/google/uuid v1.3.0
-	github.com/guohuiyuan/ZeroBot-Plugin-Webui v0.0.0-20230226142052-988dacca5f95
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.9.0
 	github.com/swaggo/files v1.0.0
