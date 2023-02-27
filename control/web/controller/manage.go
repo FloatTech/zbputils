@@ -26,7 +26,7 @@ import (
 
 var (
 	// 向前端推送消息的ws链接
-	conn *websocket.Conn
+	msgConn *websocket.Conn
 	// 向前端推送日志的ws链接
 	l logWriter
 	// 存储请求事件，flag作为键，一个request对象作为值
@@ -46,7 +46,7 @@ func init() {
 	log.SetFormatter(&log.TextFormatter{DisableColors: false})
 
 	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
-		if conn != nil {
+		if msgConn != nil {
 			mi := types.MessageInfo{
 				MessageType: ctx.Event.MessageType,
 				MessageID:   ctx.Event.MessageID,
@@ -56,7 +56,7 @@ func init() {
 				Nickname:    ctx.GetStrangerInfo(ctx.Event.UserID, false).Get("nickname").String(),
 				RawMessage:  ctx.Event.RawMessage,
 			}
-			err := conn.WriteJSON(mi)
+			err := msgConn.WriteJSON(mi)
 			if err != nil {
 				log.Errorln("[gui] 推送消息发送错误:", err)
 				return
@@ -462,11 +462,11 @@ func GetLog(context *gin.Context) {
 
 // Upgrade 连接ws，向前端推送message
 func Upgrade(context *gin.Context) {
-	con, err := upgrader.Upgrade(context.Writer, context.Request, nil)
+	conn, err := upgrader.Upgrade(context.Writer, context.Request, nil)
 	if err != nil {
 		return
 	}
-	conn = con
+	msgConn = conn
 }
 
 // SendMsg 前端调用发送信息
