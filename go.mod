@@ -3,21 +3,21 @@ module github.com/FloatTech/zbputils
 go 1.19
 
 require (
-	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
+	github.com/FloatTech/floatbox v0.0.0-20230301074105-03017a267762
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9
-	github.com/FloatTech/rendercard v0.0.10-0.20230215092509-ff0745852f23
+	github.com/FloatTech/rendercard v0.0.10-0.20230223064326-45d29fa4ede9
 	github.com/FloatTech/sqlite v1.5.7
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
-	github.com/FloatTech/zbpctrl v1.5.3-0.20230130095145-714ad318cd52
+	github.com/FloatTech/zbpctrl v1.5.3-0.20230301071613-f2c5c97cec88
 	github.com/disintegration/imaging v1.6.2
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-base16384 v1.6.4
-	github.com/fumiama/go-registry v0.2.5
+	github.com/fumiama/go-registry v0.2.6
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.6.8
+	github.com/wdvxdr1123/ZeroBot v1.6.10
 )
 
 require (
