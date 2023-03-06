@@ -3,7 +3,7 @@ module github.com/FloatTech/zbputils
 go 1.19
 
 require (
-	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230227124824-ec26e8e62cee
+	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230306161731-f641f59e16be
 	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9
