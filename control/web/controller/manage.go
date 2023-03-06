@@ -25,9 +25,11 @@ import (
 )
 
 var (
-	// 向前端推送消息的ws链接
-	msgConn *websocket.Conn
-	// 向前端推送日志的ws链接
+	// MsgConn 向前端推送消息的ws链接
+	MsgConn *websocket.Conn
+	// LogConn 向前端推送日志的ws链接
+	LogConn *websocket.Conn
+	// 实现Write接口
 	l logWriter
 	// 存储请求事件，flag作为键，一个request对象作为值
 	requestData syncx.Map[string, *zero.Event]
@@ -46,7 +48,7 @@ func init() {
 	log.SetFormatter(&log.TextFormatter{DisableColors: false})
 
 	zero.OnMessage().SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
-		if msgConn != nil {
+		if MsgConn != nil {
 			mi := types.MessageInfo{
 				MessageType: ctx.Event.MessageType,
 				MessageID:   ctx.Event.MessageID,
@@ -56,7 +58,7 @@ func init() {
 				Nickname:    ctx.GetStrangerInfo(ctx.Event.UserID, false).Get("nickname").String(),
 				RawMessage:  ctx.Event.RawMessage,
 			}
-			err := msgConn.WriteJSON(mi)
+			err := MsgConn.WriteJSON(mi)
 			if err != nil {
 				log.Errorln("[gui] 推送消息发送错误:", err)
 				return
@@ -71,7 +73,7 @@ func init() {
 
 // logWriter
 type logWriter struct {
-	logConn *websocket.Conn
+	// 日志连接
 }
 
 // GetBotList 获取机器人qq号
@@ -457,7 +459,7 @@ func GetLog(context *gin.Context) {
 	if err != nil {
 		return
 	}
-	l.logConn = conn
+	LogConn = conn
 }
 
 // Upgrade 连接ws，向前端推送message
@@ -466,7 +468,7 @@ func Upgrade(context *gin.Context) {
 	if err != nil {
 		return
 	}
-	msgConn = conn
+	MsgConn = conn
 }
 
 // SendMsg 前端调用发送信息
@@ -506,8 +508,8 @@ func SendMsg(context *gin.Context) {
 
 // Write 写入日志
 func (l logWriter) Write(p []byte) (n int, err error) {
-	if l.logConn != nil {
-		err := l.logConn.WriteMessage(websocket.TextMessage, p)
+	if LogConn != nil {
+		err := LogConn.WriteMessage(websocket.TextMessage, p)
 		if err != nil {
 			return len(p), nil
 		}

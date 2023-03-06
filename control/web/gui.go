@@ -10,6 +10,7 @@ import (
 
 	webui "github.com/FloatTech/ZeroBot-Plugin-Webui"
 	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/control/web/controller"
 	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -76,6 +77,8 @@ func RunGui(addr string) {
 			if err := server.Shutdown(context.TODO()); err != nil {
 				log.Errorln("[gui] server shutdown err: ", err.Error())
 			}
+			controller.MsgConn = nil
+			controller.LogConn = nil
 		}
 	}
 }
