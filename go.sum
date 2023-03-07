@@ -1,6 +1,6 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230306161731-f641f59e16be h1:ZNOcxaUCOeXbjejxkm+54dtQmKZh2mOLAJLVC2PEIJg=
-github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230306161731-f641f59e16be/go.mod h1:Se2A9vnC4eSYF7vR2LNSayV7rvbFcpgVs1ZN4sEYMyg=
+github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230307153523-5c33f1700c1a h1:4SXwRYniDBhGuC8/c5Pbg4wdcZRwmejI5xD2AWMK+oc=
+github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230307153523-5c33f1700c1a/go.mod h1:Se2A9vnC4eSYF7vR2LNSayV7rvbFcpgVs1ZN4sEYMyg=
 github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d h1:vVqMO5Kejt5pueuZvBxfX+psa7UwE110TpITf5eV7Zw=
 github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d/go.mod h1:OoZE4Ra7olpFaJSrlD6mcyT4chPLg9QBRE1pzTC8R84=
 github.com/FloatTech/gg v1.1.2 h1:YolgOYg3uDHc1+g0bLtt6QuRA/pvLn+b9IBCIhOOX88=
