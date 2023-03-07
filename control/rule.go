@@ -34,6 +34,8 @@ const (
 var (
 	// managers 每个插件对应的管理
 	managers = ctrl.NewManager[*zero.Ctx](dbfile)
+	// ListenCtrlChan 启动/停止 webui
+	ListenCtrlChan = make(chan bool)
 )
 
 func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
@@ -47,6 +49,21 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 // Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	return managers.Lookup(service)
+}
+
+// Response 响应
+func Response(gid int64) error {
+	return managers.Response(gid)
+}
+
+// Silence 沉默
+func Silence(gid int64) error {
+	return managers.Silence(gid)
+}
+
+// CanResponse 响应状态
+func CanResponse(gid int64) bool {
+	return managers.CanResponse(gid)
 }
 
 func init() {
@@ -483,5 +500,26 @@ func init() {
 			fullpageshadowcache = nil
 			ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
 		})
+		zero.OnRegex(`^/设置webui用户名\s?(\S+)\s?密码\s?(\S+)$`, zero.SuperUserPermission).SetBlock(true).
+			Handle(func(ctx *zero.Ctx) {
+				regexMatched := ctx.State["regex_matched"].([]string)
+				err := CreateOrUpdateUser(&User{Username: regexMatched[1], Password: regexMatched[2]})
+				if err != nil {
+					ctx.SendChain(message.Text("ERROR: ", err))
+					return
+				}
+				ctx.SendChain(message.Text("设置成功"))
+				if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
+					ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\n用户名: ", regexMatched[1], "\n密码: ", regexMatched[2]))
+				}
+
+			})
+		zero.OnCommand("webui", zero.SuperUserPermission).SetBlock(true).
+			Handle(func(ctx *zero.Ctx) {
+				args := ctx.State["args"].(string)
+				args = strings.TrimSpace(args)
+				ListenCtrlChan <- args == "启动"
+				ctx.SendChain(message.Text("webui" + args + "成功"))
+			})
 	})
 }
