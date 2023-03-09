@@ -1,10 +1,10 @@
-package control
+package model
 
 import (
 	"os"
+	"sync"
 	"time"
 
-	"github.com/FloatTech/floatbox/process"
 	sql "github.com/FloatTech/sqlite"
 )
 
@@ -15,9 +15,11 @@ type User struct {
 	Password string `db:"password"`
 }
 
+const webuiFolder = "data/webui/"
+
 var (
-	udb         = &sql.Sqlite{}
-	webuiFolder = "data/webui/"
+	udb sql.Sqlite
+	mu  sync.RWMutex
 )
 
 func init() {
@@ -27,19 +29,16 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	go func() {
-		process.GlobalInitMutex.Lock()
-		process.SleepAbout1sTo2s()
-		err := udb.Create("user", &User{})
-		if err != nil {
-			panic(err)
-		}
-		process.GlobalInitMutex.Unlock()
-	}()
+	err = udb.Create("user", &User{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // CreateOrUpdateUser 创建或修改用户密码
 func CreateOrUpdateUser(u *User) error {
+	mu.RLock()
+	defer mu.RUnlock()
 	var fu User
 	err := udb.Find("user", &fu, "WHERE username = '"+u.Username+"' AND password = '"+u.Password+"'")
 	canFind := err == nil && fu.Username == u.Username
@@ -55,6 +54,8 @@ func CreateOrUpdateUser(u *User) error {
 
 // FindUser 查找webui账号
 func FindUser(username, password string) (u User, err error) {
+	mu.Lock()
+	defer mu.Unlock()
 	err = udb.Find("user", &u, "WHERE username = '"+username+"' AND password = '"+password+"'")
 	return
 }

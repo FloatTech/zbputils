@@ -8,13 +8,46 @@ import (
 	"runtime/debug"
 	"strings"
 
-	webui "github.com/FloatTech/ZeroBot-Plugin-Webui"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/control/web/controller"
-	"github.com/FloatTech/zbputils/control/web/router"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	zero "github.com/wdvxdr1123/ZeroBot"
+
+	webui "github.com/FloatTech/ZeroBot-Plugin-Webui"
+	"github.com/wdvxdr1123/ZeroBot/message"
+
+	"github.com/FloatTech/zbputils/control/web/controller"
+	"github.com/FloatTech/zbputils/control/web/model"
+	"github.com/FloatTech/zbputils/control/web/router"
 )
+
+var (
+	// ListenCtrlChan 启动/停止 webui
+	listenCtrlChan = make(chan bool)
+)
+
+func init() {
+	zero.OnRegex(`^/设置webui用户名\s?(\S+)\s?密码\s?(\S+)$`, zero.SuperUserPermission).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			regexMatched := ctx.State["regex_matched"].([]string)
+			err := model.CreateOrUpdateUser(&model.User{Username: regexMatched[1], Password: regexMatched[2]})
+			if err != nil {
+				ctx.SendChain(message.Text("ERROR: ", err))
+				return
+			}
+			ctx.SendChain(message.Text("设置成功"))
+			if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
+				ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\n用户名: ", regexMatched[1], "\n密码: ", regexMatched[2]))
+			}
+
+		})
+	zero.OnCommand("webui", zero.SuperUserPermission).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			args := ctx.State["args"].(string)
+			args = strings.TrimSpace(args)
+			listenCtrlChan <- args == "启动"
+			ctx.SendChain(message.Text("webui" + args + "成功"))
+		})
+}
 
 // RunGui 运行webui
 // @title zbp api
@@ -49,7 +82,7 @@ func RunGui(addr string) {
 		}),
 		Addr: addr,
 	}
-	for canrun := range control.ListenCtrlChan {
+	for canrun := range listenCtrlChan {
 		if canrun {
 			if err := server.Shutdown(context.TODO()); err != nil {
 				log.Errorln("[gui] server shutdown err: ", err.Error())

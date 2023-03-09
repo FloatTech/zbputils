@@ -8,11 +8,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/FloatTech/floatbox/binary"
-	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/control/web/middleware"
-	"github.com/FloatTech/zbputils/control/web/types"
 	"github.com/RomiChan/syncx"
 	"github.com/RomiChan/websocket"
 	"github.com/gin-gonic/gin"
@@ -20,8 +15,17 @@ import (
 	"github.com/google/uuid"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
+
+	"github.com/FloatTech/floatbox/binary"
+	ctrl "github.com/FloatTech/zbpctrl"
+
+	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/control/web/middleware"
+	"github.com/FloatTech/zbputils/control/web/model"
+	"github.com/FloatTech/zbputils/control/web/types"
 )
 
 var (
@@ -534,7 +538,7 @@ func Login(context *gin.Context) {
 		})
 		return
 	}
-	user, err := control.FindUser(d.Username, d.Password)
+	user, err := model.FindUser(d.Username, d.Password)
 	if err != nil {
 		context.JSON(http.StatusOK, gin.H{
 			"code":    -1,
@@ -545,12 +549,12 @@ func Login(context *gin.Context) {
 		return
 	}
 	token := uuid.NewString()
-	middleware.LoginCache.Set(token, user, cache.DefaultExpiration)
+	middleware.LoginCache.Set(token, &user, cache.DefaultExpiration)
 	r := types.LoginResultVo{
 		Desc:     "manager",
 		RealName: user.Username,
 		Roles: []types.RoleInfo{
-			types.RoleInfo{
+			{
 				RoleName: "Super Admin",
 				Value:    "super",
 			},
@@ -573,7 +577,7 @@ func Login(context *gin.Context) {
 func GetUserInfo(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	i, _ := middleware.LoginCache.Get(token)
-	user := i.(control.User)
+	user := i.(*model.User)
 	var qq int64
 	if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
 		qq = zero.BotConfig.SuperUsers[0]
@@ -582,7 +586,7 @@ func GetUserInfo(context *gin.Context) {
 		Desc:     "manager",
 		RealName: user.Username,
 		Roles: []types.RoleInfo{
-			types.RoleInfo{
+			{
 				RoleName: "Super Admin",
 				Value:    "super",
 			},
