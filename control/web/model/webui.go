@@ -1,3 +1,4 @@
+// Package model 用户模型类
 package model
 
 import (
