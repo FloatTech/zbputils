@@ -1,8 +1,8 @@
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230307153523-5c33f1700c1a h1:4SXwRYniDBhGuC8/c5Pbg4wdcZRwmejI5xD2AWMK+oc=
 github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230307153523-5c33f1700c1a/go.mod h1:Se2A9vnC4eSYF7vR2LNSayV7rvbFcpgVs1ZN4sEYMyg=
-github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d h1:vVqMO5Kejt5pueuZvBxfX+psa7UwE110TpITf5eV7Zw=
-github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d/go.mod h1:OoZE4Ra7olpFaJSrlD6mcyT4chPLg9QBRE1pzTC8R84=
+github.com/FloatTech/floatbox v0.0.0-20230312033609-f3826d7c8d00 h1:KvQd0IaJqBPkc4mpyldX9UcRVlUPVazlcmS79LU0pJ8=
+github.com/FloatTech/floatbox v0.0.0-20230312033609-f3826d7c8d00/go.mod h1:0l1xHjcTlONupyOY5lB5PY6kFWFMHQh89e1Zqm5QZlo=
 github.com/FloatTech/gg v1.1.2 h1:YolgOYg3uDHc1+g0bLtt6QuRA/pvLn+b9IBCIhOOX88=
 github.com/FloatTech/gg v1.1.2/go.mod h1:uzPzAeT35egARdRuu+1oyjU3CmTwCceoq3Vvje7LpcI=
 github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9 h1:Havq0z/N79KeD50L7ms+Hv8F4Sw98Dt8lXM8jECp04o=
@@ -125,6 +125,8 @@ github.com/otiai10/mint v1.3.0/go.mod h1:F5AjcsTsWUqX+Na9fpHb52P8pcRX2CI6A3ctIT9
 github.com/otiai10/mint v1.3.3/go.mod h1:/yxELlJQ0ufhjUwhshSj+wFjZ78CnZ48/1wtmBH1OTc=
 github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
 github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
+github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 h1:onHthvaw9LFnH4t2DcNVpwGmV9E1BkGknEliJkfwQj0=
+github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58/go.mod h1:DXv8WO4yhMYhSNPKjeNKa5WY9YCIEBRbNzFFPJbWO6Y=
 github.com/pelletier/go-toml/v2 v2.0.1/go.mod h1:r9LEWfGN8R5k0VXJ+0BkIe7MYkRdwZOjgMj2KwnJFUo=
 github.com/pelletier/go-toml/v2 v2.0.6 h1:nrzqCb7j9cDFj2coyLNLaZuJTLjWjlaz6nvTvIwycIU=
 github.com/pelletier/go-toml/v2 v2.0.6/go.mod h1:eumQOmlWiOPt5WriQQqoM5y18pDHwha2N+QD+EUNTek=

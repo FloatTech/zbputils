@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230307153523-5c33f1700c1a
-	github.com/FloatTech/floatbox v0.0.0-20230207075003-0f70b30c320d
+	github.com/FloatTech/floatbox v0.0.0-20230312033609-f3826d7c8d00
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230215052637-9f7b05520ca9
 	github.com/FloatTech/rendercard v0.0.10-0.20230223064326-45d29fa4ede9
@@ -54,6 +54,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
