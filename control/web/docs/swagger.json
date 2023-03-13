@@ -9,169 +9,378 @@
     "host": "127.0.0.1:3000",
     "basePath": "/",
     "paths": {
+        "/api/deleteGroup": {
+            "get": {
+                "description": "删除群聊或好友",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "删除群聊或好友",
+                "parameters": [
+                    {
+                        "description": "删除群聊或好友入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.DeleteGroupParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/getBotList": {
             "get": {
                 "description": "获取机器人qq号",
-                "responses": {}
+                "tags": [
+                    "通用"
+                ],
+                "summary": "获取机器人qq号",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/getFriendList": {
             "get": {
                 "description": "获取好友列表",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "获取好友列表",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 123456,
-                        "description": "机器人qq号",
-                        "name": "selfId",
-                        "in": "query"
+                        "description": "获取好友列表入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.BotParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/getGroupList": {
             "get": {
                 "description": "获取群列表",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "获取群列表",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 123456,
-                        "description": "机器人qq号",
-                        "name": "selfId",
-                        "in": "query"
+                        "description": "获取群列表入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.BotParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/getPermCode": {
             "get": {
                 "description": "授权码",
-                "responses": {}
+                "tags": [
+                    "用户"
+                ],
+                "summary": "授权码",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/getRequestList": {
             "get": {
                 "description": "获取所有的请求",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "获取所有的请求",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 123456,
-                        "description": "机器人qq号",
-                        "name": "selfId",
-                        "in": "query"
+                        "description": "获取所有的请求入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.BotParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.RequestVo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/getUserInfo": {
             "get": {
                 "description": "获得用户信息",
-                "responses": {}
+                "tags": [
+                    "用户"
+                ],
+                "summary": "获得用户信息",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "$ref": "#/definitions/types.UserInfoVo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/handleRequest": {
             "post": {
                 "description": "处理一个请求",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "处理一个请求",
                 "parameters": [
                     {
-                        "type": "string",
-                        "default": "abc",
-                        "description": "事件id",
-                        "name": "flag",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "abc",
-                        "description": "原因",
-                        "name": "reason",
-                        "in": "formData"
-                    },
-                    {
-                        "type": "boolean",
-                        "default": true,
-                        "description": "是否同意",
-                        "name": "approve",
-                        "in": "formData"
+                        "description": "处理一个请求入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.HandleRequestParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/login": {
             "post": {
                 "description": "前端登录",
+                "tags": [
+                    "用户"
+                ],
+                "summary": "前端登录",
                 "parameters": [
                     {
-                        "type": "string",
-                        "default": "xiaoguofan",
-                        "description": "用户名",
-                        "name": "username",
-                        "in": "formData",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "default": "123456",
-                        "description": "密码",
-                        "name": "password",
-                        "in": "formData",
-                        "required": true
+                        "description": "前端登录",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.LoginParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "$ref": "#/definitions/types.LoginResultVo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/logout": {
             "get": {
                 "description": "登出",
-                "responses": {}
+                "tags": [
+                    "用户"
+                ],
+                "summary": "登出",
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/manage/getAllPlugin": {
             "get": {
                 "description": "获取所有插件的状态",
+                "tags": [
+                    "插件"
+                ],
+                "summary": "获取所有插件的状态",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "query"
+                        "description": "获取所有插件的状态入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.AllPluginParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/types.PluginVo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/manage/getPlugin": {
             "get": {
                 "description": "获取某个插件的状态",
+                "tags": [
+                    "插件"
+                ],
+                "summary": "获取某个插件的状态",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "群号",
-                        "name": "groupId",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "default": "antibuse",
-                        "description": "插件名",
-                        "name": "name",
-                        "in": "query"
+                        "description": "获取某个插件的状态入参",
+                        "name": "object",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/types.PluginParams"
+                        }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "$ref": "#/definitions/types.PluginVo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         },
         "/api/manage/updateAllPluginStatus": {
             "post": {
                 "description": "更改某群所有插件状态",
+                "tags": [
+                    "响应"
+                ],
+                "summary": "更改某群所有插件状态",
                 "parameters": [
                     {
                         "description": "修改插件状态入参",
@@ -182,12 +391,23 @@
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/manage/updatePluginStatus": {
             "post": {
                 "description": "更改某一个插件状态",
+                "tags": [
+                    "插件"
+                ],
+                "summary": "更改某一个插件状态",
                 "parameters": [
                     {
                         "description": "修改插件状态入参",
@@ -198,12 +418,23 @@
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/manage/updateResponseStatus": {
             "post": {
                 "description": "更改某一个群响应",
+                "tags": [
+                    "响应"
+                ],
+                "summary": "更改某一个群响应",
                 "parameters": [
                     {
                         "description": "修改群响应入参",
@@ -214,12 +445,23 @@
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "$ref": "#/definitions/types.Response"
+                        }
+                    }
+                }
             }
         },
         "/api/sendMsg": {
             "post": {
                 "description": "前端调用发送信息",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "前端调用发送信息",
                 "parameters": [
                     {
                         "description": "发消息参数",
@@ -230,64 +472,366 @@
                         }
                     }
                 ],
-                "responses": {}
+                "responses": {
+                    "200": {
+                        "description": "成功",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/types.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "result": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
             }
         }
     },
     "definitions": {
-        "types.AllPluginStatusParams": {
+        "types.AllPluginParams": {
+            "description": "GetAllPlugin的入参",
             "type": "object",
             "properties": {
                 "groupId": {
-                    "type": "integer"
-                },
-                "status": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
                     "type": "integer"
                 }
             }
         },
+        "types.AllPluginStatusParams": {
+            "description": "UpdateAllPluginStatus的入参",
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "插件状态,0=禁用,1=启用,2=还原",
+                    "type": "integer"
+                }
+            }
+        },
+        "types.BotParams": {
+            "description": "GetGroupList,GetFriendList的入参",
+            "type": "object",
+            "properties": {
+                "selfId": {
+                    "description": "机器人qq",
+                    "type": "integer"
+                }
+            }
+        },
+        "types.DeleteGroupParams": {
+            "description": "退群或删除好友的入参",
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
+                    "type": "integer"
+                },
+                "selfId": {
+                    "description": "机器人qq",
+                    "type": "integer"
+                }
+            }
+        },
+        "types.HandleRequestParams": {
+            "description": "处理事件的入参",
+            "type": "object",
+            "properties": {
+                "approve": {
+                    "description": "是否同意, true=同意,false=拒绝",
+                    "type": "boolean"
+                },
+                "flag": {
+                    "description": "事件的flag",
+                    "type": "string"
+                },
+                "reason": {
+                    "description": "事件的原因, 拒绝的时候需要填",
+                    "type": "string"
+                }
+            }
+        },
+        "types.LoginParams": {
+            "description": "登录参数",
+            "type": "object",
+            "properties": {
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "types.LoginResultVo": {
+            "description": "登录返回参数",
+            "type": "object",
+            "properties": {
+                "desc": {
+                    "description": "描述",
+                    "type": "string"
+                },
+                "realName": {
+                    "description": "实际名",
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "角色",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RoleInfo"
+                    }
+                },
+                "token": {
+                    "description": "token",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户id",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "types.PluginParams": {
+            "description": "GetPlugin的入参",
+            "type": "object",
+            "properties": {
+                "groupId": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "插件名",
+                    "type": "string"
+                }
+            }
+        },
         "types.PluginStatusParams": {
+            "description": "UpdatePluginStatus的入参",
             "type": "object",
             "required": [
                 "name"
             ],
             "properties": {
                 "groupId": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
                     "type": "integer"
                 },
                 "name": {
+                    "description": "插件名",
                     "type": "string"
                 },
                 "status": {
+                    "description": "插件状态,0=禁用,1=启用,2=还原",
                     "type": "integer"
+                }
+            }
+        },
+        "types.PluginVo": {
+            "description": "全部插件的返回",
+            "type": "object",
+            "properties": {
+                "banner": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "brief": {
+                    "description": "简述",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "插件序号",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "插件名",
+                    "type": "string"
+                },
+                "pluginStatus": {
+                    "description": "插件状态,false=禁用,true=启用",
+                    "type": "boolean"
+                },
+                "responseStatus": {
+                    "description": "响应状态, false=沉默,true=响应",
+                    "type": "boolean"
+                },
+                "usage": {
+                    "description": "用法",
+                    "type": "string"
+                }
+            }
+        },
+        "types.RequestVo": {
+            "description": "请求返回",
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "description": "注释",
+                    "type": "string"
+                },
+                "flag": {
+                    "description": "请求flag",
+                    "type": "string"
+                },
+                "groupId": {
+                    "description": "群id",
+                    "type": "integer"
+                },
+                "groupName": {
+                    "description": "群名",
+                    "type": "string"
+                },
+                "nickname": {
+                    "description": "昵称",
+                    "type": "string"
+                },
+                "requestType": {
+                    "description": "请求类型",
+                    "type": "string"
+                },
+                "selfId": {
+                    "description": "机器人qq",
+                    "type": "integer"
+                },
+                "subType": {
+                    "description": "请求子类型",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户id",
+                    "type": "integer"
+                }
+            }
+        },
+        "types.Response": {
+            "description": "包装返回体",
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "错误信息",
+                    "type": "string"
+                },
+                "result": {
+                    "description": "数据"
+                },
+                "type": {
+                    "description": "待定",
+                    "type": "string"
                 }
             }
         },
         "types.ResponseStatusParams": {
+            "description": "UpdateResponseStatus的入参",
             "type": "object",
             "properties": {
                 "groupId": {
+                    "description": "群id, gid\u003e0为群聊,gid\u003c0为私聊,gid=0为全部群聊",
                     "type": "integer"
                 },
                 "status": {
+                    "description": "响应状态,0=沉默,1=响应",
                     "type": "integer"
                 }
             }
         },
+        "types.RoleInfo": {
+            "description": "角色参数",
+            "type": "object",
+            "properties": {
+                "roleName": {
+                    "description": "角色名",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "角色值",
+                    "type": "string"
+                }
+            }
+        },
         "types.SendMsgParams": {
+            "description": "处理事件的入参",
             "type": "object",
             "properties": {
                 "gidList": {
+                    "description": "群聊数组",
                     "type": "array",
                     "items": {
                         "type": "integer"
                     }
                 },
                 "message": {
+                    "description": "CQ码格式的消息",
                     "type": "string"
                 },
                 "selfId": {
+                    "description": "机器人qq",
                     "type": "integer"
+                }
+            }
+        },
+        "types.UserInfoVo": {
+            "description": "用户信息",
+            "type": "object",
+            "properties": {
+                "avatar": {
+                    "description": "头像",
+                    "type": "string"
+                },
+                "desc": {
+                    "description": "描述",
+                    "type": "string"
+                },
+                "homePath": {
+                    "description": "主页路径",
+                    "type": "string"
+                },
+                "password": {
+                    "description": "密码",
+                    "type": "string"
+                },
+                "realName": {
+                    "description": "实际名",
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "角色",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/types.RoleInfo"
+                    }
+                },
+                "token": {
+                    "description": "token",
+                    "type": "string"
+                },
+                "userId": {
+                    "description": "用户id",
+                    "type": "integer"
+                },
+                "username": {
+                    "description": "用户名",
+                    "type": "string"
                 }
             }
         }
