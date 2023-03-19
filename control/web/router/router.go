@@ -5,6 +5,7 @@ import (
 	"github.com/FloatTech/zbputils/control/web/controller"
 	_ "github.com/FloatTech/zbputils/control/web/docs" // swagger数据
 	"github.com/FloatTech/zbputils/control/web/middleware"
+	"github.com/FloatTech/zbputils/job"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -17,6 +18,7 @@ func SetRouters(engine *gin.Engine) {
 	// 支持跨域
 	engine.Use(middleware.Cors(), gin.Logger())
 
+	// 通用接口
 	apiRoute := engine.Group("/api")
 	apiRoute.Use(middleware.TokenMiddle())
 	apiRoute.GET("/getFriendList", controller.GetFriendList)
@@ -26,6 +28,11 @@ func SetRouters(engine *gin.Engine) {
 	apiRoute.POST("/sendMsg", controller.SendMsg)
 	apiRoute.GET("/getUserInfo", controller.GetUserInfo)
 
+	// 任务相关接口
+	jobRoute := apiRoute.Group("/job")
+	job.JobRoute(jobRoute)
+
+	// 管理相关接口
 	manageRoute := apiRoute.Group("/manage")
 	manageRoute.GET("/getPlugin", controller.GetPlugin)
 	manageRoute.GET("/getAllPlugin", controller.GetAllPlugin)
