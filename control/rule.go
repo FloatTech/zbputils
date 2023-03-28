@@ -47,7 +47,17 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 
 // Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
-	return managers.Lookup(service)
+	serviceInfo, ok := managers.Lookup(service)
+	if !ok {
+		for _, controlinfo := range managers.M {
+			if controlinfo.Options.Brief == service {
+				serviceInfo = controlinfo
+				ok = true
+				break
+			}
+		}
+	}
+	return serviceInfo, ok
 }
 
 // Response 响应
@@ -388,14 +398,6 @@ func init() {
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
 				if !ok {
-					for _, controlinfo := range managers.M {
-						if controlinfo.Options.Brief == model.Args {
-							service = controlinfo
-							break
-						}
-					}
-				}
-				if service == nil {
 					ctx.SendChain(message.Text("没有找到指定服务!"))
 					return
 				}
