@@ -25,7 +25,7 @@ type JobListRsp struct {
 // Job 添加任务的入参
 // @Description 添加任务的入参
 type Job struct {
-	ID            int64  `json:"id"`            // 任务id
+	ID            string `json:"id"`            // 任务id
 	SelfID        int64  `json:"selfId"`        // 机器人id
 	JobType       int    `json:"jobType"`       // 任务类型,1-指令别名,2-定时任务,3-你问我答
 	Matcher       string `json:"matcher"`       // 当jobType=1时 为指令别名,当jobType=2时 为cron表达式,当jobType=3时 为正则表达式
@@ -63,7 +63,7 @@ func JobList(context *gin.Context) {
 			var j Job
 			var e zero.Event
 			j.SelfID = id
-			j.ID = c.ID
+			j.ID = strconv.FormatInt(c.ID, 10)
 			if len(c.Cron) >= 3 {
 				switch c.Cron[:3] {
 				case "sm:":
@@ -384,8 +384,8 @@ func Add(context *gin.Context) {
 // DeleteReq 删除任务的入参
 // @Description 删除任务的入参
 type DeleteReq struct {
-	IDList []int64 `json:"idList" form:"idList"` // 任务id
-	SelfID int64   `json:"selfId" form:"selfId"` // 机器人qq
+	IDList []string `json:"idList" form:"idList"` // 任务id
+	SelfID int64    `json:"selfId" form:"selfId"` // 机器人qq
 }
 
 // Delete 删除任务
@@ -414,11 +414,7 @@ func Delete(context *gin.Context) {
 	defer mu.Unlock()
 	bots := strconv.FormatInt(req.SelfID, 36)
 	var delcmd []string
-	idList := make([]string, len(req.IDList))
-	for k, v := range req.IDList {
-		idList[k] = strconv.FormatInt(v, 10)
-	}
-	err = db.FindFor(bots, &c, "WHERE id in ("+strings.Join(idList, ",")+")", func() error {
+	err = db.FindFor(bots, &c, "WHERE id in ( "+strings.Join(req.IDList, ",")+" )", func() error {
 		if len(c.Cron) >= 3 && (c.Cron[:3] == "fm:" || c.Cron[:3] == "sm:") {
 			m, ok := matchers[c.ID]
 			if ok {

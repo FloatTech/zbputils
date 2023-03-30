@@ -64,7 +64,7 @@ func init() {
 			}
 			err := MsgConn.WriteJSON(mi)
 			if err != nil {
-				log.Errorln("[gui] 推送消息发送错误:", err)
+				log.Errorln("[gui] 连接前端ws失败:", err)
 				return
 			}
 		}
@@ -578,11 +578,42 @@ func SendMsg(context *gin.Context) {
 		return
 	}
 	bot := zero.GetBot(d.SelfID)
+	all := false
+	for _, gid := range d.GIDList {
+		if gid == 0 {
+			all = true
+			break
+		}
+	}
+	// 避免机器人之间发消息
+	botMap := make(map[int64]struct{}, 4)
+	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+		botMap[id] = struct{}{}
+		return true
+	})
+	// 检查是否有全部群聊
+	if all {
+		// 添加私聊
+		r := make([]int64, 16)
+		for _, v := range d.GIDList {
+			if v < 0 {
+				r = append(r, v)
+			}
+		}
+		d.GIDList = r
+		// 添加全部群聊
+		for _, v := range bot.GetGroupList().Array() {
+			d.GIDList = append(d.GIDList, v.Get("group_id").Int())
+		}
+	}
 	for _, gid := range d.GIDList {
 		if gid > 0 {
 			msgID = bot.SendGroupMessage(gid, message.UnescapeCQCodeText(d.Message))
 		} else if gid < 0 {
-			msgID = bot.SendPrivateMessage(-gid, message.UnescapeCQCodeText(d.Message))
+			_, ok := botMap[-gid]
+			if !ok {
+				msgID = bot.SendPrivateMessage(-gid, message.UnescapeCQCodeText(d.Message))
+			}
 		}
 	}
 	context.JSON(http.StatusOK, types.Response{
