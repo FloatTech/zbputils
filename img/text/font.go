@@ -25,4 +25,6 @@ const (
 	HachiMaruPopRegularFontFile = FontPath + "HachiMaruPop-Regular.ttf"
 	// GugiRegularFontFile ...
 	GugiRegularFontFile = FontPath + "Gugi-Regular.ttf"
+	// MaokenFontFile 猫啃珠圆体
+	MaokenFontFile = FontPath + "MaokenZhuyuanTi.ttf"
 )
