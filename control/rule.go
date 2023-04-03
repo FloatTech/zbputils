@@ -47,17 +47,11 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 
 // Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
-	serviceInfo, ok := managers.Lookup(service)
-	if !ok {
-		for _, controlinfo := range managers.M {
-			if controlinfo.Options.Brief == service {
-				serviceInfo = controlinfo
-				ok = true
-				break
-			}
-		}
+	_, ok := briefmap[service]
+	if ok {
+		return managers.Lookup(briefmap[service])
 	}
-	return serviceInfo, ok
+	return managers.Lookup(service)
 }
 
 // Response 响应
