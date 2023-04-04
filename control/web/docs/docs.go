@@ -68,12 +68,10 @@ const docTemplate = `{
                 "summary": "获取好友列表",
                 "parameters": [
                     {
-                        "description": "获取好友列表入参",
-                        "name": "object",
-                        "in": "body",
-                        "schema": {
-                            "$ref": "#/definitions/types.BotParams"
-                        }
+                        "type": "integer",
+                        "description": "机器人qq",
+                        "name": "selfId",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -95,12 +93,41 @@ const docTemplate = `{
                 "summary": "获取群列表",
                 "parameters": [
                     {
-                        "description": "获取群列表入参",
-                        "name": "object",
-                        "in": "body",
+                        "type": "integer",
+                        "description": "机器人qq",
+                        "name": "selfId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "成功",
                         "schema": {
-                            "$ref": "#/definitions/types.BotParams"
+                            "$ref": "#/definitions/types.Response"
                         }
+                    }
+                }
+            }
+        },
+        "/api/getGroupMemberList": {
+            "get": {
+                "description": "获取群成员列表,groupId为0的时候拉取好友信息",
+                "tags": [
+                    "通用"
+                ],
+                "summary": "获取群成员列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "机器人qq",
+                        "name": "selfId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "群聊id",
+                        "name": "groupId",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -593,7 +620,7 @@ const docTemplate = `{
                     "description": "任务id",
                     "type": "array",
                     "items": {
-                        "type": "integer"
+                        "type": "string"
                     }
                 },
                 "selfId": {
@@ -624,7 +651,7 @@ const docTemplate = `{
                 },
                 "id": {
                     "description": "任务id",
-                    "type": "integer"
+                    "type": "string"
                 },
                 "jobType": {
                     "description": "任务类型,1-指令别名,2-定时任务,3-你问我答",

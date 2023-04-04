@@ -79,11 +79,11 @@ func init() {
 type logWriter struct{}
 
 // GetBotList 获取机器人qq号
-// @Tags    通用
-// @Summary 获取机器人qq号
-// @Description 获取机器人qq号
-// @Router /api/getBotList [get]
-// @Success 200 {object} types.Response "成功"
+//	@Tags			通用
+//	@Summary		获取机器人qq号
+//	@Description	获取机器人qq号
+//	@Router			/api/getBotList [get]
+//	@Success		200	{object}	types.Response	"成功"
 func GetBotList(context *gin.Context) {
 	var bots []int64
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
@@ -99,12 +99,12 @@ func GetBotList(context *gin.Context) {
 }
 
 // GetFriendList 获取好友列表
-// @Tags    通用
-// @Summary 获取好友列表
-// @Description 获取好友列表
-// @Router /api/getFriendList [get]
-// @Param object body types.BotParams false "获取好友列表入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			通用
+//	@Summary		获取好友列表
+//	@Description	获取好友列表
+//	@Router			/api/getFriendList [get]
+//	@Param			selfId	query		int				false	"机器人qq"
+//	@Success		200		{object}	types.Response	"成功"
 func GetFriendList(context *gin.Context) {
 	_, bot, err := getBot(context)
 	if err != nil {
@@ -136,13 +136,64 @@ func GetFriendList(context *gin.Context) {
 	})
 }
 
+// GetGroupMemberList 获取群成员列表
+//	@Tags			通用
+//	@Summary		获取群成员列表
+//	@Description	获取群成员列表,groupId为0的时候拉取好友信息
+//	@Router			/api/getGroupMemberList [get]
+//	@Param			selfId	query		int				false	"机器人qq"
+//	@Param			groupId	query		int				false	"群聊id"
+//	@Success		200		{object}	types.Response	"成功"
+func GetGroupMemberList(context *gin.Context) {
+	var (
+		d   types.GetGroupMemberListReq
+		bot *zero.Ctx
+	)
+	err := bind(&d, context)
+	if err != nil {
+		context.JSON(http.StatusOK, types.Response{
+			Code:         -1,
+			Result:       nil,
+			Message:      err.Error(),
+			ResponseType: "error",
+		})
+		return
+	}
+	if d.SelfID == 0 {
+		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+			bot = ctx
+			return false
+		})
+	} else {
+		bot = zero.GetBot(d.SelfID)
+	}
+	var resp []any
+	list := bot.GetGroupMemberList(d.GroupID).String()
+	err = json.Unmarshal(binary.StringToBytes(list), &resp)
+	if err != nil {
+		context.JSON(http.StatusOK, types.Response{
+			Code:         -1,
+			Result:       nil,
+			Message:      err.Error(),
+			ResponseType: "error",
+		})
+		return
+	}
+	context.JSON(http.StatusOK, types.Response{
+		Code:         0,
+		Result:       resp,
+		Message:      "",
+		ResponseType: "ok",
+	})
+}
+
 // GetGroupList 获取群列表
-// @Tags    通用
-// @Summary 获取群列表
-// @Description 获取群列表
-// @Router /api/getGroupList [get]
-// @Param object body types.BotParams false "获取群列表入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			通用
+//	@Summary		获取群列表
+//	@Description	获取群列表
+//	@Router			/api/getGroupList [get]
+//	@Param			selfId	query		int				false	"机器人qq"
+//	@Success		200		{object}	types.Response	"成功"
 func GetGroupList(context *gin.Context) {
 	_, bot, err := getBot(context)
 	if err != nil {
@@ -175,12 +226,12 @@ func GetGroupList(context *gin.Context) {
 }
 
 // DeleteGroup 删除群聊或好友
-// @Tags    通用
-// @Summary 删除群聊或好友
-// @Description 删除群聊或好友
-// @Router /api/deleteGroup [get]
-// @Param object body types.DeleteGroupParams false "删除群聊或好友入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			通用
+//	@Summary		删除群聊或好友
+//	@Description	删除群聊或好友
+//	@Router			/api/deleteGroup [get]
+//	@Param			object	body		types.DeleteGroupParams	false	"删除群聊或好友入参"
+//	@Success		200		{object}	types.Response			"成功"
 func DeleteGroup(context *gin.Context) {
 	var (
 		d   types.DeleteGroupParams
@@ -223,12 +274,12 @@ func DeleteGroup(context *gin.Context) {
 }
 
 // GetAllPlugin 获取所有插件的状态
-// @Tags    插件
-// @Summary 获取所有插件的状态
-// @Description 获取所有插件的状态
-// @Router /api/manage/getAllPlugin [get]
-// @Param object body types.AllPluginParams false "获取所有插件的状态入参"
-// @Success 200 {object} types.Response{result=[]types.PluginVo} "成功"
+//	@Tags			插件
+//	@Summary		获取所有插件的状态
+//	@Description	获取所有插件的状态
+//	@Router			/api/manage/getAllPlugin [get]
+//	@Param			object	body		types.AllPluginParams					false	"获取所有插件的状态入参"
+//	@Success		200		{object}	types.Response{result=[]types.PluginVo}	"成功"
 func GetAllPlugin(context *gin.Context) {
 	var d types.AllPluginParams
 	err := bind(&d, context)
@@ -264,12 +315,12 @@ func GetAllPlugin(context *gin.Context) {
 }
 
 // GetPlugin 获取某个插件的状态
-// @Tags    插件
-// @Summary 获取某个插件的状态
-// @Description 获取某个插件的状态
-// @Router /api/manage/getPlugin [get]
-// @Param object body types.PluginParams false "获取某个插件的状态入参"
-// @Success 200 {object} types.Response{result=types.PluginVo} "成功"
+//	@Tags			插件
+//	@Summary		获取某个插件的状态
+//	@Description	获取某个插件的状态
+//	@Router			/api/manage/getPlugin [get]
+//	@Param			object	body		types.PluginParams						false	"获取某个插件的状态入参"
+//	@Success		200		{object}	types.Response{result=types.PluginVo}	"成功"
 func GetPlugin(context *gin.Context) {
 	var d types.PluginParams
 	err := bind(&d, context)
@@ -309,12 +360,12 @@ func GetPlugin(context *gin.Context) {
 }
 
 // UpdatePluginStatus 更改某一个插件状态
-// @Tags    插件
-// @Summary 更改某一个插件状态
-// @Description 更改某一个插件状态
-// @Router /api/manage/updatePluginStatus [post]
-// @Param object body types.PluginStatusParams false "修改插件状态入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			插件
+//	@Summary		更改某一个插件状态
+//	@Description	更改某一个插件状态
+//	@Router			/api/manage/updatePluginStatus [post]
+//	@Param			object	body		types.PluginStatusParams	false	"修改插件状态入参"
+//	@Success		200		{object}	types.Response				"成功"
 func UpdatePluginStatus(context *gin.Context) {
 	var d types.PluginStatusParams
 	err := bind(&d, context)
@@ -355,12 +406,12 @@ func UpdatePluginStatus(context *gin.Context) {
 }
 
 // UpdateResponseStatus 更改某一个群响应
-// @Tags    响应
-// @Summary 更改某一个群响应
-// @Description 更改某一个群响应
-// @Router /api/manage/updateResponseStatus [post]
-// @Param object body types.ResponseStatusParams false "修改群响应入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			响应
+//	@Summary		更改某一个群响应
+//	@Description	更改某一个群响应
+//	@Router			/api/manage/updateResponseStatus [post]
+//	@Param			object	body		types.ResponseStatusParams	false	"修改群响应入参"
+//	@Success		200		{object}	types.Response				"成功"
 func UpdateResponseStatus(context *gin.Context) {
 	var d types.ResponseStatusParams
 	err := bind(&d, context)
@@ -396,12 +447,12 @@ func UpdateResponseStatus(context *gin.Context) {
 }
 
 // UpdateAllPluginStatus 更改某群所有插件状态
-// @Tags    响应
-// @Summary 更改某群所有插件状态
-// @Description 更改某群所有插件状态
-// @Router /api/manage/updateAllPluginStatus [post]
-// @Param object body types.AllPluginStatusParams false "修改插件状态入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			响应
+//	@Summary		更改某群所有插件状态
+//	@Description	更改某群所有插件状态
+//	@Router			/api/manage/updateAllPluginStatus [post]
+//	@Param			object	body		types.AllPluginStatusParams	false	"修改插件状态入参"
+//	@Success		200		{object}	types.Response				"成功"
 func UpdateAllPluginStatus(context *gin.Context) {
 	var d types.AllPluginStatusParams
 	err := bind(&d, context)
@@ -441,12 +492,12 @@ func UpdateAllPluginStatus(context *gin.Context) {
 }
 
 // HandleRequest 处理一个请求
-// @Tags    通用
-// @Summary 处理一个请求
-// @Description 处理一个请求
-// @Router /api/handleRequest [post]
-// @Param object body types.HandleRequestParams false "处理一个请求入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			通用
+//	@Summary		处理一个请求
+//	@Description	处理一个请求
+//	@Router			/api/handleRequest [post]
+//	@Param			object	body		types.HandleRequestParams	false	"处理一个请求入参"
+//	@Success		200		{object}	types.Response				"成功"
 func HandleRequest(context *gin.Context) {
 	var (
 		d        types.HandleRequestParams
@@ -494,12 +545,12 @@ func HandleRequest(context *gin.Context) {
 }
 
 // GetRequestList 获取所有的请求
-// @Tags    通用
-// @Summary 获取所有的请求
-// @Description 获取所有的请求
-// @Router /api/getRequestList [get]
-// @Param object body types.BotParams false "获取所有的请求入参"
-// @Success 200 {object} types.Response{result=[]types.RequestVo} "成功"
+//	@Tags			通用
+//	@Summary		获取所有的请求
+//	@Description	获取所有的请求
+//	@Router			/api/getRequestList [get]
+//	@Param			object	body		types.BotParams								false	"获取所有的请求入参"
+//	@Success		200		{object}	types.Response{result=[]types.RequestVo}	"成功"
 func GetRequestList(context *gin.Context) {
 	d, bot, err := getBot(context)
 	if err != nil {
@@ -556,12 +607,12 @@ func Upgrade(context *gin.Context) {
 }
 
 // SendMsg 前端调用发送信息
-// @Tags    通用
-// @Summary 前端调用发送信息
-// @Description 前端调用发送信息
-// @Router /api/sendMsg [post]
-// @Param object body types.SendMsgParams false "发消息参数"
-// @Success 200 {object} types.Response{result=int} "成功"
+//	@Tags			通用
+//	@Summary		前端调用发送信息
+//	@Description	前端调用发送信息
+//	@Router			/api/sendMsg [post]
+//	@Param			object	body		types.SendMsgParams			false	"发消息参数"
+//	@Success		200		{object}	types.Response{result=int}	"成功"
 func SendMsg(context *gin.Context) {
 	var (
 		d     types.SendMsgParams
@@ -636,12 +687,12 @@ func (l logWriter) Write(p []byte) (n int, err error) {
 }
 
 // Login 前端登录
-// @Tags    用户
-// @Summary 前端登录
-// @Description 前端登录
-// @Router /api/login [post]
-// @Param object body types.LoginParams false "前端登录"
-// @Success 200 {object} types.Response{result=types.LoginResultVo} "成功"
+//	@Tags			用户
+//	@Summary		前端登录
+//	@Description	前端登录
+//	@Router			/api/login [post]
+//	@Param			object	body		types.LoginParams							false	"前端登录"
+//	@Success		200		{object}	types.Response{result=types.LoginResultVo}	"成功"
 func Login(context *gin.Context) {
 	var d types.LoginParams
 	err := bind(&d, context)
@@ -688,11 +739,11 @@ func Login(context *gin.Context) {
 }
 
 // GetUserInfo 获得用户信息
-// @Tags    用户
-// @Summary 获得用户信息
-// @Description 获得用户信息
-// @Router /api/getUserInfo [get]
-// @Success 200 {object} types.Response{result=types.UserInfoVo} "成功"
+//	@Tags			用户
+//	@Summary		获得用户信息
+//	@Description	获得用户信息
+//	@Router			/api/getUserInfo [get]
+//	@Success		200	{object}	types.Response{result=types.UserInfoVo}	"成功"
 func GetUserInfo(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	i, _ := middleware.LoginCache.Get(token)
@@ -723,11 +774,11 @@ func GetUserInfo(context *gin.Context) {
 }
 
 // Logout 登出
-// @Tags    用户
-// @Summary 登出
-// @Description 登出
-// @Router /api/logout [get]
-// @Success 200 {object} types.Response "成功"
+//	@Tags			用户
+//	@Summary		登出
+//	@Description	登出
+//	@Router			/api/logout [get]
+//	@Success		200	{object}	types.Response	"成功"
 func Logout(context *gin.Context) {
 	token := context.Request.Header.Get("Authorization")
 	middleware.LoginCache.Delete(token)
@@ -740,11 +791,11 @@ func Logout(context *gin.Context) {
 }
 
 // GetPermCode 授权码
-// @Tags    用户
-// @Summary 授权码
-// @Description 授权码
-// @Router /api/getPermCode [get]
-// @Success 200 {object} types.Response{result=[]string} "成功"
+//	@Tags			用户
+//	@Summary		授权码
+//	@Description	授权码
+//	@Router			/api/getPermCode [get]
+//	@Success		200	{object}	types.Response{result=[]string}	"成功"
 func GetPermCode(context *gin.Context) {
 	r := []string{"1000", "3000", "5000"}
 	// 先写死接口

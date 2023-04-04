@@ -56,11 +56,11 @@ func init() {
 }
 
 // RunGui 运行webui
-// @title zbp api
-// @version 1.0
-// @description zbp restful api document
-// @host 127.0.0.1:3000
-// @BasePath /
+//	@title			zbp api
+//	@version		1.0
+//	@description	zbp restful api document
+//	@host			127.0.0.1:3000
+//	@BasePath		/
 func RunGui(addr string) {
 	defer func() {
 		err := recover()

@@ -6,7 +6,7 @@ definitions:
       idList:
         description: 任务id
         items:
-          type: integer
+          type: string
         type: array
       selfId:
         description: 机器人qq
@@ -29,7 +29,7 @@ definitions:
         type: string
       id:
         description: 任务id
-        type: integer
+        type: string
       jobType:
         description: 任务类型,1-指令别名,2-定时任务,3-你问我答
         type: integer
@@ -339,11 +339,10 @@ paths:
     get:
       description: 获取好友列表
       parameters:
-      - description: 获取好友列表入参
-        in: body
-        name: object
-        schema:
-          $ref: '#/definitions/types.BotParams'
+      - description: 机器人qq
+        in: query
+        name: selfId
+        type: integer
       responses:
         "200":
           description: 成功
@@ -356,17 +355,36 @@ paths:
     get:
       description: 获取群列表
       parameters:
-      - description: 获取群列表入参
-        in: body
-        name: object
-        schema:
-          $ref: '#/definitions/types.BotParams'
+      - description: 机器人qq
+        in: query
+        name: selfId
+        type: integer
       responses:
         "200":
           description: 成功
           schema:
             $ref: '#/definitions/types.Response'
       summary: 获取群列表
+      tags:
+      - 通用
+  /api/getGroupMemberList:
+    get:
+      description: 获取群成员列表,groupId为0的时候拉取好友信息
+      parameters:
+      - description: 机器人qq
+        in: query
+        name: selfId
+        type: integer
+      - description: 群聊id
+        in: query
+        name: groupId
+        type: integer
+      responses:
+        "200":
+          description: 成功
+          schema:
+            $ref: '#/definitions/types.Response'
+      summary: 获取群成员列表
       tags:
       - 通用
   /api/getPermCode:

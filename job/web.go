@@ -17,13 +17,13 @@ import (
 )
 
 // JobListRsp 任务列表的出参
-// @Description 任务列表的出参
+//	@Description	任务列表的出参
 type JobListRsp struct {
 	JobList []Job `json:"jobList"` // 任务列表
 }
 
 // Job 添加任务的入参
-// @Description 添加任务的入参
+//	@Description	添加任务的入参
 type Job struct {
 	ID            string `json:"id"`            // 任务id
 	SelfID        int64  `json:"selfId"`        // 机器人id
@@ -45,11 +45,11 @@ func JobRoute(rg *gin.RouterGroup) {
 }
 
 // JobList 任务列表
-// @Tags    任务
-// @Summary 任务列表
-// @Description 任务列表
-// @Router /api/job/list [get]
-// @Success 200 {object} types.Response{result=JobListRsp} "成功"
+//	@Tags			任务
+//	@Summary		任务列表
+//	@Description	任务列表
+//	@Router			/api/job/list [get]
+//	@Success		200	{object}	types.Response{result=JobListRsp}	"成功"
 func JobList(context *gin.Context) {
 	var (
 		rsp JobListRsp
@@ -150,7 +150,6 @@ func JobList(context *gin.Context) {
 					j.Handler = e.RawMessage
 					j.GroupID = e.GroupID
 					j.UserID = e.UserID
-					j.SelfID = e.SelfID
 				}
 			}
 			rsp.JobList = append(rsp.JobList, j)
@@ -179,12 +178,12 @@ func JobList(context *gin.Context) {
 }
 
 // Add 添加任务
-// @Tags    任务
-// @Summary 添加任务
-// @Description 添加任务
-// @Router /api/job/add [post]
-// @Param object body Job false "添加任务入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			任务
+//	@Summary		添加任务
+//	@Description	添加任务
+//	@Router			/api/job/add [post]
+//	@Param			object	body		Job				false	"添加任务入参"
+//	@Success		200		{object}	types.Response	"成功"
 func Add(context *gin.Context) {
 	var (
 		j   Job
@@ -246,21 +245,20 @@ func Add(context *gin.Context) {
 		}
 	case 2:
 		var e zero.Event
-		if len(zero.BotConfig.SuperUsers) > 0 {
-			e.UserID = zero.BotConfig.SuperUsers[0]
-			e.Sender = &zero.User{
-				ID: zero.BotConfig.SuperUsers[0],
-			}
-			e.RawMessage = j.Handler
-			e.NativeMessage = json.RawMessage("\"" + j.Handler + "\"")
-			e.GroupID = j.GroupID
-			e.PostType = "message"
-			if e.GroupID > 0 {
-				e.MessageType = "group"
-			} else {
-				e.MessageType = "private"
-				e.TargetID = j.SelfID
-			}
+		e.UserID = j.UserID
+		e.Sender = &zero.User{
+			ID: j.UserID,
+		}
+		e.SelfID = j.SelfID
+		e.RawMessage = j.Handler
+		e.NativeMessage = json.RawMessage("\"" + j.Handler + "\"")
+		e.GroupID = j.GroupID
+		e.PostType = "message"
+		if e.GroupID > 0 {
+			e.MessageType = "group"
+		} else {
+			e.MessageType = "private"
+			e.TargetID = j.SelfID
 		}
 		b, err := json.Marshal(&e)
 		if err != nil {
@@ -290,22 +288,24 @@ func Add(context *gin.Context) {
 		isInject := false
 		gid := j.GroupID
 		uid := j.UserID
-		if j.QuestionType == 2 && j.AnswerType == 2 {
+		switch {
+		case j.QuestionType == 2 && j.AnswerType == 2:
 			all = true
 			isInject = true
 			c.Cron = "im:" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		} else if j.QuestionType == 2 && j.AnswerType == 1 {
+		case j.QuestionType == 2 && j.AnswerType == 1:
 			all = true
 			isInject = false
 			c.Cron = "rm:" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		} else if j.QuestionType == 1 && j.AnswerType == 2 {
+		case j.QuestionType == 1 && j.AnswerType == 2:
 			all = false
 			isInject = true
 			c.Cron = "ip:" + strconv.FormatInt(uid, 36) + ":" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		} else if j.QuestionType == 1 && j.AnswerType == 1 {
+		case j.QuestionType == 1 && j.AnswerType == 1:
 			all = false
 			isInject = false
 			c.Cron = "rp:" + strconv.FormatInt(uid, 36) + ":" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
+		default:
 		}
 		c.Cmd = message.EscapeCQCodeText(j.Handler)
 		c.ID = idof(c.Cron, c.Cmd)
@@ -382,19 +382,19 @@ func Add(context *gin.Context) {
 }
 
 // DeleteReq 删除任务的入参
-// @Description 删除任务的入参
+//	@Description	删除任务的入参
 type DeleteReq struct {
 	IDList []string `json:"idList" form:"idList"` // 任务id
 	SelfID int64    `json:"selfId" form:"selfId"` // 机器人qq
 }
 
 // Delete 删除任务
-// @Tags    任务
-// @Summary 删除任务
-// @Description 删除任务
-// @Router /api/job/delete [post]
-// @Param object body DeleteReq false "删除任务的入参"
-// @Success 200 {object} types.Response "成功"
+//	@Tags			任务
+//	@Summary		删除任务
+//	@Description	删除任务
+//	@Router			/api/job/delete [post]
+//	@Param			object	body		DeleteReq		false	"删除任务的入参"
+//	@Success		200		{object}	types.Response	"成功"
 func Delete(context *gin.Context) {
 	var (
 		req DeleteReq
@@ -444,7 +444,7 @@ func Delete(context *gin.Context) {
 				all = false
 			} else {
 				cutList := strings.SplitN(c.Cron, ":", 3)
-				if len(cutList) == 4 {
+				if len(cutList) == 3 {
 					gid, err = strconv.ParseInt(cutList[len(cutList)-2], 36, 64)
 					if err != nil {
 						return err
@@ -458,6 +458,9 @@ func Delete(context *gin.Context) {
 				escapedpattern = ""
 			}
 			rg := global.group[gid]
+			if rg == nil {
+				return nil
+			}
 			var deleteInst func(insts []inst) ([]inst, error)
 			if escapedpattern == "" {
 				deleteInst = func(insts []inst) ([]inst, error) {

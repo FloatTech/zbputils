@@ -23,6 +23,7 @@ func SetRouters(engine *gin.Engine) {
 	apiRoute.Use(middleware.TokenMiddle())
 	apiRoute.GET("/getFriendList", controller.GetFriendList)
 	apiRoute.GET("/getGroupList", controller.GetGroupList)
+	apiRoute.GET("/getGroupMemberList", controller.GetGroupMemberList)
 	apiRoute.GET("/getRequestList", controller.GetRequestList)
 	apiRoute.POST("/handleRequest", controller.HandleRequest)
 	apiRoute.POST("/sendMsg", controller.SendMsg)
