@@ -21,6 +21,7 @@ type Engine struct {
 }
 
 var priomap = make(map[int]string)      // priomap is map[prio]service
+var briefmap = make(map[string]string)  // briefmap is map[brief]service
 var foldermap = make(map[string]string) // foldermap is map[folder]service
 
 func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine) {
@@ -41,6 +42,13 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	)
 	e.prio = prio
 	e.service = service
+	if o.Brief != "" {
+		s, ok := briefmap[o.Brief]
+		if ok {
+			panic("Brief " + o.Brief + " has been required by service " + s)
+		}
+		briefmap[o.Brief] = service
+	}
 	switch {
 	case o.PublicDataFolder != "":
 		if unicode.IsLower([]rune(o.PublicDataFolder)[0]) {
