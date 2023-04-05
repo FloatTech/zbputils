@@ -79,6 +79,7 @@ func init() {
 type logWriter struct{}
 
 // GetBotList 获取机器人qq号
+//
 //	@Tags			通用
 //	@Summary		获取机器人qq号
 //	@Description	获取机器人qq号
@@ -99,6 +100,7 @@ func GetBotList(context *gin.Context) {
 }
 
 // GetFriendList 获取好友列表
+//
 //	@Tags			通用
 //	@Summary		获取好友列表
 //	@Description	获取好友列表
@@ -137,6 +139,7 @@ func GetFriendList(context *gin.Context) {
 }
 
 // GetGroupMemberList 获取群成员列表
+//
 //	@Tags			通用
 //	@Summary		获取群成员列表
 //	@Description	获取群成员列表,groupId为0的时候拉取好友信息
@@ -169,16 +172,7 @@ func GetGroupMemberList(context *gin.Context) {
 	}
 	var resp []any
 	list := bot.GetGroupMemberList(d.GroupID).String()
-	err = json.Unmarshal(binary.StringToBytes(list), &resp)
-	if err != nil {
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      err.Error(),
-			ResponseType: "error",
-		})
-		return
-	}
+	_ = json.Unmarshal(binary.StringToBytes(list), &resp)
 	context.JSON(http.StatusOK, types.Response{
 		Code:         0,
 		Result:       resp,
@@ -188,6 +182,7 @@ func GetGroupMemberList(context *gin.Context) {
 }
 
 // GetGroupList 获取群列表
+//
 //	@Tags			通用
 //	@Summary		获取群列表
 //	@Description	获取群列表
@@ -226,6 +221,7 @@ func GetGroupList(context *gin.Context) {
 }
 
 // DeleteGroup 删除群聊或好友
+//
 //	@Tags			通用
 //	@Summary		删除群聊或好友
 //	@Description	删除群聊或好友
@@ -274,6 +270,7 @@ func DeleteGroup(context *gin.Context) {
 }
 
 // GetAllPlugin 获取所有插件的状态
+//
 //	@Tags			插件
 //	@Summary		获取所有插件的状态
 //	@Description	获取所有插件的状态
@@ -315,6 +312,7 @@ func GetAllPlugin(context *gin.Context) {
 }
 
 // GetPlugin 获取某个插件的状态
+//
 //	@Tags			插件
 //	@Summary		获取某个插件的状态
 //	@Description	获取某个插件的状态
@@ -360,6 +358,7 @@ func GetPlugin(context *gin.Context) {
 }
 
 // UpdatePluginStatus 更改某一个插件状态
+//
 //	@Tags			插件
 //	@Summary		更改某一个插件状态
 //	@Description	更改某一个插件状态
@@ -406,6 +405,7 @@ func UpdatePluginStatus(context *gin.Context) {
 }
 
 // UpdateResponseStatus 更改某一个群响应
+//
 //	@Tags			响应
 //	@Summary		更改某一个群响应
 //	@Description	更改某一个群响应
@@ -447,6 +447,7 @@ func UpdateResponseStatus(context *gin.Context) {
 }
 
 // UpdateAllPluginStatus 更改某群所有插件状态
+//
 //	@Tags			响应
 //	@Summary		更改某群所有插件状态
 //	@Description	更改某群所有插件状态
@@ -492,6 +493,7 @@ func UpdateAllPluginStatus(context *gin.Context) {
 }
 
 // HandleRequest 处理一个请求
+//
 //	@Tags			通用
 //	@Summary		处理一个请求
 //	@Description	处理一个请求
@@ -545,6 +547,7 @@ func HandleRequest(context *gin.Context) {
 }
 
 // GetRequestList 获取所有的请求
+//
 //	@Tags			通用
 //	@Summary		获取所有的请求
 //	@Description	获取所有的请求
@@ -607,6 +610,7 @@ func Upgrade(context *gin.Context) {
 }
 
 // SendMsg 前端调用发送信息
+//
 //	@Tags			通用
 //	@Summary		前端调用发送信息
 //	@Description	前端调用发送信息
@@ -687,6 +691,7 @@ func (l logWriter) Write(p []byte) (n int, err error) {
 }
 
 // Login 前端登录
+//
 //	@Tags			用户
 //	@Summary		前端登录
 //	@Description	前端登录
@@ -739,6 +744,7 @@ func Login(context *gin.Context) {
 }
 
 // GetUserInfo 获得用户信息
+//
 //	@Tags			用户
 //	@Summary		获得用户信息
 //	@Description	获得用户信息
@@ -774,6 +780,7 @@ func GetUserInfo(context *gin.Context) {
 }
 
 // Logout 登出
+//
 //	@Tags			用户
 //	@Summary		登出
 //	@Description	登出
@@ -791,6 +798,7 @@ func Logout(context *gin.Context) {
 }
 
 // GetPermCode 授权码
+//
 //	@Tags			用户
 //	@Summary		授权码
 //	@Description	授权码
