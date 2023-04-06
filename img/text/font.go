@@ -27,4 +27,8 @@ const (
 	GugiRegularFontFile = FontPath + "Gugi-Regular.ttf"
 	// MaokenFontFile 猫啃珠圆体
 	MaokenFontFile = FontPath + "MaokenZhuyuanTi.ttf"
+	// BaotuXiaobaiFontFile 包图小白体
+	BaotuXiaobaiFontFile = FontPath + "BaotuXiaobaiTi.ttf"
+	// QiantuXiaotuFontFile 千图小兔体
+	QiantuXiaotuFontFile = FontPath + "QiantuXiaotuTi.ttf"
 )
