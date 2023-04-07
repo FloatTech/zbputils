@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
@@ -41,12 +40,16 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	c := managers.NewControl(service, o)
 	return func(ctx *zero.Ctx) bool {
 		ctx.State["manager"] = c
-		return c.Handler(uintptr(unsafe.Pointer(ctx)), ctx.Event.GroupID, ctx.Event.UserID)
+		return c.Handler(ctx.Event.GroupID, ctx.Event.UserID)
 	}
 }
 
 // Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
+	_, ok := briefmap[service]
+	if ok {
+		return managers.Lookup(briefmap[service])
+	}
 	return managers.Lookup(service)
 }
 
@@ -388,14 +391,6 @@ func init() {
 				_ = ctx.Parse(&model)
 				service, ok := Lookup(model.Args)
 				if !ok {
-					for _, controlinfo := range managers.M {
-						if controlinfo.Options.Brief == model.Args {
-							service = controlinfo
-							break
-						}
-					}
-				}
-				if service == nil {
 					ctx.SendChain(message.Text("没有找到指定服务!"))
 					return
 				}
