@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"unsafe"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
@@ -41,7 +40,7 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	c := managers.NewControl(service, o)
 	return func(ctx *zero.Ctx) bool {
 		ctx.State["manager"] = c
-		return c.Handler(uintptr(unsafe.Pointer(ctx)), ctx.Event.GroupID, ctx.Event.UserID)
+		return c.Handler(ctx.Event.GroupID, ctx.Event.UserID)
 	}
 }
 
