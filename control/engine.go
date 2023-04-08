@@ -47,14 +47,14 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	if o.Brief != "" {
 		s, ok := briefmap[o.Brief]
 		if ok {
-			panic("Brief " + o.Brief + " has been required by service " + s)
+			panic("Brief \"" + o.Brief + "\" of service " + service + " has been required by service " + s)
 		}
 		briefmap[o.Brief] = service
 	}
 	if o.Extra != 0 {
 		s, ok := extramap[o.Extra]
 		if ok {
-			panic("Extra " + strconv.Itoa(int(o.Extra)) + " has been required by service " + s)
+			panic("Extra " + strconv.Itoa(int(o.Extra)) + "\" of service " + service + " has been required by service " + s)
 		}
 		extramap[o.Extra] = service
 	}

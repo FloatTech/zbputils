@@ -10,11 +10,13 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/floatbox/process"
 	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/rendercard"
@@ -29,6 +31,7 @@ const (
 	// Md5File ...
 	Md5File = StorageFolder + "stor.spb"
 	dbfile  = StorageFolder + "plugins.db"
+	lnfile  = StorageFolder + "lnperpg.txt"
 )
 
 var (
@@ -78,7 +81,18 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-
+		// 载入用户配置
+		if file.IsExist(lnfile) {
+			data, err := os.ReadFile(lnfile)
+			if err != nil {
+				panic(err)
+			}
+			mun, _ := strconv.Atoi(binary.BytesToString(data))
+			if mun > 0 {
+				lnperpg = mun
+				logrus.Infoln("获取到当前设置的服务列表显示行数为: ", lnperpg)
+			}
+		}
 		zero.OnCommandGroup([]string{
 			"响应", "response", "沉默", "silence",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
@@ -385,7 +399,7 @@ func init() {
 			ctx.SendChain(message.Text("已改变全局默认启用状态: " + model.Args))
 		})
 
-		zero.OnCommandGroup([]string{"用法", "usage"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+		zero.OnCommandGroup([]string{"用法", "usage"}).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				model := extension.CommandModel{}
 				_ = ctx.Parse(&model)
@@ -433,7 +447,7 @@ func init() {
 				}
 			})
 
-		zero.OnCommandGroup([]string{"服务列表", "service_list"}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().
+		zero.OnCommandGroup([]string{"服务列表", "service_list"}).SetBlock(true).SecondPriority().
 			Handle(func(ctx *zero.Ctx) {
 				gid := ctx.Event.GroupID
 				if gid == 0 {
@@ -487,6 +501,12 @@ func init() {
 			mun, err := strconv.Atoi(model.Args)
 			if err != nil {
 				ctx.SendChain(message.Text("请输入正确的数字"))
+				return
+			}
+			err = os.WriteFile(lnfile, binary.StringToBytes(model.Args), 0644)
+			if err != nil {
+				ctx.SendChain(message.Text(err))
+				return
 			}
 			lnperpg = mun
 			// 清除缓存
