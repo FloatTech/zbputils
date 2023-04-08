@@ -45,7 +45,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	if o.Brief != "" {
 		s, ok := briefmap[o.Brief]
 		if ok {
-			panic("Brief " + o.Brief + " has been required by service " + s)
+			panic("Brief \"" + o.Brief + "\" of service " + service + " has been required by service " + s)
 		}
 		briefmap[o.Brief] = service
 	}
