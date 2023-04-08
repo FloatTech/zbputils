@@ -87,7 +87,10 @@ func init() {
 			if err != nil {
 				panic(err)
 			}
-			mun, _ := strconv.Atoi(binary.BytesToString(data))
+			mun, err := strconv.Atoi(binary.BytesToString(data))
+			if err != nil {
+				panic(err)
+			}
 			if mun > 0 {
 				lnperpg = mun
 				logrus.Infoln("获取到当前设置的服务列表显示行数为: ", lnperpg)
