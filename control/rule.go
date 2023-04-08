@@ -69,16 +69,25 @@ func CanResponse(gid int64) bool {
 }
 
 func init() {
+	err := os.MkdirAll("data/Control", 0755)
+	if err != nil {
+		panic(err)
+	}
+	err = os.MkdirAll("data/control", 0755)
+	if err != nil {
+		panic(err)
+	}
+	var mun string
+	_ = managers.Response(-1)
+	_ = managers.GetExtra(-1, &mun)
+	if mun != "" {
+		ln, _ := strconv.Atoi(strings.ReplaceAll(mun, "列表行数:", ""))
+		if ln > 0 {
+			lnperpg = ln
+		}
+		logrus.Infoln("当前服务列表显示行数为:", lnperpg)
+	}
 	process.NewCustomOnce(&managers).Do(func() {
-		err := os.MkdirAll("data/Control", 0755)
-		if err != nil {
-			panic(err)
-		}
-		err = os.MkdirAll("data/control", 0755)
-		if err != nil {
-			panic(err)
-		}
-
 		zero.OnCommandGroup([]string{
 			"响应", "response", "沉默", "silence",
 		}, zero.UserOrGrpAdmin).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
@@ -487,6 +496,13 @@ func init() {
 			mun, err := strconv.Atoi(model.Args)
 			if err != nil {
 				ctx.SendChain(message.Text("请输入正确的数字"))
+				return
+			}
+			_ = managers.Response(-1)
+			err = managers.SetExtra(-1, "列表行数:"+model.Args)
+			if err != nil {
+				ctx.SendChain(message.Text("ERROR: ", err))
+				return
 			}
 			lnperpg = mun
 			// 清除缓存
