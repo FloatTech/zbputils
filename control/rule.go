@@ -90,8 +90,7 @@ func init() {
 			mun, err := strconv.Atoi(binary.BytesToString(data))
 			if err != nil {
 				logrus.Warning("获取设置的服务列表显示行数错误,将使用默认的显示行数\n", err)
-			}
-			if mun > 0 {
+			} else if mun > 0 {
 				lnperpg = mun
 				logrus.Infoln("获取到当前设置的服务列表显示行数为: ", lnperpg)
 			}
