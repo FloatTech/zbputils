@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
