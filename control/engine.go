@@ -3,6 +3,7 @@ package control
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"unicode"
 
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -23,6 +24,7 @@ type Engine struct {
 var priomap = make(map[int]string)      // priomap is map[prio]service
 var briefmap = make(map[string]string)  // briefmap is map[brief]service
 var foldermap = make(map[string]string) // foldermap is map[folder]service
+var extramap = make(map[int16]string)   // extramap is map[gid]service
 
 func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine) {
 	e = new(Engine)
@@ -48,6 +50,13 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 			panic("Brief " + o.Brief + " has been required by service " + s)
 		}
 		briefmap[o.Brief] = service
+	}
+	if o.Extra != 0 {
+		s, ok := extramap[o.Extra]
+		if ok {
+			panic("Extra " + strconv.Itoa(int(o.Extra)) + " has been required by service " + s)
+		}
+		extramap[o.Extra] = service
 	}
 	switch {
 	case o.PublicDataFolder != "":
