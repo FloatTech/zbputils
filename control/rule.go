@@ -85,14 +85,14 @@ func init() {
 		if file.IsExist(lnfile) {
 			data, err := os.ReadFile(lnfile)
 			if err != nil {
-				logrus.Warnln("[control] 读取配置文件失败,将使用默认的显示行数\n", err)
+				logrus.Warnln("[control] 读取配置文件失败,将使用默认的显示行数:", err)
 			} else {
 				mun, err := strconv.Atoi(binary.BytesToString(data))
 				if err != nil {
-					logrus.Warnln("[control] 获取设置的服务列表显示行数错误,将使用默认的显示行数\n", err)
+					logrus.Warnln("[control] 获取设置的服务列表显示行数错误,将使用默认的显示行数:", err)
 				} else if mun > 0 {
 					lnperpg = mun
-					logrus.Infoln("[control] 获取到当前设置的服务列表显示行数为: ", lnperpg)
+					logrus.Infoln("[control] 获取到当前设置的服务列表显示行数为:", lnperpg)
 				}
 			}
 		}
