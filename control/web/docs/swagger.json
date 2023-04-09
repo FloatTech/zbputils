@@ -337,7 +337,7 @@
                                     "type": "object",
                                     "properties": {
                                         "result": {
-                                            "$ref": "#/definitions/job.JobListRsp"
+                                            "$ref": "#/definitions/job.ListRsp"
                                         }
                                     }
                                 }
@@ -669,7 +669,7 @@
                 }
             }
         },
-        "job.JobListRsp": {
+        "job.ListRsp": {
             "description": "任务列表的出参",
             "type": "object",
             "properties": {

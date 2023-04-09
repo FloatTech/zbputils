@@ -46,7 +46,7 @@ definitions:
         description: 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
         type: integer
     type: object
-  job.JobListRsp:
+  job.ListRsp:
     description: 任务列表的出参
     properties:
       jobList:
@@ -507,7 +507,7 @@ paths:
             - $ref: '#/definitions/types.Response'
             - properties:
                 result:
-                  $ref: '#/definitions/job.JobListRsp'
+                  $ref: '#/definitions/job.ListRsp'
               type: object
       summary: 任务列表
       tags:

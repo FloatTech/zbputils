@@ -648,7 +648,7 @@ func SendMsg(context *gin.Context) {
 	// 检查是否有全部群聊
 	if all {
 		// 添加私聊
-		r := make([]int64, 16)
+		r := make([]int64, 0, 16)
 		for _, v := range d.GIDList {
 			if v < 0 {
 				r = append(r, v)

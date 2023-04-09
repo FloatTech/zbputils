@@ -343,7 +343,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "result": {
-                                            "$ref": "#/definitions/job.JobListRsp"
+                                            "$ref": "#/definitions/job.ListRsp"
                                         }
                                     }
                                 }
@@ -675,7 +675,7 @@ const docTemplate = `{
                 }
             }
         },
-        "job.JobListRsp": {
+        "job.ListRsp": {
             "description": "任务列表的出参",
             "type": "object",
             "properties": {

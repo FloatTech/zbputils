@@ -31,7 +31,7 @@ func SetRouters(engine *gin.Engine) {
 
 	// 任务相关接口
 	jobRoute := apiRoute.Group("/job")
-	job.JobRoute(jobRoute)
+	job.Route(jobRoute)
 
 	// 管理相关接口
 	manageRoute := apiRoute.Group("/manage")

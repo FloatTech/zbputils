@@ -16,13 +16,15 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// JobListRsp 任务列表的出参
+// ListRsp 任务列表的出参
+//
 //	@Description	任务列表的出参
-type JobListRsp struct {
+type ListRsp struct {
 	JobList []Job `json:"jobList"` // 任务列表
 }
 
 // Job 添加任务的入参
+//
 //	@Description	添加任务的入参
 type Job struct {
 	ID            string `json:"id"`            // 任务id
@@ -37,22 +39,23 @@ type Job struct {
 	UserID        int64  `json:"userId"`        // 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
 }
 
-// 暴露接口
-func JobRoute(rg *gin.RouterGroup) {
-	rg.GET("/list", JobList)
+// Route job路由
+func Route(rg *gin.RouterGroup) {
+	rg.GET("/list", List)
 	rg.POST("/add", Add)
 	rg.POST("/delete", Delete)
 }
 
-// JobList 任务列表
+// List 任务列表
+//
 //	@Tags			任务
 //	@Summary		任务列表
 //	@Description	任务列表
 //	@Router			/api/job/list [get]
-//	@Success		200	{object}	types.Response{result=JobListRsp}	"成功"
-func JobList(context *gin.Context) {
+//	@Success		200	{object}	types.Response{result=ListRsp}	"成功"
+func List(context *gin.Context) {
 	var (
-		rsp JobListRsp
+		rsp ListRsp
 		err error
 	)
 	rsp.JobList = make([]Job, 0, 16)
@@ -155,10 +158,7 @@ func JobList(context *gin.Context) {
 			rsp.JobList = append(rsp.JobList, j)
 			return nil
 		})
-		if err != nil {
-			return false
-		}
-		return true
+		return err == nil
 	})
 	if err != nil {
 		context.JSON(http.StatusOK, types.Response{
@@ -178,6 +178,7 @@ func JobList(context *gin.Context) {
 }
 
 // Add 添加任务
+//
 //	@Tags			任务
 //	@Summary		添加任务
 //	@Description	添加任务
@@ -382,6 +383,7 @@ func Add(context *gin.Context) {
 }
 
 // DeleteReq 删除任务的入参
+//
 //	@Description	删除任务的入参
 type DeleteReq struct {
 	IDList []string `json:"idList" form:"idList"` // 任务id
@@ -389,6 +391,7 @@ type DeleteReq struct {
 }
 
 // Delete 删除任务
+//
 //	@Tags			任务
 //	@Summary		删除任务
 //	@Description	删除任务
@@ -415,13 +418,14 @@ func Delete(context *gin.Context) {
 	bots := strconv.FormatInt(req.SelfID, 36)
 	var delcmd []string
 	err = db.FindFor(bots, &c, "WHERE id in ( "+strings.Join(req.IDList, ",")+" )", func() error {
-		if len(c.Cron) >= 3 && (c.Cron[:3] == "fm:" || c.Cron[:3] == "sm:") {
+		switch {
+		case len(c.Cron) >= 3 && (c.Cron[:3] == "fm:" || c.Cron[:3] == "sm:"):
 			m, ok := matchers[c.ID]
 			if ok {
 				m.Delete()
 				delete(matchers, c.ID)
 			}
-		} else if len(c.Cron) >= 3 && (c.Cron[:3] == "ip:" || c.Cron[:3] == "rp:" || c.Cron[:3] == "rm:" || c.Cron[:3] == "im:") {
+		case len(c.Cron) >= 3 && (c.Cron[:3] == "ip:" || c.Cron[:3] == "rp:" || c.Cron[:3] == "rm:" || c.Cron[:3] == "im:"):
 			var (
 				all     bool
 				gid     int64
@@ -493,7 +497,7 @@ func Delete(context *gin.Context) {
 			if err != nil {
 				return err
 			}
-		} else {
+		default:
 			eid, ok := entries[c.ID]
 			if ok {
 				process.CronTab.Remove(eid)
