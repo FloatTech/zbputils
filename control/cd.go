@@ -2,6 +2,7 @@ package control
 
 import (
 	"encoding/binary"
+	gomath "math"
 	"strings"
 	"time"
 
@@ -35,7 +36,7 @@ func init() {
 
 	zero.OnRegex("^●cd([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
-			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
+			if isValidToken(ctx.State["regex_matched"].([]string)[1], 10) {
 				gid := ctx.Event.GroupID
 				w := binutils.SelectWriter()
 				managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
@@ -56,6 +57,7 @@ func init() {
 					process.SleepAbout1sTo2s()
 					ctx.DeleteMessage(id)
 				}
+				_, _ = conflicts.withdraw.LoadOrStore(ctx.Event.GroupID, gomath.MaxUint8)
 			}
 		})
 
@@ -84,13 +86,13 @@ func genToken() (tok string) {
 	return
 }
 
-func isValidToken(tok string) (yes bool) {
+func isValidToken(tok string, throttlesecond int64) (yes bool) {
 	s := b14.DecodeString(tok)
 	timebytes, cl := binutils.OpenWriterF(func(w *binutils.Writer) {
 		_ = w.WriteByte(0)
 		w.WriteString(s)
 	})
-	yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < 10
+	yes = math.Abs64(time.Now().Unix()-int64(binary.BigEndian.Uint64(timebytes))) < throttlesecond
 	cl()
 	return
 }

@@ -1,6 +1,7 @@
 package control
 
 import (
+	"github.com/FloatTech/zbputils/vevent"
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
@@ -15,5 +16,9 @@ func (m *Matcher) SetBlock(block bool) *Matcher {
 
 // Handle 直接处理事件
 func (m *Matcher) Handle(handler zero.Handler) {
-	_ = (*zero.Matcher)(m).Handle(handler)
+	_ = (*zero.Matcher)(m).Handle(func(ctx *zero.Ctx) {
+		copyctx := *ctx
+		vevent.HookCtxCaller(&copyctx, vevent.NewAPICallerPrexecHook(ctx, conflicts.handle))
+		handler(&copyctx)
+	})
 }
