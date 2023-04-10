@@ -310,7 +310,7 @@ func init() {
 	en.OnPrefix("注入指令结果：", zero.UserOrGrpAdmin, func(ctx *zero.Ctx) bool {
 		return ctx.State["args"].(string) != ""
 	}, parseArgs).SetBlock(true).Handle(func(ctx *zero.Ctx) {
-		hook := vevent.NewAPICallerHook(ctx, func(rsp zero.APIResponse, err error) {
+		hook := vevent.NewAPICallerReturnHook(ctx, func(rsp zero.APIResponse, err error) {
 			if err == nil {
 				logrus.Debugln("[job] CallerHook returned")
 				id := message.NewMessageIDFromInteger(rsp.Data.Get("message_id").Int())

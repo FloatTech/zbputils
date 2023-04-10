@@ -74,7 +74,13 @@ func init() {
 	zero.OnRegex("^●ca([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
 			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
-				conflicts.hasConflict.Set(ctx.Event.GroupID, true)
+				gid := ctx.Event.GroupID
+				_, _ = conflicts.withdraw.LoadOrStore(gid, math.MaxUint8)
+				conflicts.hasConflict.Set(gid, true)
+				go func() {
+					<-zero.NewFutureEvent("message", 999, false, ctx.CheckSession()).Next()
+					conflicts.hasConflict.Delete(gid)
+				}()
 			}
 		})
 }
