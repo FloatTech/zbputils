@@ -9,7 +9,7 @@ import (
 func TestGenToken(t *testing.T) {
 	tok := genToken()
 	t.Log(tok)
-	assert.Equal(t, true, isValidToken(tok))
+	assert.Equal(t, true, isValidToken(tok, 10))
 }
 
 func TestMaru(t *testing.T) {

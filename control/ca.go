@@ -15,6 +15,7 @@ import (
 
 type ca struct {
 	hasConflict *ttl.Cache[int64, bool]
+	canDelete   syncx.Map[int64, struct{}]
 	withdraw    syncx.Map[int64, uint8]
 }
 
@@ -22,10 +23,15 @@ func (c *ca) handle(ctx *zero.Ctx) bool {
 	if !zero.OnlyGroup(ctx) {
 		return true
 	}
-	if c.hasConflict.Get(ctx.Event.GroupID) {
+	gid := ctx.Event.GroupID
+	if _, ok := c.canDelete.Load(gid); ok {
+		c.hasConflict.Delete(gid)
+		c.canDelete.Delete(gid)
+	}
+	if c.hasConflict.Get(gid) {
 		return false
 	}
-	delaymax, ok := c.withdraw.Load(ctx.Event.GroupID)
+	delaymax, ok := c.withdraw.Load(gid)
 	if !ok {
 		return true
 	}
@@ -34,14 +40,14 @@ func (c *ca) handle(ctx *zero.Ctx) bool {
 	}
 	slptm := rand.Intn(int(delaymax))
 	time.Sleep(time.Millisecond * 100 * time.Duration(slptm))
-	_, ok = c.withdraw.Load(ctx.Event.GroupID)
+	_, ok = c.withdraw.Load(gid)
 	if !ok {
 		return true
 	}
-	if c.hasConflict.Get(ctx.Event.GroupID) {
+	if c.hasConflict.Get(gid) {
 		delaymax -= uint8(slptm)
-		c.withdraw.Store(ctx.Event.GroupID, delaymax)
-		c.hasConflict.Delete(ctx.Event.GroupID)
+		c.withdraw.Store(gid, delaymax)
+		c.hasConflict.Delete(gid)
 		return false
 	}
 	go func() {
@@ -73,13 +79,13 @@ func init() {
 
 	zero.OnRegex("^●ca([\u4e00-\u8e00]{4})$", zero.OnlyGroup).SetBlock(true).SecondPriority().
 		Handle(func(ctx *zero.Ctx) {
-			if isValidToken(ctx.State["regex_matched"].([]string)[1]) {
+			if isValidToken(ctx.State["regex_matched"].([]string)[1], 64) {
 				gid := ctx.Event.GroupID
 				_, _ = conflicts.withdraw.LoadOrStore(gid, math.MaxUint8)
 				conflicts.hasConflict.Set(gid, true)
 				go func() {
 					<-zero.NewFutureEvent("message", 999, false, ctx.CheckSession()).Next()
-					conflicts.hasConflict.Delete(gid)
+					conflicts.canDelete.Store(gid, struct{}{})
 				}()
 			}
 		})
