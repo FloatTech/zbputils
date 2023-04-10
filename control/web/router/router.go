@@ -5,7 +5,6 @@ import (
 	"github.com/FloatTech/zbputils/control/web/controller"
 	_ "github.com/FloatTech/zbputils/control/web/docs" // swagger数据
 	"github.com/FloatTech/zbputils/control/web/middleware"
-	"github.com/FloatTech/zbputils/job"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -31,7 +30,9 @@ func SetRouters(engine *gin.Engine) {
 
 	// 任务相关接口
 	jobRoute := apiRoute.Group("/job")
-	job.Route(jobRoute)
+	jobRoute.GET("/list", controller.JobList)
+	jobRoute.POST("/add", controller.JobAdd)
+	jobRoute.POST("/delete", controller.JobDelete)
 
 	// 管理相关接口
 	manageRoute := apiRoute.Group("/manage")

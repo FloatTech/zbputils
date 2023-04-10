@@ -3,15 +3,12 @@ package job
 import (
 	"encoding/json"
 	"errors"
-	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/process"
-	"github.com/FloatTech/zbputils/control/web/types"
-	"github.com/gin-gonic/gin"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -39,25 +36,8 @@ type Job struct {
 	UserID        int64  `json:"userId"`        // 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
 }
 
-// Route job路由
-func Route(rg *gin.RouterGroup) {
-	rg.GET("/list", List)
-	rg.POST("/add", Add)
-	rg.POST("/delete", Delete)
-}
-
 // List 任务列表
-//
-//	@Tags			任务
-//	@Summary		任务列表
-//	@Description	任务列表
-//	@Router			/api/job/list [get]
-//	@Success		200	{object}	types.Response{result=ListRsp}	"成功"
-func List(context *gin.Context) {
-	var (
-		rsp ListRsp
-		err error
-	)
+func List() (rsp ListRsp, err error) {
 	rsp.JobList = make([]Job, 0, 16)
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
 		c := &cmd{}
@@ -160,47 +140,17 @@ func List(context *gin.Context) {
 		})
 		return err == nil
 	})
-	if err != nil {
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      err.Error(),
-			ResponseType: "error",
-		})
-		return
-	}
-	context.JSON(http.StatusOK, types.Response{
-		Code:         0,
-		Result:       rsp,
-		Message:      "",
-		ResponseType: "ok",
-	})
+	return
 }
 
 // Add 添加任务
-//
-//	@Tags			任务
-//	@Summary		添加任务
-//	@Description	添加任务
-//	@Router			/api/job/add [post]
-//	@Param			object	body		Job				false	"添加任务入参"
-//	@Success		200		{object}	types.Response	"成功"
-func Add(context *gin.Context) {
+func Add(j Job) (err error) {
 	var (
-		j   Job
-		c   cmd
-		bot *zero.Ctx
+		c        cmd
+		bot      *zero.Ctx
+		b        []byte
+		compiled *regexp.Regexp
 	)
-	err := context.ShouldBind(&j)
-	if err != nil {
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      err.Error(),
-			ResponseType: "error",
-		})
-		return
-	}
 	bot = zero.GetBot(j.SelfID)
 	bot.Event = &zero.Event{
 		SelfID: j.SelfID,
@@ -221,27 +171,15 @@ func Add(context *gin.Context) {
 				e.RawMessage = j.Handler
 				e.NativeMessage = json.RawMessage("\"" + j.Handler + "\"")
 			}
-			b, err := json.Marshal(&e)
+			b, err = json.Marshal(&e)
 			if err != nil {
-				context.JSON(http.StatusOK, types.Response{
-					Code:         -1,
-					Result:       nil,
-					Message:      err.Error(),
-					ResponseType: "error",
-				})
 				return
 			}
 			c.Cmd = binary.BytesToString(b)
 		}
 		c.ID = idof(c.Cron, c.Cmd)
-		err := registercmd(j.SelfID, &c)
+		err = registercmd(j.SelfID, &c)
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      err.Error(),
-				ResponseType: "error",
-			})
 			return
 		}
 	case 2:
@@ -261,14 +199,8 @@ func Add(context *gin.Context) {
 			e.MessageType = "private"
 			e.TargetID = j.SelfID
 		}
-		b, err := json.Marshal(&e)
+		b, err = json.Marshal(&e)
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      err.Error(),
-				ResponseType: "error",
-			})
 			return
 		}
 		c.Cmd = binary.BytesToString(b)
@@ -276,12 +208,6 @@ func Add(context *gin.Context) {
 		c.ID = idof(c.Cron, c.Cmd)
 		err = addcmd(bot, &c)
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      err.Error(),
-				ResponseType: "error",
-			})
 			return
 		}
 	case 3:
@@ -320,14 +246,8 @@ func Add(context *gin.Context) {
 		if global.group[gid].Private == nil {
 			global.group[gid].Private = make(map[int64][]inst)
 		}
-		compiled, err := regexp.Compile(transformPattern(pattern))
+		compiled, err = regexp.Compile(transformPattern(pattern))
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      "无法编译正则表达式",
-				ResponseType: "error",
-			})
 			return
 		}
 		regexInst := inst{
@@ -357,29 +277,13 @@ func Add(context *gin.Context) {
 			}
 		}
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      "无法保存正则表达式",
-				ResponseType: "error",
-			})
 			return
 		}
 	default:
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      "不存在的任务类型",
-			ResponseType: "error",
-		})
+		err = errors.New("不存在的任务类型")
 		return
 	}
-	context.JSON(http.StatusOK, types.Response{
-		Code:         0,
-		Result:       nil,
-		Message:      "",
-		ResponseType: "ok",
-	})
+	return
 }
 
 // DeleteReq 删除任务的入参
@@ -391,28 +295,10 @@ type DeleteReq struct {
 }
 
 // Delete 删除任务
-//
-//	@Tags			任务
-//	@Summary		删除任务
-//	@Description	删除任务
-//	@Router			/api/job/delete [post]
-//	@Param			object	body		DeleteReq		false	"删除任务的入参"
-//	@Success		200		{object}	types.Response	"成功"
-func Delete(context *gin.Context) {
+func Delete(req DeleteReq) (err error) {
 	var (
-		req DeleteReq
-		c   cmd
+		c cmd
 	)
-	err := context.ShouldBind(&req)
-	if err != nil {
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      err.Error(),
-			ResponseType: "error",
-		})
-		return
-	}
 	mu.Lock()
 	defer mu.Unlock()
 	bots := strconv.FormatInt(req.SelfID, 36)
@@ -508,30 +394,13 @@ func Delete(context *gin.Context) {
 		return nil
 	})
 	if err != nil {
-		context.JSON(http.StatusOK, types.Response{
-			Code:         -1,
-			Result:       nil,
-			Message:      err.Error(),
-			ResponseType: "error",
-		})
 		return
 	}
 	if len(delcmd) > 0 {
 		err = db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
 		if err != nil {
-			context.JSON(http.StatusOK, types.Response{
-				Code:         -1,
-				Result:       nil,
-				Message:      err.Error(),
-				ResponseType: "error",
-			})
 			return
 		}
 	}
-	context.JSON(http.StatusOK, types.Response{
-		Code:         0,
-		Result:       nil,
-		Message:      "",
-		ResponseType: "ok",
-	})
+	return
 }
