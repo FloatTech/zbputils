@@ -17,7 +17,8 @@ func (m *Matcher) SetBlock(block bool) *Matcher {
 // Handle 直接处理事件
 func (m *Matcher) Handle(handler zero.Handler) {
 	_ = (*zero.Matcher)(m).Handle(func(ctx *zero.Ctx) {
-		vevent.HookCtxCaller(ctx, vevent.NewAPICallerPrexecHook(ctx, conflicts.handle))
-		handler(ctx)
+		copyctx := *ctx
+		vevent.HookCtxCaller(&copyctx, vevent.NewAPICallerPrexecHook(ctx, conflicts.handle))
+		handler(&copyctx)
 	})
 }
