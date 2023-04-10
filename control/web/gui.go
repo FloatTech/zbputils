@@ -26,7 +26,7 @@ var (
 )
 
 func init() {
-	zero.OnRegex(`^/设置webui用户名\s?(\S+)\s?密码\s?(\S+)$`, zero.SuperUserPermission).SetBlock(true).
+	zero.OnRegex(`^/设置webui用户名\s?(\S+)\s?密码\s?(\S+)$`, zero.SuperUserPermission, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			regexMatched := ctx.State["regex_matched"].([]string)
 			err := model.CreateOrUpdateUser(&model.User{Username: regexMatched[1], Password: regexMatched[2]})
@@ -40,7 +40,7 @@ func init() {
 			}
 
 		})
-	zero.OnCommand("webui", zero.SuperUserPermission).SetBlock(true).
+	zero.OnCommand("webui", zero.SuperUserPermission, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			args := ctx.State["args"].(string)
 			args = strings.TrimSpace(args)
