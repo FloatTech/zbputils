@@ -34,6 +34,10 @@ func (c *ca) handle(ctx *zero.Ctx) bool {
 	}
 	slptm := rand.Intn(int(delaymax))
 	time.Sleep(time.Millisecond * 100 * time.Duration(slptm))
+	_, ok = c.withdraw.Load(ctx.Event.GroupID)
+	if !ok {
+		return true
+	}
 	if c.hasConflict.Get(ctx.Event.GroupID) {
 		delaymax -= uint8(slptm)
 		c.withdraw.Store(ctx.Event.GroupID, delaymax)
