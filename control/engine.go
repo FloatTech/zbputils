@@ -41,6 +41,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 			return ctx.Event.UserID != ctx.Event.SelfID || ctx.Event.PostType != "message"
 		},
 		newctrl(service, o),
+		conflicts.handle,
 	)
 	e.prio = prio
 	e.service = service
