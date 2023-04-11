@@ -26,7 +26,7 @@ var (
 func init() {
 	_ = os.MkdirAll(webuiFolder, 0755)
 	udb.DBPath = webuiFolder + "user.db"
-	err := udb.Open(time.Hour * 24)
+	err := udb.Open(time.Hour)
 	if err != nil {
 		panic(err)
 	}
