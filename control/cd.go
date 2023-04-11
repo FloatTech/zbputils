@@ -2,7 +2,6 @@ package control
 
 import (
 	"encoding/binary"
-	gomath "math"
 	"strings"
 	"time"
 
@@ -57,7 +56,6 @@ func init() {
 					process.SleepAbout1sTo2s()
 					ctx.DeleteMessage(id)
 				}
-				_, _ = conflicts.withdraw.LoadOrStore(ctx.Event.GroupID, gomath.MaxUint8)
 			}
 		})
 
