@@ -42,6 +42,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 		},
 		newctrl(service, o),
 	)
+	e.en.UseMidHandler(conflicts.handle)
 	e.prio = prio
 	e.service = service
 	if o.Brief != "" {

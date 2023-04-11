@@ -16,4 +16,5 @@ func init() {
 			return ctx.Event.UserID != ctx.Event.SelfID || ctx.Event.PostType != "message"
 		},
 	)
+	defaultEngine.UseMidHandler(conflicts.handle)
 }

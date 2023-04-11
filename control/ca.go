@@ -7,6 +7,7 @@ import (
 
 	"github.com/RomiChan/syncx"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/process"
@@ -15,12 +16,16 @@ import (
 
 type ca struct {
 	hasConflict *ttl.Cache[int64, bool]
+	catoken     *rate.Limiter
 	canDelete   syncx.Map[int64, struct{}]
 	withdraw    syncx.Map[int64, uint8]
 }
 
 func (c *ca) handle(ctx *zero.Ctx) bool {
 	if !zero.OnlyGroup(ctx) {
+		return true
+	}
+	if _, ok := ctx.State["__●ca●passed●__"]; ok {
 		return true
 	}
 	gid := ctx.Event.GroupID
@@ -48,20 +53,28 @@ func (c *ca) handle(ctx *zero.Ctx) bool {
 		delaymax -= uint8(slptm)
 		c.withdraw.Store(gid, delaymax)
 		c.hasConflict.Delete(gid)
+		c.canDelete.Delete(gid)
 		return false
 	}
-	go func() {
-		tok := genToken()
-		t := message.Text("●ca" + tok)
-		id := ctx.SendChain(t)
-		process.SleepAbout1sTo2s()
-		ctx.DeleteMessage(id)
-	}()
+	ctx.State["__●ca●passed●__"] = true
+	go c.sendca(ctx)
 	return true
+}
+
+func (c *ca) sendca(ctx *zero.Ctx) {
+	if !c.catoken.Acquire() {
+		return
+	}
+	tok := genToken()
+	t := message.Text("●ca" + tok)
+	id := ctx.SendChain(t)
+	process.SleepAbout1sTo2s()
+	ctx.DeleteMessage(id)
 }
 
 var conflicts = ca{
 	hasConflict: ttl.NewCache[int64, bool](time.Millisecond * 100 * math.MaxUint8),
+	catoken:     rate.NewLimiter(time.Millisecond*100*math.MaxUint8, 4),
 }
 
 func init() {
