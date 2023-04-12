@@ -1,7 +1,7 @@
 package control
 
 import (
-	_ "unsafe"
+	_ "unsafe" // for linkname to defaultEngine
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
