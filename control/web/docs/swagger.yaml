@@ -46,15 +46,6 @@ definitions:
         description: 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
         type: integer
     type: object
-  job.ListRsp:
-    description: 任务列表的出参
-    properties:
-      jobList:
-        description: 任务列表
-        items:
-          $ref: '#/definitions/job.Job'
-        type: array
-    type: object
   types.AllPluginParams:
     description: GetAllPlugin的入参
     properties:
@@ -507,7 +498,9 @@ paths:
             - $ref: '#/definitions/types.Response'
             - properties:
                 result:
-                  $ref: '#/definitions/job.ListRsp'
+                  items:
+                    $ref: '#/definitions/job.Job'
+                  type: array
               type: object
       summary: 任务列表
       tags:

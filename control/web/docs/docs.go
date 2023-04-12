@@ -343,7 +343,10 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "result": {
-                                            "$ref": "#/definitions/job.ListRsp"
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/job.Job"
+                                            }
                                         }
                                     }
                                 }
@@ -672,19 +675,6 @@ const docTemplate = `{
                 "userId": {
                     "description": "用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0",
                     "type": "integer"
-                }
-            }
-        },
-        "job.ListRsp": {
-            "description": "任务列表的出参",
-            "type": "object",
-            "properties": {
-                "jobList": {
-                    "description": "任务列表",
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/job.Job"
-                    }
                 }
             }
         },

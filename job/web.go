@@ -13,32 +13,53 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// ListRsp 任务列表的出参
-//
-//	@Description	任务列表的出参
-type ListRsp struct {
-	JobList []Job `json:"jobList"` // 任务列表
-}
+type (
+	JobType       uint8
+	FullMatchType uint8
+	QuestionType  uint8
+	AnswerType    uint8
+)
+
+const (
+	FullMatchJob JobType = iota + 1
+	CronJob
+	RegexpJob
+)
+
+const (
+	NoStateMsg FullMatchType = iota + 1
+	SuperMsg
+)
+
+const (
+	OneQuestion QuestionType = iota + 1
+	AllQuestion
+)
+
+const (
+	TextMsg AnswerType = iota + 1
+	InjectMsg
+)
 
 // Job 添加任务的入参
 //
 //	@Description	添加任务的入参
 type Job struct {
-	ID            string `json:"id"`            // 任务id
-	SelfID        int64  `json:"selfId"`        // 机器人id
-	JobType       int    `json:"jobType"`       // 任务类型,1-指令别名,2-定时任务,3-你问我答
-	Matcher       string `json:"matcher"`       // 当jobType=1时 为指令别名,当jobType=2时 为cron表达式,当jobType=3时 为正则表达式
-	Handler       string `json:"handler"`       // 执行内容
-	FullMatchType int    `json:"fullMatchType"` // 指令别名类型, jobType=1使用的参数, 1=无状态消息, 2=主人消息
-	QuestionType  int    `json:"questionType"`  // 问题类型, jobType=3使用的参数, 1=单独问, 2=所有人问
-	AnswerType    int    `json:"answerType"`    // 回答类型, jobType=3使用的参数, 1=文本消息, 2=注入消息
-	GroupID       int64  `json:"groupId"`       // 群聊id, jobType=2,3使用的参数, jobType=2且私聊, group_id=0
-	UserID        int64  `json:"userId"`        // 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
+	ID            string        `json:"id"`            // 任务id
+	SelfID        int64         `json:"selfId"`        // 机器人id
+	JobType       JobType       `json:"jobType"`       // 任务类型,1-指令别名,2-定时任务,3-你问我答
+	Matcher       string        `json:"matcher"`       // 当jobType=1时 为指令别名,当jobType=2时 为cron表达式,当jobType=3时 为正则表达式
+	Handler       string        `json:"handler"`       // 执行内容
+	FullMatchType FullMatchType `json:"fullMatchType"` // 指令别名类型, jobType=1使用的参数, 1=无状态消息, 2=主人消息
+	QuestionType  QuestionType  `json:"questionType"`  // 问题类型, jobType=3使用的参数, 1=单独问, 2=所有人问
+	AnswerType    AnswerType    `json:"answerType"`    // 回答类型, jobType=3使用的参数, 1=文本消息, 2=注入消息
+	GroupID       int64         `json:"groupId"`       // 群聊id, jobType=2,3使用的参数, jobType=2且私聊, group_id=0
+	UserID        int64         `json:"userId"`        // 用户id, jobType=2,3使用的参数, 当jobType=3, QuestionType=2,userId=0
 }
 
 // List 任务列表
-func List() (rsp ListRsp, err error) {
-	rsp.JobList = make([]Job, 0, 16)
+func List() (jobList []Job, err error) {
+	jobList = make([]Job, 0, 16)
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
 		c := &cmd{}
 		ids := strconv.FormatInt(id, 36)
@@ -50,8 +71,8 @@ func List() (rsp ListRsp, err error) {
 			if len(c.Cron) >= 3 {
 				switch c.Cron[:3] {
 				case "sm:":
-					j.JobType = 1
-					j.FullMatchType = 2
+					j.JobType = FullMatchJob
+					j.FullMatchType = SuperMsg
 					j.Matcher = c.Cron[3:]
 					err = json.Unmarshal(binary.StringToBytes(c.Cmd), &e)
 					if err != nil {
@@ -59,14 +80,14 @@ func List() (rsp ListRsp, err error) {
 					}
 					j.Handler = e.RawMessage
 				case "fm:":
-					j.JobType = 1
-					j.FullMatchType = 1
+					j.JobType = FullMatchJob
+					j.FullMatchType = NoStateMsg
 					j.Matcher = c.Cron[3:]
 					j.Handler = c.Cmd
 				case "rm:":
-					j.JobType = 3
-					j.QuestionType = 2
-					j.AnswerType = 1
+					j.JobType = RegexpJob
+					j.QuestionType = AllQuestion
+					j.AnswerType = TextMsg
 					j.Handler = message.UnescapeCQCodeText(c.Cmd)
 					cutList := strings.SplitN(c.Cron, ":", 3)
 					if len(cutList) == 3 {
@@ -77,9 +98,9 @@ func List() (rsp ListRsp, err error) {
 						j.Matcher = cutList[len(cutList)-1]
 					}
 				case "rp:":
-					j.JobType = 3
-					j.QuestionType = 1
-					j.AnswerType = 1
+					j.JobType = RegexpJob
+					j.QuestionType = OneQuestion
+					j.AnswerType = TextMsg
 					j.Handler = message.UnescapeCQCodeText(c.Cmd)
 					cutList := strings.SplitN(c.Cron, ":", 4)
 					if len(cutList) == 4 {
@@ -94,9 +115,9 @@ func List() (rsp ListRsp, err error) {
 						j.Matcher = cutList[len(cutList)-1]
 					}
 				case "im:":
-					j.JobType = 3
-					j.QuestionType = 2
-					j.AnswerType = 2
+					j.JobType = RegexpJob
+					j.QuestionType = AllQuestion
+					j.AnswerType = InjectMsg
 					j.Handler = message.UnescapeCQCodeText(c.Cmd)
 					cutList := strings.SplitN(c.Cron, ":", 3)
 					if len(cutList) == 3 {
@@ -107,9 +128,9 @@ func List() (rsp ListRsp, err error) {
 						j.Matcher = cutList[len(cutList)-1]
 					}
 				case "ip:":
-					j.JobType = 3
-					j.QuestionType = 1
-					j.AnswerType = 2
+					j.JobType = RegexpJob
+					j.QuestionType = OneQuestion
+					j.AnswerType = InjectMsg
 					j.Handler = message.UnescapeCQCodeText(c.Cmd)
 					cutList := strings.SplitN(c.Cron, ":", 4)
 					if len(cutList) == 4 {
@@ -124,7 +145,7 @@ func List() (rsp ListRsp, err error) {
 						j.Matcher = cutList[len(cutList)-1]
 					}
 				default:
-					j.JobType = 2
+					j.JobType = CronJob
 					j.Matcher = c.Cron
 					err = json.Unmarshal(binary.StringToBytes(c.Cmd), &e)
 					if err != nil {
@@ -135,7 +156,7 @@ func List() (rsp ListRsp, err error) {
 					j.UserID = e.UserID
 				}
 			}
-			rsp.JobList = append(rsp.JobList, j)
+			jobList = append(jobList, j)
 			return nil
 		})
 		return err == nil
@@ -144,7 +165,7 @@ func List() (rsp ListRsp, err error) {
 }
 
 // Add 添加任务
-func Add(j Job) (err error) {
+func Add(j *Job) (err error) {
 	var (
 		c        cmd
 		bot      *zero.Ctx
@@ -156,7 +177,7 @@ func Add(j Job) (err error) {
 		SelfID: j.SelfID,
 	}
 	switch j.JobType {
-	case 1:
+	case FullMatchJob:
 		if j.FullMatchType == 1 {
 			c.Cron = "fm:" + j.Matcher
 			c.Cmd = binary.BytesToString(json.RawMessage("\"" + j.Handler + "\""))
@@ -182,7 +203,7 @@ func Add(j Job) (err error) {
 		if err != nil {
 			return
 		}
-	case 2:
+	case CronJob:
 		var e zero.Event
 		e.UserID = j.UserID
 		e.Sender = &zero.User{
@@ -210,25 +231,25 @@ func Add(j Job) (err error) {
 		if err != nil {
 			return
 		}
-	case 3:
+	case RegexpJob:
 		all := false
 		isInject := false
 		gid := j.GroupID
 		uid := j.UserID
 		switch {
-		case j.QuestionType == 2 && j.AnswerType == 2:
+		case j.QuestionType == AllQuestion && j.AnswerType == InjectMsg:
 			all = true
 			isInject = true
 			c.Cron = "im:" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		case j.QuestionType == 2 && j.AnswerType == 1:
+		case j.QuestionType == AllQuestion && j.AnswerType == TextMsg:
 			all = true
 			isInject = false
 			c.Cron = "rm:" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		case j.QuestionType == 1 && j.AnswerType == 2:
+		case j.QuestionType == OneQuestion && j.AnswerType == InjectMsg:
 			all = false
 			isInject = true
 			c.Cron = "ip:" + strconv.FormatInt(uid, 36) + ":" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
-		case j.QuestionType == 1 && j.AnswerType == 1:
+		case j.QuestionType == OneQuestion && j.AnswerType == TextMsg:
 			all = false
 			isInject = false
 			c.Cron = "rp:" + strconv.FormatInt(uid, 36) + ":" + strconv.FormatInt(gid, 36) + ":" + j.Matcher
@@ -295,7 +316,7 @@ type DeleteReq struct {
 }
 
 // Delete 删除任务
-func Delete(req DeleteReq) (err error) {
+func Delete(req *DeleteReq) (err error) {
 	var (
 		c cmd
 	)

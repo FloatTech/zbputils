@@ -14,7 +14,7 @@ import (
 //	@Summary		任务列表
 //	@Description	任务列表
 //	@Router			/api/job/list [get]
-//	@Success		200	{object}	types.Response{result=job.ListRsp}	"成功"
+//	@Success		200	{object}	types.Response{result=[]job.Job}	"成功"
 func JobList(context *gin.Context) {
 	rsp, err := job.List()
 	if err != nil {
@@ -56,7 +56,7 @@ func JobAdd(context *gin.Context) {
 		})
 		return
 	}
-	err = job.Add(j)
+	err = job.Add(&j)
 	if err != nil {
 		context.JSON(http.StatusOK, types.Response{
 			Code:         -1,
@@ -96,7 +96,7 @@ func JobDelete(context *gin.Context) {
 		})
 		return
 	}
-	err = job.Delete(req)
+	err = job.Delete(&req)
 	if err != nil {
 		context.JSON(http.StatusOK, types.Response{
 			Code:         -1,
