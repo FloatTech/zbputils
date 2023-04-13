@@ -14,30 +14,43 @@ import (
 )
 
 type (
-	JobType       uint8
+	// JobType 任务类型,1=指令别名,2=定时任务,3=你问我答
+	JobType uint8
+	// FullMatchType 指令别名类型, jobType=1使用的参数, 1=无状态消息, 2=主人消息
 	FullMatchType uint8
-	QuestionType  uint8
-	AnswerType    uint8
+	// QuestionType 问题类型, jobType=3使用的参数, 1=单独问, 2=所有人问
+	QuestionType uint8
+	// AnswerType 回答类型, jobType=3使用的参数, 1=文本消息, 2=注入消息
+	AnswerType uint8
 )
 
 const (
+	// FullMatchJob 指令别名
 	FullMatchJob JobType = iota + 1
+	// CronJob 定时任务
 	CronJob
+	// RegexpJob 你问我答
 	RegexpJob
 )
 
 const (
+	// NoStateMsg 无状态消息
 	NoStateMsg FullMatchType = iota + 1
+	// SuperMsg 主人消息
 	SuperMsg
 )
 
 const (
+	// OneQuestion 单独问
 	OneQuestion QuestionType = iota + 1
+	// AllQuestion 所有人问
 	AllQuestion
 )
 
 const (
+	// TextMsg 文本消息
 	TextMsg AnswerType = iota + 1
+	// InjectMsg 注入消息
 	InjectMsg
 )
 
