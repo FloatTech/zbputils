@@ -9,6 +9,7 @@ import (
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/process"
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -76,7 +77,7 @@ func List() (jobList []Job, err error) {
 	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
 		c := &cmd{}
 		ids := strconv.FormatInt(id, 36)
-		err := db.FindFor(ids, c, "", func() error {
+		_ = db.FindFor(ids, c, "", func() error {
 			var j Job
 			var e zero.Event
 			j.SelfID = id
@@ -172,7 +173,11 @@ func List() (jobList []Job, err error) {
 			jobList = append(jobList, j)
 			return nil
 		})
-		return err == nil
+		// 不能打断循环
+		if err != nil {
+			logrus.Errorln("jobList: ", err)
+		}
+		return true
 	})
 	return
 }
