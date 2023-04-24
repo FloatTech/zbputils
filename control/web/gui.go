@@ -44,23 +44,29 @@ func init() {
 		Handle(func(ctx *zero.Ctx) {
 			args := ctx.State["args"].(string)
 			args = strings.TrimSpace(args)
-			listenCtrlChan <- args == "启动"
-			ctx.SendChain(message.Text("webui" + args + "成功"))
+			isSuccess := args == "启动"
+			listenCtrlChan <- isSuccess
+			if isSuccess {
+				ctx.SendChain(message.Text("成功, webui启动"))
+			} else {
+				ctx.SendChain(message.Text("成功, webui停止"))
+			}
+
 		})
 }
 
 // RunGui 运行webui
-// @title zbp api
-// @version 1.0
-// @description zbp restful api document
-// @host 127.0.0.1:3000
-// @BasePath /
+//	@title			zbp api
+//	@version		1.0
+//	@description	zbp restful api document
+//	@host			127.0.0.1:3000
+//	@BasePath		/
 func RunGui(addr string) {
 	defer func() {
 		err := recover()
 		if err != nil {
 			log.Errorln("[gui] ZeroBot-Plugin-Webui出现不可恢复的错误")
-			log.Errorln("[gui] err:", err, ",stack:", debug.Stack())
+			log.Errorln("[gui] err:", err, ", stack:", debug.Stack())
 		}
 	}()
 
@@ -81,6 +87,11 @@ func RunGui(addr string) {
 			staticEngine.ServeHTTP(writer, request)
 		}),
 		Addr: addr,
+	}
+	log.Infoln("[gui] the webui is running on", "http://"+addr)
+	log.Infoln("[gui] you can see api by http://" + addr + "/swagger/index.html")
+	if err := server.ListenAndServe(); err != nil {
+		log.Errorln("[gui] server listen err: ", err.Error())
 	}
 	for canrun := range listenCtrlChan {
 		if canrun {
