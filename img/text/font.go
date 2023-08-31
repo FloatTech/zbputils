@@ -31,4 +31,6 @@ const (
 	BaotuXiaobaiFontFile = FontPath + "BaotuXiaobaiTi.ttf"
 	// QiantuXiaotuFontFile 千图小兔体
 	QiantuXiaotuFontFile = FontPath + "QiantuXiaotuTi.ttf"
+	// GNUUnifontFontFile GNU Unifont https://unifoundry.com/unifont/index.html
+	GNUUnifontFontFile = FontPath + "unifont-15.0.06.ttf"
 )
