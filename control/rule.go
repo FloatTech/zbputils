@@ -31,6 +31,8 @@ const (
 	Md5File = StorageFolder + "stor.spb"
 	dbfile  = StorageFolder + "plugins.db"
 	lnfile  = StorageFolder + "lnperpg.txt"
+	// priofile 插件的优先级配置文件
+	priofile = StorageFolder + "prio.yaml"
 )
 
 var (
