@@ -1,29 +1,22 @@
 package control
 
 import (
+	"os"
 	"runtime"
+	"slices"
 	"strings"
-	"sync/atomic"
+
+	"github.com/sirupsen/logrus"
+	"gopkg.in/yaml.v3"
 
 	ctrl "github.com/FloatTech/zbpctrl"
-	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
 var (
-	enmap       = make(map[string]*Engine)
-	prio        uint64
-	custpriomap map[string]uint64
+	enmap = make(map[string]*Engine)
+	pm    = loadPrioMap()
 )
-
-// LoadCustomPriority 加载自定义优先级 map，适配 1.21 及以上版本
-func LoadCustomPriority(m map[string]uint64) {
-	if custpriomap != nil {
-		panic("double-defined custpriomap")
-	}
-	custpriomap = m
-	prio = uint64(len(custpriomap)+1) * 10
-}
 
 // AutoRegister 根据包名自动注册插件
 func AutoRegister(o *ctrl.Options[*zero.Ctx]) *Engine {
@@ -47,14 +40,7 @@ func AutoRegister(o *ctrl.Options[*zero.Ctx]) *Engine {
 
 // Register 注册插件控制器
 func Register(service string, o *ctrl.Options[*zero.Ctx]) *Engine {
-	if custpriomap != nil {
-		logrus.Debugln("[control]插件", service, "已设置自定义优先级", prio)
-		engine := newengine(service, int(custpriomap[service]), o)
-		enmap[service] = engine
-		return engine
-	}
-	logrus.Debugln("[control]插件", service, "已自动设置优先级", prio)
-	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
+	engine := newengine(service, getPrioFromProfile(service), o)
 	enmap[service] = engine
 	return engine
 }
@@ -73,4 +59,39 @@ func Delete(service string) {
 			managers.Unlock()
 		}
 	}
+}
+
+// loadPrioMap 从文件中获取优先级配置文件的优先级，若文件不存在或文件格式错误，则返回一个空的切片类型
+func loadPrioMap() (pm []string) {
+	data, err := os.ReadFile(priofile)
+	if err != nil {
+		logrus.Warnln("[control] 读取优先级配置文件失败,将使用默认的优先级配置:", err)
+		return
+	}
+	if err = yaml.Unmarshal(data, &pm); err != nil {
+		logrus.Warnln("[control] 序列化优先级配置文件失败:", err)
+	}
+	return
+}
+
+// writePrioMap 写入优先级配置文件的相关代码
+func writePrioMap() {
+	data, err := yaml.Marshal(&pm)
+	if err != nil {
+		logrus.Warnln("[control] 反序列化优先级配置文件失败:", err)
+	}
+	if err = os.WriteFile(priofile, data, 0644); err != nil {
+		logrus.Warnln("[control] 写入优先级配置文件失败:", err)
+	}
+}
+
+// getPrioFromProfile 获取优先级配置文件中的优先级，若不存在，则在末尾添加并写回文件
+func getPrioFromProfile(s string) int {
+	i := slices.Index(pm, s)
+	if i == -1 {
+		pm = append(pm, s)
+		i = slices.Index(pm, s)
+		writePrioMap()
+	}
+	return (i + 1) * 10
 }
