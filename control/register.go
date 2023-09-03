@@ -4,16 +4,34 @@ import (
 	"sync/atomic"
 
 	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
 var (
-	enmap = make(map[string]*Engine)
-	prio  uint64
+	enmap       = make(map[string]*Engine)
+	prio        uint64
+	custpriomap map[string]uint64
 )
+
+// LoadCustomPriority 加载自定义优先级 map，适配 1.21 及以上版本
+func LoadCustomPriority(m map[string]uint64) {
+	if custpriomap != nil {
+		panic("double-defined custpriomap")
+	}
+	custpriomap = m
+	prio = uint64(len(custpriomap)+1) * 10
+}
 
 // Register 注册插件控制器
 func Register(service string, o *ctrl.Options[*zero.Ctx]) *Engine {
+	if custpriomap != nil {
+		logrus.Debugln("[control]插件", service, "已设置自定义优先级", prio)
+		engine := newengine(service, int(custpriomap[service]), o)
+		enmap[service] = engine
+		return engine
+	}
+	logrus.Debugln("[control]插件", service, "已自动设置优先级", prio)
 	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
 	enmap[service] = engine
 	return engine

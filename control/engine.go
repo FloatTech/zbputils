@@ -33,7 +33,6 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 		panic(fmt.Sprint("prio", prio, "is used by", s))
 	}
 	priomap[prio] = service
-	logrus.Debugln("[control]插件", service, "已设置优先级", prio)
 	e.en = zero.New()
 	e.en.UsePreHandler(
 		func(ctx *zero.Ctx) bool {
