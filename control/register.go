@@ -1,6 +1,8 @@
 package control
 
 import (
+	"runtime"
+	"strings"
 	"sync/atomic"
 
 	ctrl "github.com/FloatTech/zbpctrl"
@@ -21,6 +23,21 @@ func LoadCustomPriority(m map[string]uint64) {
 	}
 	custpriomap = m
 	prio = uint64(len(custpriomap)+1) * 10
+}
+
+// AutoRegister 根据包名自动注册插件
+func AutoRegister(o *ctrl.Options[*zero.Ctx]) *Engine {
+	pc, _, _, ok := runtime.Caller(1)
+	if !ok {
+		panic("unable to get caller")
+	}
+	name := runtime.FuncForPC(pc).Name()
+	a := strings.LastIndex(name, "/")
+	b := strings.LastIndex(name, ".")
+	if a < 0 || b < 0 || a >= b {
+		panic("invalid package name: " + name)
+	}
+	return Register(name[a:b], o)
 }
 
 // Register 注册插件控制器
