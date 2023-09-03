@@ -33,11 +33,16 @@ func AutoRegister(o *ctrl.Options[*zero.Ctx]) *Engine {
 	}
 	name := runtime.FuncForPC(pc).Name()
 	a := strings.LastIndex(name, "/")
-	b := strings.LastIndex(name, ".")
-	if a < 0 || b < 0 || a >= b {
+	if a < 0 {
 		panic("invalid package name: " + name)
 	}
-	return Register(name[a:b], o)
+	name = name[a+1:]
+	b := strings.Index(name, ".")
+	if b < 0 {
+		panic("invalid package name: " + name)
+	}
+	name = name[:b]
+	return Register(name, o)
 }
 
 // Register 注册插件控制器
