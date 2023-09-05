@@ -48,6 +48,11 @@ func newctrl(service string, o *ctrl.Options[*zero.Ctx]) zero.Rule {
 	}
 }
 
+// CloseDB 关闭数据库（仅用于测试）
+func CloseDB() (err error) {
+	return managers.D.Close()
+}
+
 // Lookup 查找服务
 func Lookup(service string) (*ctrl.Control[*zero.Ctx], bool) {
 	_, ok := briefmap[service]
