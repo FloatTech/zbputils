@@ -3,9 +3,10 @@ package controller
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/FloatTech/zbputils/control/web/types"
 	"github.com/FloatTech/zbputils/job"
-	"github.com/gin-gonic/gin"
 )
 
 // JobList 任务列表

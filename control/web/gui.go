@@ -38,7 +38,6 @@ func init() {
 			if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
 				ctx.SendPrivateMessage(zero.BotConfig.SuperUsers[0], message.Text("webui账号\n用户名: ", regexMatched[1], "\n密码: ", regexMatched[2]))
 			}
-
 		})
 	zero.OnCommand("webui", zero.SuperUserPermission, zero.OnlyToMe).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
@@ -51,11 +50,11 @@ func init() {
 			} else {
 				ctx.SendChain(message.Text("成功, webui停止"))
 			}
-
 		})
 }
 
 // RunGui 运行webui
+//
 //	@title			zbp api
 //	@version		1.0
 //	@description	zbp restful api document
