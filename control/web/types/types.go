@@ -2,6 +2,7 @@
 package types
 
 // Response 包装返回体
+//
 //	@Description	包装返回体
 type Response struct {
 	Code         int         `json:"code"`    // 错误码
@@ -11,12 +12,14 @@ type Response struct {
 }
 
 // BotParams GetGroupList,GetFriendList的入参
+//
 //	@Description	GetGroupList,GetFriendList的入参
 type BotParams struct {
 	SelfID int64 `json:"selfId" form:"selfId"` // 机器人qq
 }
 
 // GetGroupMemberListReq 获得群成员的入参
+//
 //	@Description	获得群成员的入参
 type GetGroupMemberListReq struct {
 	SelfID  int64 `json:"selfId" form:"selfId"`   // 机器人qq
@@ -24,12 +27,14 @@ type GetGroupMemberListReq struct {
 }
 
 // AllPluginParams GetAllPlugin的入参
+//
 //	@Description	GetAllPlugin的入参
 type AllPluginParams struct {
 	GroupID int64 `json:"groupId" form:"groupId"` // 群id, gid>0为群聊,gid<0为私聊,gid=0为全部群聊
 }
 
 // DeleteGroupParams 退群或删除好友的入参
+//
 //	@Description	退群或删除好友的入参
 type DeleteGroupParams struct {
 	SelfID  int64 `json:"selfId" form:"selfId"`   // 机器人qq
@@ -37,6 +42,7 @@ type DeleteGroupParams struct {
 }
 
 // PluginParams GetPlugin的入参
+//
 //	@Description	GetPlugin的入参
 type PluginParams struct {
 	GroupID int64  `json:"groupId" form:"groupId"` // 群id, gid>0为群聊,gid<0为私聊,gid=0为全部群聊
@@ -44,6 +50,7 @@ type PluginParams struct {
 }
 
 // PluginStatusParams UpdatePluginStatus的入参
+//
 //	@Description	UpdatePluginStatus的入参
 type PluginStatusParams struct {
 	GroupID int64  `json:"groupId" form:"groupId"`               // 群id, gid>0为群聊,gid<0为私聊,gid=0为全部群聊
@@ -52,6 +59,7 @@ type PluginStatusParams struct {
 }
 
 // ResponseStatusParams UpdateResponseStatus的入参
+//
 //	@Description	UpdateResponseStatus的入参
 type ResponseStatusParams struct {
 	GroupID int64 `json:"groupId" form:"groupId"` // 群id, gid>0为群聊,gid<0为私聊,gid=0为全部群聊
@@ -59,6 +67,7 @@ type ResponseStatusParams struct {
 }
 
 // AllPluginStatusParams UpdateAllPluginStatus的入参
+//
 //	@Description	UpdateAllPluginStatus的入参
 type AllPluginStatusParams struct {
 	GroupID int64 `json:"groupId" form:"groupId"` // 群id, gid>0为群聊,gid<0为私聊,gid=0为全部群聊
@@ -66,6 +75,7 @@ type AllPluginStatusParams struct {
 }
 
 // HandleRequestParams 处理事件的入参
+//
 //	@Description	处理事件的入参
 type HandleRequestParams struct {
 	Flag    string `json:"flag" form:"flag"`       // 事件的flag
@@ -74,6 +84,7 @@ type HandleRequestParams struct {
 }
 
 // SendMsgParams 发送消息的入参
+//
 //	@Description	处理事件的入参
 type SendMsgParams struct {
 	SelfID  int64   `json:"selfId" form:"selfId"`   // 机器人qq
@@ -82,6 +93,7 @@ type SendMsgParams struct {
 }
 
 // LoginParams 登录参数
+//
 //	@Description	登录参数
 type LoginParams struct {
 	Username string `json:"username" form:"username"` // 用户名
@@ -89,6 +101,7 @@ type LoginParams struct {
 }
 
 // LoginResultVo 登录返回参数
+//
 //	@Description	登录返回参数
 type LoginResultVo struct {
 	UserID   int        `json:"userId"`   // 用户id
@@ -100,6 +113,7 @@ type LoginResultVo struct {
 }
 
 // RoleInfo 角色参数
+//
 //	@Description	角色参数
 type RoleInfo struct {
 	RoleName string `json:"roleName"` // 角色名
@@ -107,6 +121,7 @@ type RoleInfo struct {
 }
 
 // UserInfoVo 用户信息
+//
 //	@Description	用户信息
 type UserInfoVo struct {
 	UserID   int        `json:"userId"`   // 用户id
@@ -121,6 +136,7 @@ type UserInfoVo struct {
 }
 
 // MessageInfo 消息信息
+//
 //	@Description	消息信息
 type MessageInfo struct {
 	MessageType string      `json:"message_type"` // 消息类型, group为群聊,private为私聊
@@ -133,6 +149,7 @@ type MessageInfo struct {
 }
 
 // PluginVo 全部插件的返回
+//
 //	@Description	全部插件的返回
 type PluginVo struct {
 	ID             int    `json:"id"`             // 插件序号
@@ -145,6 +162,7 @@ type PluginVo struct {
 }
 
 // RequestVo 请求返回
+//
 //	@Description	请求返回
 type RequestVo struct {
 	Flag        string `json:"flag"`        // 请求flag
