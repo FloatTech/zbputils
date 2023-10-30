@@ -2,12 +2,13 @@
 package router
 
 import (
-	"github.com/FloatTech/zbputils/control/web/controller"
-	_ "github.com/FloatTech/zbputils/control/web/docs" // swagger数据
-	"github.com/FloatTech/zbputils/control/web/middleware"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/FloatTech/zbputils/control/web/controller"
+	_ "github.com/FloatTech/zbputils/control/web/docs" // swagger数据
+	"github.com/FloatTech/zbputils/control/web/middleware"
 )
 
 // SetRouters 创建路由
