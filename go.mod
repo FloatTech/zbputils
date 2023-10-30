@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
-	github.com/FloatTech/floatbox v0.0.0-20230331064925-9af336a84944
+	github.com/FloatTech/floatbox v0.0.0-20231017134949-ae5059ebace7
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.0.10-0.20230223064326-45d29fa4ede9
