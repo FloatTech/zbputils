@@ -55,12 +55,12 @@ func (nu nturl) pack() (string, error) {
 	var buf [ntrawlen]byte
 	fileid := subs[1]
 	rkey := subs[2]
-	_, err := base64.RawURLEncoding.AppendDecode(buf[:0], binary.StringToBytes(fileid))
+	_, err := base64.RawURLEncoding.Decode(buf[:ntappidlen], binary.StringToBytes(fileid))
 	if err != nil {
 		return "", err
 	}
 	buf[ntappidlen-1] = byte(len(fileid))
-	_, err = base64.RawURLEncoding.AppendDecode(buf[60:60], binary.StringToBytes(rkey))
+	_, err = base64.RawURLEncoding.Decode(buf[ntappidlen:], binary.StringToBytes(rkey))
 	if err != nil {
 		return "", err
 	}
