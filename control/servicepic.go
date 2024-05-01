@@ -24,7 +24,7 @@ import (
 const (
 	bannerpath = "data/zbpbanner/"
 	kanbanpath = "data/Control/"
-	bannerurl  = "https://gitcode.net/u011570312/zbpbanner/-/raw/main/"
+	bannerurl  = "https://github.com/FloatTech/zbpbanner/raw/main/"
 )
 
 type plugininfo struct {
