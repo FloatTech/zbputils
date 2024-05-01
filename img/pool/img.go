@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -22,6 +23,10 @@ var (
 	ErrNoSuchImg       = errors.New("no such img")
 	ErrSendImg         = errors.New("send image error")
 	ErrGetMsg          = errors.New("get msg error")
+)
+
+var (
+	oldimgre = regexp.MustCompile(`^[0-9A-F-]+$`)
 )
 
 // Image 图片数据
@@ -84,7 +89,14 @@ func (m *Image) String() string {
 	if m.item == nil {
 		return m.f
 	}
-	return fmt.Sprintf(cacheurl, m.item.u)
+	if oldimgre.MatchString(m.item.u) {
+		return fmt.Sprintf(cacheurl, m.item.u)
+	}
+	nu, err := unpack(m.item.u)
+	if err != nil {
+		return m.f
+	}
+	return string(nu)
 }
 
 // SetFile f
@@ -109,6 +121,28 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 		for _, e := range msg.Elements {
 			if e.Type == "image" {
 				u := e.Data["url"]
+				if ntcachere.MatchString(u) { // is NTQQ
+					raw := ""
+					raw, err = nturl(u).pack()
+					if err != nil {
+						logrus.Errorln("[imgpool] pack nturl err:", err)
+						err = nil
+						return
+					}
+					m.item, err = newItem(m.n, raw)
+					if err != nil {
+						logrus.Errorln("[imgpool] get newItem err:", err)
+						err = nil
+						return
+					}
+					logrus.Debugln("[imgpool] 缓存:", m.n, "url:", u)
+					err = m.item.push("minamoto")
+					if err != nil {
+						logrus.Errorln("[imgpool] item.push err:", err)
+						err = nil
+					}
+					return
+				}
 				i := strings.LastIndex(u, "/")
 				if i <= 0 {
 					break

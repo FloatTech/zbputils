@@ -4,14 +4,14 @@ go 1.19
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
-	github.com/FloatTech/floatbox v0.0.0-20231107124407-e38535efa2a2
+	github.com/FloatTech/floatbox v0.0.0-20240304064110-78a83f1af9a6
 	github.com/FloatTech/gg v1.1.2
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.0.10-0.20230223064326-45d29fa4ede9
 	github.com/FloatTech/sqlite v1.6.3
 	github.com/FloatTech/ttl v0.0.0-20220715042055-15612be72f5b
-	github.com/FloatTech/zbpctrl v1.6.0
-	github.com/RomiChan/syncx v0.0.0-20221202055724-5f842c53020e
+	github.com/FloatTech/zbpctrl v1.6.1-0.20240501122621-27fbe564d42a
+	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
 	github.com/disintegration/imaging v1.6.2
 	github.com/fumiama/cron v1.3.0
@@ -27,7 +27,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.10
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.7.5-0.20231009162356-57f71b9f5258
+	github.com/wdvxdr1123/ZeroBot v1.7.5-0.20240501122138-fdbe4e1d21b4
 )
 
 require (
