@@ -45,16 +45,18 @@ func GetImage(name string) (m *Image, err error) {
 		var resp *http.Response
 		resp, err = http2.Head(m.String())
 		if err == nil {
-			return
-		}
-		if resp.StatusCode == http.StatusNotFound {
-			logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
-			err = ErrImgFileOutdated
-			return
+			if resp.StatusCode == http.StatusOK {
+				return
+			}
+			if resp.StatusCode == http.StatusNotFound {
+				logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
+				err = ErrImgFileOutdated
+				return
+			}
 		}
 		resp, err = http2.Get(m.String())
 		_ = resp.Body.Close()
-		if err == nil {
+		if err == nil && resp.StatusCode == http.StatusOK {
 			return
 		}
 		err = ErrImgFileOutdated
@@ -75,13 +77,15 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 		var resp *http.Response
 		resp, err = http2.Head(m.String())
 		if err == nil {
-			return
-		}
-		if resp.StatusCode != http.StatusNotFound {
-			resp, err = http2.Get(m.String())
-			_ = resp.Body.Close()
-			if err == nil {
+			if resp.StatusCode == http.StatusOK {
 				return
+			}
+			if resp.StatusCode != http.StatusNotFound {
+				resp, err = http2.Get(m.String())
+				_ = resp.Body.Close()
+				if err == nil && resp.StatusCode == http.StatusOK {
+					return
+				}
 			}
 		}
 		logrus.Debugln("[imgpool] image", name, m, "outdated:", err, "updating...")
