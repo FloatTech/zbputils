@@ -10,10 +10,10 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/fumiama/terasu/http2"
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
-	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 )
 
@@ -42,14 +42,21 @@ func GetImage(name string) (m *Image, err error) {
 	m.n = name
 	m.item, err = getItem(name)
 	if err == nil && m.u != "" {
-		_, err = web.RequestDataWithHeaders(web.NewDefaultClient(), m.String(), "HEAD", func(r *http.Request) error {
-			r.Header.Set("user-agent", web.RandUA())
-			return nil
-		}, nil)
+		var resp *http.Response
+		resp, err = http2.Head(m.String())
 		if err == nil {
 			return
 		}
-		logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
+		if resp.StatusCode == http.StatusNotFound {
+			logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
+			err = ErrImgFileOutdated
+			return
+		}
+		resp, err = http2.Get(m.String())
+		_ = resp.Body.Close()
+		if err == nil {
+			return
+		}
 		err = ErrImgFileOutdated
 		return
 	}
@@ -65,12 +72,17 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 	m.SetFile(f)
 	m.item, err = getItem(name)
 	if err == nil && m.item.u != "" {
-		_, err = web.RequestDataWithHeaders(web.NewDefaultClient(), m.String(), "HEAD", func(r *http.Request) error {
-			r.Header.Set("user-agent", web.RandUA())
-			return nil
-		}, nil)
+		var resp *http.Response
+		resp, err = http2.Head(m.String())
 		if err == nil {
 			return
+		}
+		if resp.StatusCode != http.StatusNotFound {
+			resp, err = http2.Get(m.String())
+			_ = resp.Body.Close()
+			if err == nil {
+				return
+			}
 		}
 		logrus.Debugln("[imgpool] image", name, m, "outdated:", err, "updating...")
 	}
