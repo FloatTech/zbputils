@@ -55,9 +55,11 @@ func GetImage(name string) (m *Image, err error) {
 			}
 		}
 		resp, err = http2.Get(m.String())
-		_ = resp.Body.Close()
-		if err == nil && resp.StatusCode == http.StatusOK {
-			return
+		if err == nil {
+			_ = resp.Body.Close()
+			if resp.StatusCode == http.StatusOK {
+				return
+			}
 		}
 		err = ErrImgFileOutdated
 		return
@@ -82,9 +84,11 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 			}
 			if resp.StatusCode != http.StatusNotFound {
 				resp, err = http2.Get(m.String())
-				_ = resp.Body.Close()
-				if err == nil && resp.StatusCode == http.StatusOK {
-					return
+				if err == nil {
+					_ = resp.Body.Close()
+					if resp.StatusCode == http.StatusOK {
+						return
+					}
 				}
 			}
 		}
