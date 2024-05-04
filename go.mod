@@ -10,7 +10,7 @@ require (
 	github.com/FloatTech/rendercard v0.0.10-0.20230223064326-45d29fa4ede9
 	github.com/FloatTech/sqlite v1.6.3
 	github.com/FloatTech/ttl v0.0.0-20230307105452-d6f7b2b647d1
-	github.com/FloatTech/zbpctrl v1.6.1-0.20240501122621-27fbe564d42a
+	github.com/FloatTech/zbpctrl v1.6.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
 	github.com/disintegration/imaging v1.6.2
@@ -27,7 +27,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.10
 	github.com/tidwall/gjson v1.14.4
-	github.com/wdvxdr1123/ZeroBot v1.7.5-0.20240501122138-fdbe4e1d21b4
+	github.com/wdvxdr1123/ZeroBot v1.7.5-0.20240501144516-eb574bbdad32
 )
 
 require (

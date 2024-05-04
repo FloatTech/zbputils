@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -119,7 +118,6 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (err erro
 	if get == nil {
 		return
 	}
-	time.Sleep(2 * time.Second) // LLOneBot get_msg delay
 	msg := get(id)
 	for _, e := range msg.Elements {
 		if e.Type == "image" {
