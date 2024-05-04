@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
+	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 )
 
@@ -41,20 +42,15 @@ func GetImage(name string) (m *Image, err error) {
 	m.n = name
 	m.item, err = getItem(name)
 	if err == nil && m.u != "" {
-		var resp *http.Response
-		resp, err = http.Head(m.String())
+		_, err = web.RequestDataWithHeaders(web.NewDefaultClient(), m.String(), "HEAD", func(r *http.Request) error {
+			r.Header.Set("user-agent", web.RandUA())
+			return nil
+		}, nil)
 		if err == nil {
-			_ = resp.Body.Close()
-		} else {
-			goto OUTDATE
+			return
 		}
-		if resp.StatusCode != http.StatusOK {
-			goto OUTDATE
-		}
-		return
-	OUTDATE:
+		logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
 		err = ErrImgFileOutdated
-		logrus.Debugln("[imgpool] image", name, m, "outdated")
 		return
 	}
 	err = ErrNoSuchImg
@@ -63,24 +59,22 @@ func GetImage(name string) (m *Image, err error) {
 }
 
 // NewImage context name file
-func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) (m *Image, err error) {
+func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) (m *Image, hassent bool, err error) {
 	m = new(Image)
 	m.n = name
 	m.SetFile(f)
 	m.item, err = getItem(name)
 	if err == nil && m.item.u != "" {
-		var resp *http.Response
-		resp, err = http.Head(m.String())
+		_, err = web.RequestDataWithHeaders(web.NewDefaultClient(), m.String(), "HEAD", func(r *http.Request) error {
+			r.Header.Set("user-agent", web.RandUA())
+			return nil
+		}, nil)
 		if err == nil {
-			_ = resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				return
-			}
+			return
 		}
-		logrus.Debugln("[imgpool] image", name, m, "outdated, updating...")
-		get = nil
+		logrus.Debugln("[imgpool] image", name, m, "outdated:", err, "updating...")
 	}
-	err = m.Push(send, get)
+	hassent, err = m.Push(send, get)
 	return
 }
 
@@ -109,12 +103,13 @@ func (m *Image) SetFile(f string) {
 }
 
 // Push context
-func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (err error) {
+func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent bool, err error) {
 	id := send(message.Message{message.Image(m.f)})
 	if id == 0 {
 		err = ErrSendImg
 		return
 	}
+	hassent = true
 	if get == nil {
 		return
 	}
