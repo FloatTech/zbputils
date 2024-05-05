@@ -14,6 +14,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
+	"github.com/FloatTech/floatbox/web"
 	"github.com/FloatTech/zbputils/ctxext"
 )
 
@@ -49,18 +50,20 @@ func GetImage(name string) (m *Image, err error) {
 				return
 			}
 			if resp.StatusCode == http.StatusNotFound {
-				logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
+				logrus.Debugln("[imgpool] image", name, m, "outdated, code:", resp.StatusCode)
 				err = ErrImgFileOutdated
 				return
 			}
 		}
-		resp, err = http2.Get(m.String())
+		_, err = web.RequestDataWithHeaders(http.DefaultClient, m.String(), "GET", func(r *http.Request) error {
+			r.Header.Set("Range", "bytes=0-1")
+			r.Header.Set("User-Agent", web.RandUA())
+			return nil
+		}, nil)
 		if err == nil {
-			_ = resp.Body.Close()
-			if resp.StatusCode == http.StatusOK {
-				return
-			}
+			return
 		}
+		logrus.Debugln("[imgpool] image", name, m, "outdated:", err)
 		err = ErrImgFileOutdated
 		return
 	}
@@ -83,12 +86,13 @@ func NewImage(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg, name, f string) 
 				return
 			}
 			if resp.StatusCode != http.StatusNotFound {
-				resp, err = http2.Get(m.String())
+				_, err = web.RequestDataWithHeaders(http.DefaultClient, m.String(), "GET", func(r *http.Request) error {
+					r.Header.Set("Range", "bytes=0-1")
+					r.Header.Set("User-Agent", web.RandUA())
+					return nil
+				}, nil)
 				if err == nil {
-					_ = resp.Body.Close()
-					if resp.StatusCode == http.StatusOK {
-						return
-					}
+					return
 				}
 			}
 		}
