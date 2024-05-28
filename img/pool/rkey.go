@@ -4,7 +4,7 @@ import "time"
 
 const rkeykey = "__latest_rkey__"
 
-var rs *rkeystorage
+var rs rkeystorage
 
 func init() {
 	var err error
