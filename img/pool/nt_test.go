@@ -18,7 +18,7 @@ func TestNTPacker(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(hex.EncodeToString(binary.StringToBytes(raw)))
-	upknt, err := unpack(raw)
+	upknt, err := unpack(raw, "")
 	if err != nil {
 		t.Fatal(err)
 	}

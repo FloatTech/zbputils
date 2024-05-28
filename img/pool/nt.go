@@ -26,7 +26,7 @@ var (
 
 type nturl string
 
-func unpack(raw string) (nturl, error) {
+func unpack(raw, rkey string) (nturl, error) {
 	if len(raw) != ntrawlen {
 		return "", ErrInvalidNTRaw
 	}
@@ -37,12 +37,14 @@ func unpack(raw string) (nturl, error) {
 		return "", ErrInvalidNTRaw
 	}
 	fileid = fileid[:b]
-	rkey := base64.RawURLEncoding.EncodeToString(rb[60:])
-	b = rb[ntrawlen-1]
-	if len(rkey) < int(b) {
-		return "", ErrInvalidNTRaw
+	if rkey == "" {
+		rkey = base64.RawURLEncoding.EncodeToString(rb[60:])
+		b = rb[ntrawlen-1]
+		if len(rkey) < int(b) {
+			return "", ErrInvalidNTRaw
+		}
+		rkey = rkey[:b]
 	}
-	rkey = rkey[:b]
 	return nturl(fmt.Sprintf(ntcacheurl, fileid, rkey)), nil
 }
 
@@ -66,4 +68,13 @@ func (nu nturl) pack() (string, error) {
 	}
 	buf[ntrawlen-1] = byte(len(rkey))
 	return binary.BytesToString(buf[:]), nil
+}
+
+// rkey get the embeded rkey
+func (nu nturl) rkey() (string, error) {
+	subs := ntcachere.FindStringSubmatch(string(nu))
+	if len(subs) != 3 {
+		return "", ErrInvalidNTURL
+	}
+	return subs[2], nil
 }

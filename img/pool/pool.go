@@ -40,6 +40,22 @@ func getItem(name string) (*item, error) {
 	return &item{name: name, u: u}, nil
 }
 
+// update 同步 item 为服务器最新
+func (t *item) update() error {
+	reg := registry.NewRegReader("reilia.fumiama.top:35354", "", "fumiama")
+	err := reg.ConnectIn(time.Second * 4)
+	if err != nil {
+		return err
+	}
+	u, err := reg.Get(t.name)
+	defer reg.Close()
+	if err != nil {
+		return err
+	}
+	t.u = u
+	return nil
+}
+
 // push 推送 item
 func (t *item) push(key string) (err error) {
 	for i := 0; i < 8; i++ {

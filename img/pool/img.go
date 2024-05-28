@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -88,7 +89,11 @@ func (m *Image) String() string {
 	if oldimgre.MatchString(m.item.u) {
 		return fmt.Sprintf(cacheurl, m.item.u)
 	}
-	nu, err := unpack(m.item.u)
+	rk, err := rs.rkey(time.Minute)
+	if err != nil {
+		logrus.Debugln("[imgpool] get reky error:", err)
+	}
+	nu, err := unpack(m.item.u, rk)
 	if err != nil {
 		return m.f
 	}
@@ -121,7 +126,8 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 			u := e.Data["url"]
 			if ntcachere.MatchString(u) { // is NTQQ
 				raw := ""
-				raw, err = nturl(u).pack()
+				ntu := nturl(u)
+				raw, err = ntu.pack()
 				if err != nil {
 					logrus.Errorln("[imgpool] pack nturl err:", err)
 					err = nil
@@ -138,6 +144,19 @@ func (m *Image) Push(send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) (hassent 
 				if err != nil {
 					logrus.Errorln("[imgpool] item.push err:", err)
 					err = nil
+					return
+				}
+				raw, err = ntu.rkey()
+				if err != nil {
+					logrus.Errorln("[imgpool] parse rkey err:", err)
+					err = nil
+					return
+				}
+				err = rs.set(time.Minute, raw)
+				if err != nil {
+					logrus.Errorln("[imgpool] set rkey err:", err)
+					err = nil
+					return
 				}
 				return
 			}
