@@ -1,6 +1,9 @@
 package pool
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
 const rkeykey = "__latest_rkey__"
 
@@ -15,11 +18,14 @@ func init() {
 }
 
 type rkeystorage struct {
+	sync.Mutex
 	*item
 	lastrefresh time.Time
 }
 
 func (rs *rkeystorage) rkey(timeout time.Duration) (string, error) {
+	rs.Lock()
+	defer rs.Unlock()
 	if time.Since(rs.lastrefresh) < timeout {
 		return rs.u, nil
 	}
@@ -32,6 +38,8 @@ func (rs *rkeystorage) rkey(timeout time.Duration) (string, error) {
 }
 
 func (rs *rkeystorage) set(timeout time.Duration, rkey string) error {
+	rs.Lock()
+	defer rs.Unlock()
 	if time.Since(rs.lastrefresh) < timeout { // 降低设置频次
 		return nil
 	}

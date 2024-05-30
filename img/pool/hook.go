@@ -1,11 +1,37 @@
 package pool
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
+
+type NTImage nturl
+
+func NewNTImage(u string) (nti NTImage, err error) {
+	subs := ntcachere.FindStringSubmatch(u)
+	if len(subs) != 3 {
+		err = ErrInvalidNTURL
+		return
+	}
+	nti = NTImage(u)
+	return
+}
+
+func (nti NTImage) String() string {
+	subs := ntcachere.FindStringSubmatch(string(nti))
+	if len(subs) != 3 {
+		panic(ErrInvalidNTURL)
+	}
+	fileid := subs[1]
+	rkey, err := rs.rkey(time.Minute)
+	if err != nil || rkey == "" {
+		rkey = subs[2]
+	}
+	return fmt.Sprintf(ntcacheurl, fileid, rkey)
+}
 
 func init() {
 	zero.OnMessage(zero.HasPicture).SetBlock(false).FirstPriority().Handle(func(ctx *zero.Ctx) {
