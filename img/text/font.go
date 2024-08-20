@@ -34,5 +34,9 @@ const (
 	// GNUUnifontFontFile GNU Unifont https://unifoundry.com/unifont/index.html
 	GNUUnifontFontFile = FontPath + "unifont-15.0.06.ttf"
 	// AiralFontFile ...
-	AiralFontFile = FontPath + "arial.ttf"
+	ArialFontFile = FontPath + "arial.ttf"
+	// TorusFontFile ...
+	TorusFontFile = FontPath + "Torus-Regular.otf"
+	// YurukaFontFile ...
+	YurukaFontFile = FontPath + "FOT-Yuruka Std.ttf"
 )
