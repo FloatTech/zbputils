@@ -8,8 +8,10 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
+// NTImage ...
 type NTImage nturl
 
+// NewNTImage ...
 func NewNTImage(u string) (nti NTImage, err error) {
 	subs := ntcachere.FindStringSubmatch(u)
 	if len(subs) != 3 {

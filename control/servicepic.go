@@ -273,7 +273,10 @@ func renderserverlistlogo() (img image.Image, err error) {
 	mask := canvas.AsMask()
 
 	stroked := gg.NewContext(w, h)
-	stroked.SetMask(mask)
+	err = stroked.SetMask(mask)
+	if err != nil {
+		return
+	}
 	stroked.SetRGBA255(255, 255, 255, 255)
 	stroked.DrawRectangle(0, 0, float64(stroked.W()), float64(stroked.H()))
 	stroked.Fill()

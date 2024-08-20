@@ -167,7 +167,7 @@ func init() {
 		}
 		condition := strings.Contains(ctx.Event.RawMessage, "启用") || strings.Contains(ctx.Event.RawMessage, "enable")
 		if condition {
-			managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+			managers.ForEach(func(_ string, manager *ctrl.Control[*zero.Ctx]) bool {
 				if manager.Options.DisableOnDefault == condition {
 					return true
 				}
@@ -176,7 +176,7 @@ func init() {
 			})
 			ctx.SendChain(message.Text("此处启用所有插件成功"))
 		} else {
-			managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+			managers.ForEach(func(_ string, manager *ctrl.Control[*zero.Ctx]) bool {
 				manager.Disable(grp)
 				return true
 			})
@@ -234,7 +234,7 @@ func init() {
 		argsparsed := make([]int64, 0, len(args))
 		var uid int64
 		var err error
-		haspermission := zero.GroupHigherPermission(func(ctx *zero.Ctx) int64 { return uid })
+		haspermission := zero.GroupHigherPermission(func(_ *zero.Ctx) int64 { return uid })
 		for _, usr := range args[1:] {
 			uid, err = strconv.ParseInt(usr, 10, 64)
 			if err == nil && haspermission(ctx) {

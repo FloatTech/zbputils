@@ -38,7 +38,7 @@ var (
 	// 存储请求事件，flag作为键，一个request对象作为值
 	requestData syncx.Map[string, *zero.Event]
 	upgrader    = websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
+		CheckOrigin: func(_ *http.Request) bool {
 			return true
 		},
 	}
