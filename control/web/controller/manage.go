@@ -86,7 +86,7 @@ type logWriter struct{}
 //	@Success		200	{object}	types.Response	"成功"
 func GetBotList(context *gin.Context) {
 	var bots []int64
-	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+	zero.RangeBot(func(id int64, _ *zero.Ctx) bool {
 		bots = append(bots, id)
 		return true
 	})
@@ -162,7 +162,7 @@ func GetGroupMemberList(context *gin.Context) {
 		return
 	}
 	if d.SelfID == 0 {
-		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+		zero.RangeBot(func(_ int64, ctx *zero.Ctx) bool {
 			bot = ctx
 			return false
 		})
@@ -244,7 +244,7 @@ func DeleteGroup(context *gin.Context) {
 		return
 	}
 	if d.SelfID == 0 {
-		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+		zero.RangeBot(func(_ int64, ctx *zero.Ctx) bool {
 			bot = ctx
 			return false
 		})
@@ -467,17 +467,17 @@ func UpdateAllPluginStatus(context *gin.Context) {
 	}
 	switch d.Status {
 	case 0:
-		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+		control.ForEachByPrio(func(_ int, manager *ctrl.Control[*zero.Ctx]) bool {
 			manager.Disable(d.GroupID)
 			return true
 		})
 	case 1:
-		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+		control.ForEachByPrio(func(_ int, manager *ctrl.Control[*zero.Ctx]) bool {
 			manager.Enable(d.GroupID)
 			return true
 		})
 	case 2:
-		control.ForEachByPrio(func(i int, manager *ctrl.Control[*zero.Ctx]) bool {
+		control.ForEachByPrio(func(_ int, manager *ctrl.Control[*zero.Ctx]) bool {
 			manager.Reset(d.GroupID)
 			return true
 		})
@@ -565,7 +565,7 @@ func GetRequestList(context *gin.Context) {
 		return
 	}
 	var data []types.RequestVo
-	requestData.Range(func(key string, value *zero.Event) bool {
+	requestData.Range(func(_ string, value *zero.Event) bool {
 		if d.SelfID != 0 && value.SelfID != d.SelfID {
 			return true
 		}
@@ -641,7 +641,7 @@ func SendMsg(context *gin.Context) {
 	}
 	// 避免机器人之间发消息
 	botMap := make(map[int64]struct{}, 4)
-	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+	zero.RangeBot(func(id int64, _ *zero.Ctx) bool {
 		botMap[id] = struct{}{}
 		return true
 	})
@@ -754,7 +754,7 @@ func GetUserInfo(context *gin.Context) {
 	i, _ := middleware.LoginCache.Get(token)
 	user := i.(*model.User)
 	var qq int64
-	if zero.BotConfig.SuperUsers != nil && len(zero.BotConfig.SuperUsers) > 0 {
+	if len(zero.BotConfig.SuperUsers) != 0 {
 		qq = zero.BotConfig.SuperUsers[0]
 	}
 	r := types.UserInfoVo{
@@ -826,7 +826,7 @@ func getBot(context *gin.Context) (d types.BotParams, bot *zero.Ctx, err error) 
 		return
 	}
 	if d.SelfID == 0 {
-		zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+		zero.RangeBot(func(_ int64, ctx *zero.Ctx) bool {
 			bot = ctx
 			return false
 		})

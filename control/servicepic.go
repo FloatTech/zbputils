@@ -86,8 +86,8 @@ func renderservepicof(gid int64) (img image.Image, err error) {
 	if err != nil {
 		return
 	}
-	max := len(pluginlist)
-	ln := math.Ceil(max, 3)
+	listnum := len(pluginlist)
+	ln := math.Ceil(listnum, 3)
 	w := (290+24)*3 + 24
 	h := serverlistlogo.Bounds().Dy() + ln*(80+16) + serverlistlogo.Bounds().Dy()/3
 	canvas := gg.NewContext(w, h)
