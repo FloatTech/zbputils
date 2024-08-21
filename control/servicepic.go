@@ -27,6 +27,8 @@ type plugininfo struct {
 }
 
 var (
+	// serverlistlogo 缓存
+	serverlistlogo image.Image
 	// 字体 GlowSans 数据
 	glowsd []byte
 	// 字体 Impact 数据
@@ -82,9 +84,11 @@ func renderservepicof(gid int64) (img image.Image, err error) {
 	if err != nil {
 		return
 	}
-	serverlistlogo, err := renderserverlistlogo()
-	if err != nil {
-		return
+	if serverlistlogo == nil {
+		serverlistlogo, err = renderserverlistlogo()
+		if err != nil {
+			return
+		}
 	}
 	listnum := len(pluginlist)
 	ln := math.Ceil(listnum, 3)
