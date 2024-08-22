@@ -2,26 +2,18 @@
 package control
 
 import (
-	"encoding/base64"
-	"image"
-	"image/jpeg"
 	"os"
 	"strconv"
 	"strings"
-	"sync"
 
-	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/floatbox/file"
 	"github.com/FloatTech/imgfactory"
 	"github.com/FloatTech/rendercard"
 	ctrl "github.com/FloatTech/zbpctrl"
-
-	"github.com/FloatTech/zbputils/ctxext"
 )
 
 const (
@@ -30,7 +22,6 @@ const (
 	// Md5File ...
 	Md5File = StorageFolder + "stor.spb"
 	dbfile  = StorageFolder + "plugins.db"
-	lnfile  = StorageFolder + "lnperpg.txt"
 )
 
 var (
@@ -78,21 +69,6 @@ func init() {
 	err = os.MkdirAll("data/control", 0755)
 	if err != nil {
 		panic(err)
-	}
-	// 载入用户配置
-	if file.IsExist(lnfile) {
-		data, err := os.ReadFile(lnfile)
-		if err != nil {
-			logrus.Warnln("[control] 读取配置文件失败,将使用默认的显示行数:", err)
-		} else {
-			mun, err := strconv.Atoi(binary.BytesToString(data))
-			if err != nil {
-				logrus.Warnln("[control] 获取设置的服务列表显示行数错误,将使用默认的显示行数:", err)
-			} else if mun > 0 {
-				lnperpg = mun
-				logrus.Infoln("[control] 获取到当前设置的服务列表显示行数为:", lnperpg)
-			}
-		}
 	}
 	zero.OnCommandGroup([]string{
 		"响应", "response", "沉默", "silence",
@@ -191,7 +167,7 @@ func init() {
 		}
 		condition := strings.Contains(ctx.Event.RawMessage, "启用") || strings.Contains(ctx.Event.RawMessage, "enable")
 		if condition {
-			managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+			managers.ForEach(func(_ string, manager *ctrl.Control[*zero.Ctx]) bool {
 				if manager.Options.DisableOnDefault == condition {
 					return true
 				}
@@ -200,7 +176,7 @@ func init() {
 			})
 			ctx.SendChain(message.Text("此处启用所有插件成功"))
 		} else {
-			managers.ForEach(func(key string, manager *ctrl.Control[*zero.Ctx]) bool {
+			managers.ForEach(func(_ string, manager *ctrl.Control[*zero.Ctx]) bool {
 				manager.Disable(grp)
 				return true
 			})
@@ -258,7 +234,7 @@ func init() {
 		argsparsed := make([]int64, 0, len(args))
 		var uid int64
 		var err error
-		haspermission := zero.GroupHigherPermission(func(ctx *zero.Ctx) int64 { return uid })
+		haspermission := zero.GroupHigherPermission(func(_ *zero.Ctx) int64 { return uid })
 		for _, usr := range args[1:] {
 			uid, err = strconv.ParseInt(usr, 10, 64)
 			if err == nil && haspermission(ctx) {
@@ -474,65 +450,18 @@ func init() {
 			if gid == 0 {
 				gid = -ctx.Event.UserID
 			}
-			var imgs []image.Image
-			imgs, err = drawservicesof(gid)
+			img, err := renderservepicof(gid)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
-			if len(imgs) > 1 {
-				wg := sync.WaitGroup{}
-				msg := make(message.Message, len(imgs))
-				wg.Add(len(imgs))
-				for i := 0; i < len(imgs); i++ {
-					go func(i int) {
-						defer wg.Done()
-						msg[i] = ctxext.FakeSenderForwardNode(ctx, message.Image(binary.BytesToString(binary.NewWriterF(func(w *binary.Writer) {
-							w.WriteString("base64://")
-							encoder := base64.NewEncoder(base64.StdEncoding, w)
-							var opt jpeg.Options
-							opt.Quality = 70
-							if err1 := jpeg.Encode(encoder, imgs[i], &opt); err1 != nil {
-								err = err1
-								return
-							}
-							_ = encoder.Close()
-						}))))
-					}(i)
-				}
-				wg.Wait()
-				if id := ctx.Send(msg); id.ID() == 0 {
-					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
-				}
-			} else {
-				b64, err := imgfactory.ToBase64(imgs[0])
-				if err != nil {
-					ctx.SendChain(message.Text("ERROR: ", err))
-					return
-				}
-				if id := ctx.SendChain(message.Image("base64://" + binary.BytesToString(b64))); id.ID() == 0 {
-					ctx.SendChain(message.Text("ERROR: 可能被风控了"))
-				}
+			b64, err := imgfactory.ToBase64(img)
+			if err != nil {
+				ctx.SendChain(message.Text("ERROR: ", err))
+				return
+			}
+			if id := ctx.SendChain(message.Image("base64://" + binary.BytesToString(b64))); id.ID() == 0 {
+				ctx.SendChain(message.Text("ERROR: 可能被风控了"))
 			}
 		})
-
-	zero.OnCommand("设置服务列表显示行数", zero.SuperUserPermission, zero.OnlyToMe).SetBlock(true).SecondPriority().Handle(func(ctx *zero.Ctx) {
-		model := extension.CommandModel{}
-		_ = ctx.Parse(&model)
-		mun, err := strconv.Atoi(model.Args)
-		if err != nil {
-			ctx.SendChain(message.Text("请输入正确的数字"))
-			return
-		}
-		err = os.WriteFile(lnfile, binary.StringToBytes(model.Args), 0644)
-		if err != nil {
-			ctx.SendChain(message.Text(err))
-			return
-		}
-		lnperpg = mun
-		// 清除缓存
-		titlecache = nil
-		fullpageshadowcache = nil
-		ctx.SendChain(message.Text("已设置列表单页显示数为 " + strconv.Itoa(lnperpg)))
-	})
 }
