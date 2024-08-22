@@ -74,7 +74,7 @@ type Job struct {
 // List 任务列表
 func List() (jobList []Job, err error) {
 	jobList = make([]Job, 0, 16)
-	zero.RangeBot(func(id int64, ctx *zero.Ctx) bool {
+	zero.RangeBot(func(id int64, _ *zero.Ctx) bool {
 		c := &cmd{}
 		ids := strconv.FormatInt(id, 36)
 		_ = db.FindFor(ids, c, "", func() error {
