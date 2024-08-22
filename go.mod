@@ -5,7 +5,6 @@ go 1.20
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
 	github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14
-	github.com/FloatTech/gg v1.1.3
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.1.1
 	github.com/FloatTech/sqlite v1.6.3
@@ -29,6 +28,7 @@ require (
 )
 
 require (
+	github.com/FloatTech/gg v1.1.3 // indirect
 	github.com/FloatTech/ttl v0.0.0-20230307105452-d6f7b2b647d1 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
