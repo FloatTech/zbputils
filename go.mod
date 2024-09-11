@@ -6,7 +6,7 @@ require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
 	github.com/FloatTech/floatbox v0.0.0-20240505082030-226ec6713e14
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
-	github.com/FloatTech/rendercard v0.1.1
+	github.com/FloatTech/rendercard v0.1.2
 	github.com/FloatTech/sqlite v1.6.3
 	github.com/FloatTech/zbpctrl v1.6.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
