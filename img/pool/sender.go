@@ -11,9 +11,11 @@ import (
 )
 
 // SendImageFromPool ...
-func SendImageFromPool(imgname, imgpath string, genimg func() error, send ctxext.NoCtxSendMsg, get ctxext.NoCtxGetMsg) error {
+func SendImageFromPool(
+	imgpath string, genimg func(string) error, send ctxext.NoCtxSendMsg,
+) error {
 	if file.IsNotExist(imgpath) {
-		err := genimg()
+		err := genimg(imgpath)
 		if err != nil {
 			return err
 		}
