@@ -13,7 +13,6 @@ require (
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/go-base16384 v1.7.0
-	github.com/fumiama/go-registry v0.2.6
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
@@ -35,6 +34,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
+	github.com/fumiama/go-registry v0.2.6 // indirect
 	github.com/fumiama/go-simple-protobuf v0.1.0 // indirect
 	github.com/fumiama/gofastTEA v0.0.10 // indirect
 	github.com/fumiama/imgsz v0.0.2 // indirect
