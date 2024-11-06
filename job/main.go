@@ -40,7 +40,6 @@ var (
 )
 
 func init() {
-	db.DBPath = en.DataFolder() + "job.db"
 	err := db.Open(time.Hour)
 	if err != nil {
 		panic(err)
@@ -230,9 +229,11 @@ func init() {
 		}
 		lst := make([]string, 0, n+2)
 		q := ""
+		args := []any{}
 		if ctx.Event.GroupID != 0 {
 			grp := strconv.FormatInt(ctx.Event.GroupID, 36)
-			q = "WHERE cron LIKE 'fm:%' OR cron LIKE 'sm:%' OR cron LIKE '_m:" + grp + ":%' OR cron LIKE '_p:%:" + grp + ":%' "
+			q = "WHERE cron LIKE 'fm:%' OR cron LIKE 'sm:%' OR cron LIKE ? OR cron LIKE ? "
+			args = []any{"_m:" + grp + ":%", "_p:" + grp + ":?:%"}
 			lst = append(lst, "在本群的触发指令]\n")
 		} else {
 			lst = append(lst, "全部触发指令]\n")
@@ -241,7 +242,7 @@ func init() {
 		err = db.FindFor(ids, c, q, func() error {
 			lst = append(lst, c.Cron+"\n")
 			return nil
-		})
+		}, args...)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
@@ -261,10 +262,10 @@ func init() {
 			return
 		}
 		lst := make([]string, 0, n)
-		err = db.FindFor(ids, c, "WHERE cron='"+cron+"'", func() error {
+		err = db.FindFor(ids, c, "WHERE cron = ?", func() error {
 			lst = append(lst, c.Cmd+"\n")
 			return nil
-		})
+		}, cron)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
@@ -290,10 +291,10 @@ func init() {
 			return
 		}
 		lst := make([]string, 0, n)
-		err = db.FindFor(ids, c, "WHERE cron='"+cron+"'", func() error {
+		err = db.FindFor(ids, c, "WHERE cron = ?", func() error {
 			lst = append(lst, c.Cmd+"\n")
 			return nil
-		})
+		}, cron)
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
@@ -320,7 +321,7 @@ func init() {
 				}
 				msg := ctx.GetMessage(id)
 				ctx.Event.NativeMessage = json.RawMessage("\"" + msg.Elements.String() + "\"")
-				ctx.Event.RawMessageID = json.RawMessage(msg.MessageId.String())
+				ctx.Event.RawMessageID = json.RawMessage(msg.MessageID.String())
 				ctx.Event.RawMessage = msg.Elements.String()
 				process.SleepAbout1sTo2s() // 防止风控
 				ctx.Event.Time = time.Now().Unix()
@@ -446,8 +447,8 @@ func rmcmd(bot, caller int64, cron string) error {
 	defer mu.Unlock()
 	bots := strconv.FormatInt(bot, 36)
 	e := new(zero.Event)
-	var delcmd []string
-	err := db.FindFor(bots, c, "WHERE cron='"+cron+"' OR cron LIKE '"+cron+":->%'", func() error {
+	var delids []int64
+	err := db.FindFor(bots, c, "WHERE cron = ? OR cron LIKE ?", func() error {
 		err := json.Unmarshal(binary.StringToBytes(c.Cmd), e)
 		if err != nil {
 			return err
@@ -459,15 +460,15 @@ func rmcmd(bot, caller int64, cron string) error {
 		if ok {
 			process.CronTab.Remove(eid)
 			delete(entries, c.ID)
-			delcmd = append(delcmd, "id="+strconv.FormatInt(c.ID, 10))
+			delids = append(delids, c.ID)
 		}
 		return nil
-	})
+	}, cron, cron+":->%")
 	if err != nil {
 		return err
 	}
-	if len(delcmd) > 0 {
-		return db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
+	if len(delids) > 0 {
+		return db.Del(bots, "WHERE id IN ?", delids)
 	}
 	return nil
 }
@@ -477,21 +478,21 @@ func delcmd(bot int64, cron string) error {
 	mu.Lock()
 	defer mu.Unlock()
 	bots := strconv.FormatInt(bot, 36)
-	var delcmd []string
-	err := db.FindFor(bots, c, "WHERE cron='"+cron+"'", func() error {
+	var delids []int64
+	err := db.FindFor(bots, c, "WHERE cron = ?", func() error {
 		m, ok := matchers[c.ID]
 		if ok {
 			m.Delete()
 			delete(matchers, c.ID)
-			delcmd = append(delcmd, "id="+strconv.FormatInt(c.ID, 10))
+			delids = append(delids, c.ID)
 		}
 		return nil
-	})
+	}, cron)
 	if err != nil {
 		return err
 	}
-	if len(delcmd) > 0 {
-		return db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
+	if len(delids) > 0 {
+		return db.Del(bots, "WHERE id IN ?", delids)
 	}
 	return nil
 }
@@ -525,7 +526,7 @@ func parseArgs(ctx *zero.Ctx) bool {
 		}
 		arr, ok := args[arg]
 		if !ok {
-			var id message.MessageID
+			var id message.ID
 			if msg == "" {
 				id = ctx.SendChain(message.At(ctx.Event.UserID), message.Text("请输入参数", arg))
 			} else {

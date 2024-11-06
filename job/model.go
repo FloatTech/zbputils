@@ -8,4 +8,4 @@ type cmd struct {
 	Cmd  string `db:"cmd"`
 }
 
-var db = &sql.Sqlite{}
+var db = sql.New(en.DataFolder() + "job.db")

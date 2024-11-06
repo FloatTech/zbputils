@@ -338,11 +338,23 @@ func Delete(req *DeleteReq) (err error) {
 	var (
 		c cmd
 	)
+	if len(req.IDList) == 0 {
+		return
+	}
 	mu.Lock()
 	defer mu.Unlock()
 	bots := strconv.FormatInt(req.SelfID, 36)
-	var delcmd []string
-	err = db.FindFor(bots, &c, "WHERE id in ( "+strings.Join(req.IDList, ",")+" )", func() error {
+	var (
+		delids []int64
+		reqids = make([]int64, len(req.IDList))
+	)
+	for i, idstr := range req.IDList {
+		reqids[i], err = strconv.ParseInt(idstr, 10, 64)
+		if err != nil {
+			return
+		}
+	}
+	err = db.FindFor(bots, &c, "WHERE id in ?", func() error {
 		switch {
 		case len(c.Cron) >= 3 && (c.Cron[:3] == "fm:" || c.Cron[:3] == "sm:"):
 			m, ok := matchers[c.ID]
@@ -429,14 +441,14 @@ func Delete(req *DeleteReq) (err error) {
 				delete(entries, c.ID)
 			}
 		}
-		delcmd = append(delcmd, "id="+strconv.FormatInt(c.ID, 10))
+		delids = append(delids, c.ID)
 		return nil
-	})
+	}, reqids)
 	if err != nil {
 		return
 	}
-	if len(delcmd) > 0 {
-		err = db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
+	if len(delids) > 0 {
+		err = db.Del(bots, "WHERE id IN ?", delids)
 		if err != nil {
 			return
 		}

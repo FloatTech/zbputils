@@ -85,13 +85,13 @@ func removeRegex(gid, uid int64, bots, pattern string) error {
 	}
 	cr += strconv.FormatInt(gid, 36) + ":" + pattern
 	c := &cmd{}
-	var delcmd []string
-	_ = db.FindFor(bots, c, "where cron='"+cr+"'", func() error {
-		delcmd = append(delcmd, "id="+strconv.FormatInt(c.ID, 10))
+	var delids []int64
+	_ = db.FindFor(bots, c, "WHERE cron = ?", func() error {
+		delids = append(delids, c.ID)
 		return nil
-	})
-	if len(delcmd) > 0 {
-		return db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
+	}, cr)
+	if len(delids) > 0 {
+		return db.Del(bots, "WHERE id IN ?", delids)
 	}
 	return nil
 }
@@ -104,13 +104,13 @@ func removeInjectRegex(gid, uid int64, bots, pattern string) error {
 	}
 	cr += strconv.FormatInt(gid, 36) + ":" + pattern
 	c := &cmd{}
-	var delcmd []string
-	_ = db.FindFor(bots, c, "where cron='"+cr+"'", func() error {
-		delcmd = append(delcmd, "id="+strconv.FormatInt(c.ID, 10))
+	var delids []int64
+	_ = db.FindFor(bots, c, "WHERE cron = ?", func() error {
+		delids = append(delids, c.ID)
 		return nil
-	})
-	if len(delcmd) > 0 {
-		return db.Del(bots, "WHERE "+strings.Join(delcmd, " or "))
+	}, cr)
+	if len(delids) > 0 {
+		return db.Del(bots, "WHERE id IN ?", delids)
 	}
 	return nil
 }

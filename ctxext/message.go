@@ -68,7 +68,7 @@ func SendToSelf(ctx *zero.Ctx) NoCtxSendMsg {
 }
 
 // FakeSenderForwardNode ...
-func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) message.MessageSegment {
+func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.Segment) message.Segment {
 	return message.CustomNode(
 		ctx.CardOrNickName(ctx.Event.UserID),
 		ctx.Event.UserID,
@@ -76,7 +76,7 @@ func FakeSenderForwardNode(ctx *zero.Ctx, msgs ...message.MessageSegment) messag
 }
 
 // SendFakeForwardToGroup ...
-func SendFakeForwardToGroup(ctx *zero.Ctx, msgs ...message.MessageSegment) NoCtxSendMsg {
+func SendFakeForwardToGroup(ctx *zero.Ctx, msgs ...message.Segment) NoCtxSendMsg {
 	return func(msg any) int64 {
 		return ctx.SendGroupForwardMessage(ctx.Event.GroupID, message.Message{
 			FakeSenderForwardNode(ctx, msg.(message.Message)...),
