@@ -1,3 +1,4 @@
+// Package pool only for backports
 package pool
 
 import (
