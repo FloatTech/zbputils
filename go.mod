@@ -7,7 +7,7 @@ require (
 	github.com/FloatTech/floatbox v0.0.0-20241106130736-5aea0a935024
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.2.0
-	github.com/FloatTech/sqlite v1.7.0
+	github.com/FloatTech/sqlite v1.7.1
 	github.com/FloatTech/zbpctrl v1.7.0
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5

@@ -15,6 +15,7 @@ import (
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/process"
+	sql "github.com/FloatTech/sqlite"
 
 	"github.com/FloatTech/zbputils/ctxext"
 )
@@ -91,7 +92,8 @@ func removeRegex(gid, uid int64, bots, pattern string) error {
 		return nil
 	}, cr)
 	if len(delids) > 0 {
-		return db.Del(bots, "WHERE id IN ?", delids)
+		q, s := sql.QuerySet("WHERE id", "IN", delids)
+		return db.Del(bots, q, s...)
 	}
 	return nil
 }
@@ -110,7 +112,8 @@ func removeInjectRegex(gid, uid int64, bots, pattern string) error {
 		return nil
 	}, cr)
 	if len(delids) > 0 {
-		return db.Del(bots, "WHERE id IN ?", delids)
+		q, s := sql.QuerySet("WHERE id", "IN", delids)
+		return db.Del(bots, q, s...)
 	}
 	return nil
 }

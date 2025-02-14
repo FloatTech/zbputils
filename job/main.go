@@ -468,7 +468,8 @@ func rmcmd(bot, caller int64, cron string) error {
 		return err
 	}
 	if len(delids) > 0 {
-		return db.Del(bots, "WHERE id IN ?", delids)
+		q, s := sql.QuerySet("WHERE id", "IN", delids)
+		return db.Del(bots, q, s...)
 	}
 	return nil
 }
@@ -492,7 +493,8 @@ func delcmd(bot int64, cron string) error {
 		return err
 	}
 	if len(delids) > 0 {
-		return db.Del(bots, "WHERE id IN ?", delids)
+		q, s := sql.QuerySet("WHERE id", "IN", delids)
+		return db.Del(bots, q, s...)
 	}
 	return nil
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/FloatTech/floatbox/binary"
 	"github.com/FloatTech/floatbox/process"
+	sql "github.com/FloatTech/sqlite"
 	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
@@ -448,7 +449,8 @@ func Delete(req *DeleteReq) (err error) {
 		return
 	}
 	if len(delids) > 0 {
-		err = db.Del(bots, "WHERE id IN ?", delids)
+		q, s := sql.QuerySet("WHERE id", "IN", delids)
+		err = db.Del(bots, q, s...)
 		if err != nil {
 			return
 		}
