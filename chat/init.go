@@ -30,7 +30,7 @@ func Reply(ctx *zero.Ctx, txt string) {
 	lst.add(gid, txt, false)
 }
 
-func Ask(ctx *zero.Ctx, temp float32, grp int64, mn, sysp, sepstr string) deepinfra.Model {
+func Ask(ctx *zero.Ctx, temp float32, mn, sysp, sepstr string) deepinfra.Model {
 	gid := ctx.Event.GroupID
 	if gid == 0 {
 		gid = -ctx.Event.UserID
