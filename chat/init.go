@@ -27,7 +27,7 @@ func Reply(ctx *zero.Ctx, txt string) {
 	if gid == 0 {
 		gid = -ctx.Event.UserID
 	}
-	lst.add(gid, txt, false)
+	lst.add(gid, txt, true)
 }
 
 func Ask(ctx *zero.Ctx, temp float32, mn, sysp, sepstr string) deepinfra.Model {
