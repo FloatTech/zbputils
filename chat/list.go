@@ -7,6 +7,7 @@ import (
 	"github.com/fumiama/deepinfra/model"
 )
 
+// listcap cannot < 2
 const listcap = 8
 
 type list struct {
@@ -40,8 +41,9 @@ func (l *list) add(grp int64, txt string, isme bool) {
 		l.m[grp] = msgs
 		return
 	}
-	copy(msgs, msgs[1:])
-	msgs[len(msgs)-1] = txt
+	copy(msgs, msgs[2:])
+	msgs[len(msgs)-2] = txt
+	l.m[grp] = msgs[:len(msgs)-1]
 }
 
 func (l *list) modelize(temp float32, grp int64, mn, sysp, sepstr string) deepinfra.Model {
