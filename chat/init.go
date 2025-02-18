@@ -18,7 +18,7 @@ func init() {
 		if gid == 0 {
 			gid = -ctx.Event.UserID
 		}
-		lst.add(gid, ctx.State["__zbputil_chat_txt__"].(string), false)
+		lst.add(gid, ctx.Event.Sender.Name(), ctx.State["__zbputil_chat_txt__"].(string), false)
 	})
 }
 
@@ -27,7 +27,7 @@ func Reply(ctx *zero.Ctx, txt string) {
 	if gid == 0 {
 		gid = -ctx.Event.UserID
 	}
-	lst.add(gid, txt, true)
+	lst.add(gid, "", txt, true)
 }
 
 func Ask(ctx *zero.Ctx, temp float32, mn, sysp, sepstr string) deepinfra.Model {

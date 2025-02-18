@@ -21,7 +21,10 @@ func newlist() list {
 	}
 }
 
-func (l *list) add(grp int64, txt string, isme bool) {
+func (l *list) add(grp int64, usr, txt string, isme bool) {
+	if !isme {
+		txt = "【" + usr + "】" + txt
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	msgs, ok := l.m[grp]
