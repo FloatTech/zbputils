@@ -49,8 +49,8 @@ func (l *list) add(grp int64, usr, txt string, isme bool) {
 	l.m[grp] = msgs[:len(msgs)-1]
 }
 
-func (l *list) modelize(temp float32, grp int64, mn, sysp, sepstr string) deepinfra.Model {
-	m := model.NewCustom(mn, sepstr, temp, 0.9, 1024).System(sysp)
+func (l *list) modelize(p model.Protocol, grp int64, sysp string) deepinfra.Model {
+	m := p.System(sysp)
 	l.mu.RLock()
 	defer l.mu.RUnlock()
 	sz := len(l.m[grp])

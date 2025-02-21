@@ -2,6 +2,7 @@ package chat
 
 import (
 	"github.com/fumiama/deepinfra"
+	"github.com/fumiama/deepinfra/model"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
 )
@@ -22,18 +23,10 @@ func init() {
 	})
 }
 
-func Reply(ctx *zero.Ctx, txt string) {
-	gid := ctx.Event.GroupID
-	if gid == 0 {
-		gid = -ctx.Event.UserID
-	}
-	lst.add(gid, "", txt, true)
+func Reply(grp int64, txt string) {
+	lst.add(grp, "", txt, true)
 }
 
-func Ask(ctx *zero.Ctx, temp float32, mn, sysp, sepstr string) deepinfra.Model {
-	gid := ctx.Event.GroupID
-	if gid == 0 {
-		gid = -ctx.Event.UserID
-	}
-	return lst.modelize(temp, gid, mn, sysp, sepstr)
+func Ask(p model.Protocol, grp int64, sysp string) deepinfra.Model {
+	return lst.modelize(p, grp, sysp)
 }
