@@ -42,6 +42,10 @@ func Ask(p model.Protocol, grp int64, sysp string) deepinfra.Model {
 	return lst.Modelize(p, grp, sysp)
 }
 
+func AskCustom[T any](grp int64, f func(int, string) T) []T {
+	return chat.Modelize(&lst, grp, f)
+}
+
 func Sanitize(msg string) string {
 	_, s, ok := strings.Cut(msg, "】")
 	if ok {
