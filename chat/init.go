@@ -38,8 +38,8 @@ func Reply(grp int64, txt string) {
 	lst.Add(grp, "", txt, true, false)
 }
 
-func Ask(p model.Protocol, grp int64, sysp string) deepinfra.Model {
-	return lst.Modelize(p, grp, sysp)
+func Ask(p model.Protocol, grp int64, sysp string, isusersys bool) deepinfra.Model {
+	return lst.Modelize(p, grp, sysp, isusersys)
 }
 
 func AskCustom[T any](grp int64, f func(int, string) T) []T {
