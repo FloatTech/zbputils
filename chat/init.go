@@ -49,10 +49,16 @@ func AskCustom[T any](grp int64, f func(int, string) T) []T {
 func Sanitize(msg string) string {
 	i := strings.LastIndex(msg, "】")
 	if i > 0 {
-		msg = msg[i:]
+		if i+1 >= len(msg) {
+			return ""
+		}
+		msg = msg[i+1:]
 	} else {
 		i = strings.LastIndex(msg, "]")
 		if i > 0 {
+			if i+1 >= len(msg) {
+				return ""
+			}
 			msg = msg[i:]
 		}
 	}
