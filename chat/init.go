@@ -47,7 +47,7 @@ func AskCustom[T any](grp int64, f func(int, string) T) []T {
 }
 
 func Sanitize(msg string) string {
-	_, msg, _ = strings.Cut(msg, "\n")
+	msg, _, _ = strings.Cut(msg, "\n")
 	msg = strings.TrimSpace(msg)
 	i := strings.LastIndex(msg, "】")
 	if i > 0 {
