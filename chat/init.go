@@ -47,12 +47,16 @@ func AskCustom[T any](grp int64, f func(int, string) T) []T {
 }
 
 func Sanitize(msg string) string {
-	_, s, ok := strings.Cut(msg, "】")
-	if ok {
-		return s
+	i := strings.LastIndex(msg, "】")
+	if i > 0 {
+		msg = msg[i:]
+	} else {
+		i = strings.LastIndex(msg, "]")
+		if i > 0 {
+			msg = msg[i:]
+		}
 	}
-	_, s, ok = strings.Cut(msg, "]")
-	if ok {
+	if s, n := findRepeatedPattern(msg, 10); n > 0 {
 		return s
 	}
 	return msg
