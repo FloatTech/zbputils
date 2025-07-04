@@ -162,7 +162,7 @@ func (f *FCClient) handleRequest(req *zero.APIRequest) (r *zero.APIResponse, err
 			r = &zero.APIResponse{ // 发送api调用响应
 				Status:  s,
 				Data:    data.Get("data"),
-				Msg:     m,
+				Message: m,
 				Wording: w,
 				RetCode: c,
 				Echo:    req.Echo,

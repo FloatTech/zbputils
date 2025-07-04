@@ -1,5 +1,5 @@
-// Package aichat OpenAI聊天
-package aichat
+// Package airecord 群应用：AI声聊
+package airecord
 
 import (
 	"strconv"
