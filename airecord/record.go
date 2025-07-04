@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"github.com/tidwall/gjson"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -16,17 +17,23 @@ import (
 )
 
 func init() {
+	if err := loadConfig(); err != nil {
+		logrus.Warnln("WARN: 加载配置文件失败，使用默认配置:", err)
+	} else {
+		logrus.Infoln("成功从文件加载语音记录配置")
+	}
 	en := control.AutoRegister(&ctrl.Options[*zero.Ctx]{
 		DisableOnDefault: false,
 		Extra:            control.ExtraFromString("airecord"),
 		Brief:            "群应用：AI声聊",
-		Help: "- 设置AI语音群号1048452984	(tips：群里必须有AI声聊应用)\n" +
+		Help: "- 设置AI语音群号1048452984(tips：机器人任意所在群聊即可)\n" +
 			"- 设置AI语音模型\n" +
 			"- 查看AI语音配置\n" +
 			"- 发送AI语音xxx",
 		PrivateDataFolder: "airecord",
 	})
-	en.OnPrefix("设置AI语音群号", ensureRecordConfig, zero.SuperUserPermission).SetBlock(true).
+
+	en.OnPrefix("设置AI语音群号", zero.SuperUserPermission).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			u := strings.TrimSpace(ctx.State["args"].(string))
 			num, err := strconv.ParseInt(u, 10, 64)
@@ -34,29 +41,14 @@ func init() {
 				ctx.SendChain(message.Text("ERROR: parse gid err: ", err))
 				return
 			}
-			c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-			if !ok {
-				ctx.SendChain(message.Text("ERROR: no such plugin"))
-				return
-			}
-			err = c.SetExtra(&recordcfg)
-			if err != nil {
-				ctx.SendChain(message.Text("ERROR: set extra err: ", err))
-				return
-			}
 			setCustomGID(num)
 			ctx.SendChain(message.Text("设置AI语音群号为", num))
 		})
-	en.OnFullMatch("设置AI语音模型", ensureRecordConfig, zero.SuperUserPermission).SetBlock(true).
+	en.OnFullMatch("设置AI语音模型", zero.SuperUserPermission).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			next := zero.NewFutureEvent("message", 999, false, ctx.CheckSession())
 			recv, cancel := next.Repeat()
 			defer cancel()
-			c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-			if !ok {
-				ctx.SendChain(message.Text("ERROR: no such plugin"))
-				return
-			}
 			jsonData := ctx.GetAICharacters(0, 1)
 
 			// 转换为字符串数组
@@ -112,24 +104,24 @@ func init() {
 						continue
 					}
 					setRecordModel(names[num], nameToID[names[num]])
-					err = c.SetExtra(&recordcfg)
-					if err != nil {
-						ctx.SendChain(message.Text("ERROR: set extra err: ", err))
-						return
-					}
 					ctx.SendChain(message.Text("已选择语音模型: ", names[num]))
 					ctx.SendChain(message.Record(nameToURL[names[num]]))
 					return
 				}
 			}
 		})
-	en.OnFullMatch("查看AI语音配置", ensureRecordConfig).SetBlock(true).
+	en.OnFullMatch("查看AI语音配置").SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(printRecordConfig(recordcfg)))
 		})
-	en.OnPrefix("发送AI语音", ensureRecordConfig).SetBlock(true).
+	en.OnPrefix("发送AI语音").SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			u := strings.TrimSpace(ctx.State["args"].(string))
-			ctx.SendChain(message.Text(u))
+			record := ctx.GetAIRecord(recordcfg.ModelID, recordcfg.Customgid, u).String()
+			if record == "" {
+				ctx.SendChain(message.Text("ERROR: get record err: empty record"))
+				return
+			}
+			ctx.SendChain(message.Record(record))
 		})
 }

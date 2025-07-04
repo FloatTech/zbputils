@@ -1,28 +1,24 @@
-package aichat
+package airecord
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 
-	ctrl "github.com/FloatTech/zbpctrl"
 	"github.com/sirupsen/logrus"
-	zero "github.com/wdvxdr1123/ZeroBot"
 )
 
 var (
-	recordcfg = newrecordconfig()
+	recordcfg  recordconfig
+	configPath = "data/airecord/recordconfig.json" // 配置文件路径
 )
 
 // recordconfig 存储语音记录相关配置
 type recordconfig struct {
-	ModelName string // 语音模型名称
-	ModelID   string // 语音模型ID
-	Customgid int64  // 自定义群ID
-}
-
-// newrecordconfig 创建并返回默认语音记录配置
-func newrecordconfig() recordconfig {
-	return recordconfig{}
+	ModelName string `json:"modelName"` // 语音模型名称
+	ModelID   string `json:"modelID"`   // 语音模型ID
+	Customgid int64  `json:"customgid"` // 自定义群ID
 }
 
 // GetRecordConfig 返回当前语音记录配置信息
@@ -34,31 +30,13 @@ func GetRecordConfig() recordconfig {
 func setRecordModel(modelName, modelID string) {
 	recordcfg.ModelName = modelName
 	recordcfg.ModelID = modelID
+	saveConfig() // 保存配置
 }
 
 // setCustomGID 设置自定义群ID
 func setCustomGID(gid int64) {
 	recordcfg.Customgid = gid
-}
-
-// isvalid 检查语音记录配置是否有效
-func (c *recordconfig) isvalid() bool {
-	return c.ModelName != "" && c.ModelID != "" && c.Customgid != 0
-}
-
-// ensureRecordConfig 确保语音记录配置存在
-func ensureRecordConfig(ctx *zero.Ctx) bool {
-	c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-	if !ok {
-		return false
-	}
-	if !recordcfg.isvalid() {
-		err := c.GetExtra(&recordcfg)
-		if err != nil {
-			logrus.Warnln("ERROR: get extra err:", err)
-		}
-	}
-	return true
+	saveConfig() // 保存配置
 }
 
 // printRecordConfig 生成格式化的语音记录配置信息字符串
@@ -69,4 +47,33 @@ func printRecordConfig(recCfg recordconfig) string {
 	builder.WriteString(fmt.Sprintf("• 语音模型ID：%s\n", recCfg.ModelID))
 	builder.WriteString(fmt.Sprintf("• 自定义群ID：%d\n", recCfg.Customgid))
 	return builder.String()
+}
+
+// saveConfig 将配置保存到JSON文件
+func saveConfig() error {
+	data, err := json.MarshalIndent(recordcfg, "", "  ")
+	if err != nil {
+		logrus.Warnln("ERROR: 序列化配置失败:", err)
+		return err
+	}
+	err = os.WriteFile(configPath, data, 0644)
+	if err != nil {
+		logrus.Warnln("ERROR: 写入配置文件失败:", err)
+		return err
+	}
+	return nil
+}
+
+// loadConfig 从JSON文件加载配置
+func loadConfig() error {
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(data, &recordcfg)
+	if err != nil {
+		logrus.Warnln("ERROR: 解析配置文件失败:", err)
+		return err
+	}
+	return nil
 }
