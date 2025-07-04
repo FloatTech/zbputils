@@ -25,8 +25,8 @@ func newrecordconfig() recordconfig {
 	return recordconfig{}
 }
 
-// getRecordConfig 返回当前语音记录配置信息
-func getRecordConfig() recordconfig {
+// GetRecordConfig 返回当前语音记录配置信息
+func GetRecordConfig() recordconfig {
 	return recordcfg
 }
 

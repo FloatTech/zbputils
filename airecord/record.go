@@ -123,8 +123,13 @@ func init() {
 				}
 			}
 		})
-	en.OnFullMatch("查看AI语音配置", ensureRecordConfig, zero.SuperUserPermission).SetBlock(true).
+	en.OnFullMatch("查看AI语音配置", ensureRecordConfig).SetBlock(true).
 		Handle(func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text(printRecordConfig(recordcfg)))
+		})
+	en.OnPrefix("发送AI语音", ensureRecordConfig).SetBlock(true).
+		Handle(func(ctx *zero.Ctx) {
+			u := strings.TrimSpace(ctx.State["args"].(string))
+			ctx.SendChain(message.Text(u))
 		})
 }
