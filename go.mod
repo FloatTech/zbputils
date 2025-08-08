@@ -24,7 +24,7 @@ require (
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.10
 	github.com/tidwall/gjson v1.18.0
-	github.com/wdvxdr1123/ZeroBot v1.8.0
+	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20250804063440-ccc03e33ac20
 )
 
 require (
