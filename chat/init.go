@@ -1,3 +1,4 @@
+// Package chat 提供聊天记录管理和 AI 模型交互功能
 package chat
 
 import (
