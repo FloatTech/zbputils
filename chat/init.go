@@ -86,5 +86,5 @@ func Sanitize(msg string) string {
 
 // Reset 清空全局聊天记录，重新开始
 func Reset() {
-	lst = chat.NewLog(8, "\n\n", "自己随机开启新话题", "【", "】", ">>")
+	lst.Reset()
 }
