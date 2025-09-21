@@ -3,6 +3,7 @@ package driver
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"runtime/debug"
@@ -78,7 +79,7 @@ func RegisterServer(r func(string, func(CQBot))) {
 
 // Connect 连接服务端
 func (f *FCClient) Connect() {
-	rsp, err := f.CallAPI(zero.APIRequest{
+	rsp, err := f.CallAPI(context.TODO(), zero.APIRequest{
 		Action: "get_login_info",
 		Params: nil,
 	})
@@ -99,7 +100,7 @@ func (f *FCClient) Listen(handler func([]byte, zero.APICaller)) {
 // CallAPI 发送请求
 //
 //nolint:revive
-func (f *FCClient) CallAPI(req zero.APIRequest) (zero.APIResponse, error) {
+func (f *FCClient) CallAPI(_ context.Context, req zero.APIRequest) (zero.APIResponse, error) {
 	req.Echo = f.nextSeq()
 	rsp, err := f.handleRequest(&req)
 	log.Debug("向服务器发送请求: ", req)

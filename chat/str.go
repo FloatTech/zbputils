@@ -1,5 +1,36 @@
 package chat
 
+import "strings"
+
+// Sanitize 清洗 AI 返回文本：
+// 1. 去掉换行后内容
+// 2. 去掉发言前缀（如【name】或[name]）
+// 3. 去掉重复 10 次以上的子串
+// 4. 去除首尾空白
+func Sanitize(msg string) string {
+	msg, _, _ = strings.Cut(msg, "\n")
+	msg = strings.TrimSpace(msg)
+	i := strings.LastIndex(msg, "】")
+	if i > 0 {
+		if i+len("】") >= len(msg) {
+			return ""
+		}
+		msg = msg[i+len("】"):]
+	} else {
+		i = strings.LastIndex(msg, "]")
+		if i > 0 {
+			if i+1 >= len(msg) {
+				return ""
+			}
+			msg = msg[i:]
+		}
+	}
+	if s, n := findRepeatedPattern(msg, 10); n > 0 {
+		return s
+	}
+	return strings.TrimSpace(msg)
+}
+
 // findRepeatedPattern 查找字符串中连续重复次数超过 n 的子串
 func findRepeatedPattern(s string, n int) (string, int) {
 	runes := []rune(s) // 将字符串转换为 rune 切片，支持 Unicode 字符
