@@ -69,10 +69,9 @@ func (item *item) String() string {
 }
 
 // AddChatReply 将 AI 回复追加到指定群组的聊天记录
-func AddChatReply(grp int64, botname, txt string) {
+func AddChatReply(grp int64, txt string) {
 	lst.Add(grp, &item{
-		isatme: false,
-		usr:    botname, txt: txt,
+		isatme: false, txt: txt,
 		atprefix: AtPrefix, namel: NameL, namer: NameR,
 	}, true)
 }
