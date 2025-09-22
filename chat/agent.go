@@ -36,7 +36,7 @@ func AgentOf(id int64) *goba.Agent {
 	}
 	ag := goba.NewAgent(
 		id, 16, 8, zero.BotConfig.NickName[0],
-		cfg.Sex, cfg.Char, cfg.Default,
+		cfg.Sex, cfg.Char, cfg.Default, false,
 	)
 	ags.Store(id, &ag)
 	return &ag
