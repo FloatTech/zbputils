@@ -12,7 +12,7 @@ require (
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/deepinfra v0.0.0-20250923161832-8757564fe76c
+	github.com/fumiama/deepinfra v0.0.0-20250924134153-348633b5c6fb
 	github.com/fumiama/go-base16384 v1.7.0
 	github.com/fumiama/go-onebot-agent v0.0.0-20250922144028-320c6b821c49
 	github.com/gin-gonic/gin v1.8.2
