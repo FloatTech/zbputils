@@ -3,9 +3,14 @@ package chat
 import (
 	"bytes"
 	_ "embed"
+	"encoding/json"
+	"reflect"
 
 	"github.com/RomiChan/syncx"
+	"github.com/fumiama/deepinfra"
+	"github.com/fumiama/deepinfra/model"
 	goba "github.com/fumiama/go-onebot-agent"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 
 	zero "github.com/wdvxdr1123/ZeroBot"
@@ -40,6 +45,49 @@ func AgentOf(id int64) *goba.Agent {
 	)
 	ags.Store(id, &ag)
 	return &ag
+}
+
+var checkgids = map[string]struct{}{
+	"send_group_msg":          {},
+	"set_group_kick":          {},
+	"set_group_ban":           {},
+	"set_group_whole_ban":     {},
+	"set_group_card":          {},
+	"set_group_name":          {},
+	"set_group_special_title": {},
+	"get_group_member_info":   {},
+	"get_group_member_list":   {},
+}
+
+// CallAgent and check group API permission
+func CallAgent(ag *goba.Agent, issudo bool, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) []zero.APIRequest {
+	reqs, err := ag.GetAction(api, p, grp, role, false)
+	if err != nil {
+		logrus.Warnln("[chat] agent err:", err, reqs)
+		return nil
+	}
+	logrus.Infoln("[chat] agent do:", reqs)
+	checkedreqs := make([]zero.APIRequest, 0, len(reqs))
+	for _, req := range reqs {
+		if _, ok := checkgids[req.Action]; ok {
+			v, ok := req.Params["group_id"].(json.Number)
+			if !ok {
+				logrus.Warnln("[chat] invalid group_id type", reflect.TypeOf(req.Params["group_id"]))
+				continue
+			}
+			gid, err := v.Int64()
+			if !ok {
+				logrus.Warnln("[chat] agent conv req gid err:", err)
+				continue
+			}
+			if grp != gid && !issudo {
+				logrus.Warnln("[chat] refuse to send out of grp from", grp, "to", gid)
+				continue
+			}
+		}
+		checkedreqs = append(checkedreqs, req)
+	}
+	return checkedreqs
 }
 
 func togobaev(ev *zero.Event) *goba.Event {
