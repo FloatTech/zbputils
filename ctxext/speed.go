@@ -7,20 +7,56 @@ import (
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/extension/rate"
 	"github.com/wdvxdr1123/ZeroBot/extension/single"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// DefaultSingle 默认反并发处理
+// DefaultSingle 默认反并发处理, 不匹配后续插件
 //
 //	按 qq 号反并发
 //	并发时返回 "您有操作正在执行, 请稍后再试!"
-var DefaultSingle = single.New(
-	single.WithKeyFn(func(ctx *zero.Ctx) int64 {
-		return ctx.Event.UserID
-	}),
-	single.WithPostFn[int64](func(ctx *zero.Ctx) {
-		ctx.Send("您有操作正在执行, 请稍后再试!")
-	}),
-)
+var DefaultSingle = NewDefaultSingle("您有操作正在执行, 请稍后再试!")
+
+// NewDefaultSingle 自定义失败文案
+func NewDefaultSingle(failtext string) *single.Single[int64] {
+	return single.New(
+		single.WithKeyFn(func(ctx *zero.Ctx) int64 {
+			return ctx.Event.UserID
+		}),
+		single.WithPostFn[int64](func(ctx *zero.Ctx) {
+			ctx.Break()
+			ctx.Send(
+				message.ReplyWithMessage(ctx.Event.MessageID,
+					message.Text(failtext),
+				),
+			)
+		}),
+	)
+}
+
+// GroupSingle 按群反并发, 私聊时按个人, 不匹配后续插件
+//
+//	并发时返回 "您有操作正在执行, 请稍后再试!"
+var GroupSingle = NewGroupSingle("您有操作正在执行, 请稍后再试!")
+
+// NewGroupSingle 自定义失败文案
+func NewGroupSingle(failtext string) *single.Single[int64] {
+	return single.New(
+		single.WithKeyFn(func(ctx *zero.Ctx) int64 {
+			if ctx.Event.GroupID == 0 {
+				return -ctx.Event.UserID
+			}
+			return ctx.Event.GroupID
+		}),
+		single.WithPostFn[int64](func(ctx *zero.Ctx) {
+			ctx.Break()
+			ctx.Send(
+				message.ReplyWithMessage(ctx.Event.MessageID,
+					message.Text(failtext),
+				),
+			)
+		}),
+	)
+}
 
 // defaultLimiterManager 默认限速器管理
 //
