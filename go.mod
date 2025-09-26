@@ -12,9 +12,9 @@ require (
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/deepinfra v0.0.0-20250924134153-348633b5c6fb
+	github.com/fumiama/deepinfra v0.0.0-20250924162107-cf156d49a0fa
 	github.com/fumiama/go-base16384 v1.7.0
-	github.com/fumiama/go-onebot-agent v0.0.0-20250925150209-46ace7c2b17a
+	github.com/fumiama/go-onebot-agent v0.0.0-20250926145606-37ebfa6131c8
 	github.com/gin-gonic/gin v1.8.2
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.11.1
