@@ -30,7 +30,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	e = new(Engine)
 	s, ok := priomap[prio]
 	if ok {
-		panic(fmt.Sprint("prio", prio, "is used by", s))
+		panic(fmt.Sprint("prio ", prio, " is used by ", s))
 	}
 	priomap[prio] = service
 	e.en = zero.New()

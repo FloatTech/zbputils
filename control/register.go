@@ -53,7 +53,7 @@ func Register(service string, o *ctrl.Options[*zero.Ctx]) *Engine {
 		enmap[service] = engine
 		return engine
 	}
-	logrus.Debugln("[control]插件", service, "已自动设置优先级", prio)
+	logrus.Warnln("[control]插件", service, "不在ab记录中, 自动设置优先级", prio)
 	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
 	enmap[service] = engine
 	return engine
