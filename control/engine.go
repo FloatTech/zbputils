@@ -29,8 +29,8 @@ var extramap = make(map[int16]string)   // extramap is map[gid]service
 func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine) {
 	e = new(Engine)
 	s, ok := priomap[prio]
-	if ok {
-		panic(fmt.Sprint("prio ", prio, " is used by ", s))
+	if ok && s != service {
+		panic(fmt.Sprint("prio ", prio, " is used by ", s, " but ", service, " want to register"))
 	}
 	priomap[prio] = service
 	e.en = zero.New()
@@ -84,7 +84,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 			panic(err)
 		}
 	}
-	logrus.Debugln("[control]插件", service, "已设置数据目录", e.datafolder)
+	logrus.Debugln("[control] 插件", service, "已设置数据目录", e.datafolder)
 	return
 }
 
