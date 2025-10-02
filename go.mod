@@ -1,16 +1,16 @@
 module github.com/FloatTech/zbputils
 
-go 1.24
+go 1.24.0
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
-	github.com/FloatTech/floatbox v0.0.0-20250513111443-adba80e84e80
+	github.com/FloatTech/floatbox v0.0.0-20251002074805-f95cbc7edb31
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.2.0
 	github.com/FloatTech/sqlite v1.7.2
 	github.com/FloatTech/zbpctrl v1.7.0
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
-	github.com/RomiChan/websocket v1.4.3-0.20220227141055-9b2c6168c9c5
+	github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/deepinfra v0.0.0-20250924162107-cf156d49a0fa
 	github.com/fumiama/go-base16384 v1.7.0
@@ -25,13 +25,13 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/tidwall/gjson v1.18.0
-	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20250921063512-13752a73d444
+	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20251002074418-56567b7fc282
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/FloatTech/gg v1.1.3 // indirect
-	github.com/FloatTech/ttl v0.0.0-20240716161252-965925764562 // indirect
+	github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
@@ -43,9 +43,10 @@ require (
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-registry v0.2.7 // indirect
 	github.com/fumiama/go-simple-protobuf v0.2.0 // indirect
-	github.com/fumiama/gofastTEA v0.0.10 // indirect
+	github.com/fumiama/gofastTEA v0.1.3 // indirect
 	github.com/fumiama/imgsz v0.0.4 // indirect
-	github.com/fumiama/terasu v0.0.0-20241027183601-987ab91031ce // indirect
+	github.com/fumiama/orbyte v0.0.0-20251002065953-3bb358367eb5 // indirect
+	github.com/fumiama/terasu v0.0.0-20250930151601-1d9b679c36c2 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/gin-contrib/sse v1.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
@@ -78,14 +79,14 @@ require (
 	github.com/ugorji/go/codec v1.3.0 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.20.0 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
 	golang.org/x/image v0.16.0 // indirect
-	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/mod v0.27.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.27.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	google.golang.org/protobuf v1.36.9 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	modernc.org/libc v1.61.0 // indirect
