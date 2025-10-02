@@ -53,7 +53,7 @@ linters:
 run:
   # default concurrency is a available CPU number.
   # concurrency: 4 # explicitly omit this value to fully utilize available resources.
-  deadline: 10m
+  deadline: 15m
   issues-exit-code: 1
   tests: false
   go: '1.24'

@@ -17,7 +17,7 @@ jobs:
         uses: golangci/golangci-lint-action@master
         with:
           version: latest
-          args: --issues-exit-code=0
+          args: --issues-exit-code=0 --timeout=10m
       - name: Commit back
         continue-on-error: true
         run: |
