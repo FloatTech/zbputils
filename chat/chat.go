@@ -18,9 +18,12 @@ import (
 var SystemPrompt string
 
 var (
+	// AtPrefix @用户时给 LLM 的前缀提示, 需要和提示词一致
 	AtPrefix = ">>"
-	NameL    = "【"
-	NameR    = "】"
+	// NameL 包裹用户名的左括号, 需要和提示词一致
+	NameL = "【"
+	// NameR 包裹用户名的右括号, 需要和提示词一致
+	NameR = "】"
 )
 
 // lst 全局聊天记录，每群/每用户独立保存最近 8 条
