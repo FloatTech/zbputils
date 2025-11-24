@@ -194,7 +194,7 @@ func init() {
 	})
 	en.OnRegex(`^取消在"(.*)"触发的指令$`, zero.UserOrGrpAdmin, isfirstregmatchnotnil).SetBlock(true).Handle(func(ctx *zero.Ctx) {
 		cron := ctx.State["regex_matched"].([]string)[1]
-		err := rmcmd(ctx.Event.SelfID, ctx.Event.UserID, cron)
+		err := rmcmd(ctx.Event.SelfID, ctx.Event.UserID, cron, zero.AdminPermission(ctx))
 		if err != nil {
 			ctx.SendChain(message.Text("ERROR: ", err))
 			return
@@ -441,7 +441,7 @@ func superuserhandler(rsp []byte) (zero.Handler, error) {
 	}, nil
 }
 
-func rmcmd(bot, caller int64, cron string) error {
+func rmcmd(bot, caller int64, cron string, force bool) error {
 	c := &cmd{}
 	mu.Lock()
 	defer mu.Unlock()
@@ -453,7 +453,7 @@ func rmcmd(bot, caller int64, cron string) error {
 		if err != nil {
 			return err
 		}
-		if e.UserID != caller {
+		if !force && e.UserID != caller {
 			return nil
 		}
 		eid, ok := entries[c.ID]
