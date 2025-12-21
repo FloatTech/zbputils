@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"reflect"
+	"time"
 
 	"github.com/RomiChan/syncx"
 	"github.com/fumiama/deepinfra"
@@ -40,7 +41,8 @@ func AgentOf(id int64) *goba.Agent {
 		panic(err)
 	}
 	ag := goba.NewAgent(
-		id, 16, 8, zero.BotConfig.NickName[0],
+		id, 16, 8, time.Hour*24,
+		zero.BotConfig.NickName[0],
 		cfg.Sex, cfg.Char, cfg.Default, false,
 	)
 	ags.Store(id, &ag)
