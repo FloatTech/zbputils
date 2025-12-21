@@ -41,7 +41,7 @@ func (s Storage) SaveTo(ctx *zero.Ctx, gid int64) error {
 // Get bmp is a continuous 1's sequence like 0x00ff00
 func (s Storage) Get(bmp int64) int64 {
 	sft := bits.TrailingZeros64(uint64(bmp))
-	return (int64(s) & bmp) >> int64(sft)
+	return (int64(s) >> int64(sft)) & (bmp >> int64(sft))
 }
 
 // Set bmp is a continuous 1's sequence like 0x00ff00
@@ -50,7 +50,7 @@ func (s Storage) Set(x int64, bmp int64) Storage {
 		panic("cannot use bmp == 0")
 	}
 	sft := bits.TrailingZeros64(uint64(bmp))
-	return Storage((int64(s) & (^bmp)) | ((x & (bmp >> int64(sft))) << int64(sft)))
+	return Storage((int64(s) & (^bmp)) | ((x << int64(sft)) & bmp))
 }
 
 // GetBool bmp must be 1-bit-long
