@@ -2,11 +2,13 @@ package ctxext
 
 import (
 	"errors"
+	"fmt"
 	"math/bits"
 	"strconv"
 	"strings"
 
 	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/sirupsen/logrus"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -26,6 +28,7 @@ func NewStorage(ctx *zero.Ctx, gid int64) (Storage, error) {
 		return 0, ErrManagerNotFound
 	}
 	x := c.GetData(gid)
+	logrus.Debugln("[ctxext] NewStorage get plugin", c.Service, "grp:", gid, "val:", fmt.Sprintf("%016x", x))
 	return Storage(x), nil
 }
 
@@ -35,13 +38,16 @@ func (s Storage) SaveTo(ctx *zero.Ctx, gid int64) error {
 	if !ok {
 		return ErrManagerNotFound
 	}
-	return c.SetData(int64(s), gid)
+	logrus.Debugln("[ctxext] SaveTo plugin", c.Service, "grp:", gid, "val:", fmt.Sprintf("%016x", int64(s)))
+	return c.SetData(gid, int64(s))
 }
 
 // Get bmp is a continuous 1's sequence like 0x00ff00
 func (s Storage) Get(bmp int64) int64 {
 	sft := bits.TrailingZeros64(uint64(bmp))
-	return (int64(s) >> int64(sft)) & (bmp >> int64(sft))
+	x := (int64(s) >> int64(sft)) & (bmp >> int64(sft))
+	logrus.Debugln("[ctxext] Storage", fmt.Sprintf("%016x", int64(s)), "get bmp", fmt.Sprintf("%016x", bmp), "sft:", sft, "val:", fmt.Sprintf("%016x", x))
+	return x
 }
 
 // Set bmp is a continuous 1's sequence like 0x00ff00
@@ -50,12 +56,16 @@ func (s Storage) Set(x int64, bmp int64) Storage {
 		panic("cannot use bmp == 0")
 	}
 	sft := bits.TrailingZeros64(uint64(bmp))
-	return Storage((int64(s) & (^bmp)) | ((x << int64(sft)) & bmp))
+	news := Storage((int64(s) & (^bmp)) | ((x << int64(sft)) & bmp))
+	logrus.Debugln("[ctxext] Storage", fmt.Sprintf("%016x", int64(s)), "set bmp", fmt.Sprintf("%016x", bmp), "sft:", sft, "val:", fmt.Sprintf("%016x", x), "after set:", fmt.Sprintf("%016x", int64(news)))
+	return news
 }
 
 // GetBool bmp must be 1-bit-long
 func (s Storage) GetBool(bmp int64) bool {
-	return s.Get(bmp) != 0
+	x := s.Get(bmp) != 0
+	logrus.Debugln("[ctxext] Storage", fmt.Sprintf("%016x", int64(s)), "get bmp", fmt.Sprintf("%016x", bmp), "val:", x)
+	return x
 }
 
 // NewStorageSaveBitmapHandler is a easy handler that cooperate with OnPrefix
@@ -127,6 +137,6 @@ func NewStorageSaveBoolHandler(bmp int64) func(ctx *zero.Ctx) {
 			ctx.SendChain(message.Text("ERROR: set data err: ", err))
 			return
 		}
-		ctx.SendChain(message.Text("成功"))
+		ctx.SendChain(message.Text("成功设置为", isone))
 	}
 }
