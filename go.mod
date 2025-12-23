@@ -8,7 +8,7 @@ require (
 	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
 	github.com/FloatTech/rendercard v0.2.0
 	github.com/FloatTech/sqlite v1.7.2
-	github.com/FloatTech/zbpctrl v1.7.0
+	github.com/FloatTech/zbpctrl v1.7.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438
 	github.com/fumiama/cron v1.3.0
@@ -25,7 +25,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/tidwall/gjson v1.18.0
-	github.com/wdvxdr1123/ZeroBot v1.8.2-0.20251002074418-56567b7fc282
+	github.com/wdvxdr1123/ZeroBot v1.8.2
 	gopkg.in/yaml.v3 v3.0.1
 )
 

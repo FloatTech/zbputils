@@ -12,8 +12,8 @@ github.com/FloatTech/sqlite v1.7.2 h1:b8COegNLSzofzOyARsVwSbz9OOzWEa8IElsTlx1TBL
 github.com/FloatTech/sqlite v1.7.2/go.mod h1:/4tzfCGhrZnnjC1U8vcfwGQeF6eR649fhOsS3+Le0+s=
 github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d h1:mUQ/c3wXKsUGa4Sg9DBy01APXKB68PmobhxOyaJI7lY=
 github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d/go.mod h1:fHZFWGquNXuHttu9dUYoKuNbm3dzLETnIOnm1muSfDs=
-github.com/FloatTech/zbpctrl v1.7.0 h1:Hxo6EIhJo+pHjcQP9QgIJgluaT1pHH99zkk3njqTNMo=
-github.com/FloatTech/zbpctrl v1.7.0/go.mod h1:xmM4dSwHA02Gei3ogCRiG+RTrw/7Z69PfrN5NYf8BPE=
+github.com/FloatTech/zbpctrl v1.7.1 h1:0yPEmCForhyMbnhTckmjDUFFDZgQp1RjO2bVF4ZVqOs=
+github.com/FloatTech/zbpctrl v1.7.1/go.mod h1:xmM4dSwHA02Gei3ogCRiG+RTrw/7Z69PfrN5NYf8BPE=
 github.com/KyleBanks/depth v1.2.1 h1:5h8fQADFrWtarTdtDudMmGsC7GPbOAu6RVB3ffsVFHc=
 github.com/KyleBanks/depth v1.2.1/go.mod h1:jzSb9d0L43HxTQfT+oSA1EEp2q+ne2uh6XgeJcm8brE=
 github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7 h1:S/ferNiehVjNaBMNNBxUjLtVmP/YWD6Yh79RfPv4ehU=
@@ -185,8 +185,8 @@ github.com/twitchyliquid64/golang-asm v0.15.1 h1:SU5vSMR7hnwNxj24w34ZyCi/FmDZTkS
 github.com/twitchyliquid64/golang-asm v0.15.1/go.mod h1:a1lVb/DtPvCB8fslRZhAngC2+aY1QWCk3Cedj/Gdt08=
 github.com/ugorji/go/codec v1.3.1 h1:waO7eEiFDwidsBN6agj1vJQ4AG7lh2yqXyOXqhgQuyY=
 github.com/ugorji/go/codec v1.3.1/go.mod h1:pRBVtBSKl77K30Bv8R2P+cLSGaTtex6fsA2Wjqmfxj4=
-github.com/wdvxdr1123/ZeroBot v1.8.2-0.20251002074418-56567b7fc282 h1:YctW/t88sQ0H8cJ69PWULU6xWfh8kNsX/XgCpW2OPHw=
-github.com/wdvxdr1123/ZeroBot v1.8.2-0.20251002074418-56567b7fc282/go.mod h1:trueIIVRywKJa3ov4QphzVvzYzgCNrlXdf9JvPJOFW8=
+github.com/wdvxdr1123/ZeroBot v1.8.2 h1:H4qNHgeYLLm3ID5T9MKnO4fI0SWWl0rFCGLCUr8u10M=
+github.com/wdvxdr1123/ZeroBot v1.8.2/go.mod h1:trueIIVRywKJa3ov4QphzVvzYzgCNrlXdf9JvPJOFW8=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 go.uber.org/mock v0.6.0 h1:hyF9dfmbgIX5EfOdasqLsWD6xqpNZlXblLB/Dbnwv3Y=
 go.uber.org/mock v0.6.0/go.mod h1:KiVJ4BqZJaMj4svdfmHM0AUx4NJYO8ZNpPnZn1Z+BBU=
