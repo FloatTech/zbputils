@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"reflect"
+	"strconv"
 	"time"
 
 	"github.com/RomiChan/syncx"
@@ -12,9 +13,12 @@ import (
 	"github.com/fumiama/deepinfra/model"
 	goba "github.com/fumiama/go-onebot-agent"
 	"github.com/sirupsen/logrus"
+	"github.com/tidwall/gjson"
 	"gopkg.in/yaml.v3"
 
+	ctrl "github.com/FloatTech/zbpctrl"
 	zero "github.com/wdvxdr1123/ZeroBot"
+	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
 // AgentChar 将 char.yaml 内容嵌入为默认 agent 性格
@@ -31,7 +35,7 @@ type charcfg struct {
 }
 
 // AgentOf id is self_id
-func AgentOf(id int64) *goba.Agent {
+func AgentOf(id int64, service string) *goba.Agent {
 	if ag, ok := ags.Load(id); ok {
 		return ag
 	}
@@ -40,10 +44,14 @@ func AgentOf(id int64) *goba.Agent {
 	if err != nil {
 		panic(err)
 	}
+	mem, err := atomicgetmemstorage(service)
+	if err != nil {
+		panic(err)
+	}
 	ag := goba.NewAgent(
 		id, 16, 8, time.Hour*24,
 		zero.BotConfig.NickName[0],
-		cfg.Sex, cfg.Char, cfg.Default, false,
+		cfg.Sex, cfg.Char, cfg.Default, mem, false, false,
 	)
 	ags.Store(id, &ag)
 	return &ag
@@ -85,6 +93,32 @@ func CallAgent(ag *goba.Agent, issudo bool, api deepinfra.API, p model.Protocol,
 			if grp != gid && !issudo {
 				logrus.Warnln("[chat] refuse to send out of grp from", grp, "to", gid)
 				continue
+			}
+			if role == goba.PermRoleUser { // check @all
+				msg, ok := req.Params["message"].(string)
+				if !ok {
+					logrus.Warnln("[chat] invalid message type", reflect.TypeOf(req.Params["message"]))
+					continue
+				}
+				msgs := message.ParseMessageFromArray(gjson.Parse(msg))
+				for _, m := range msgs {
+					if m.Type == "at" {
+						qqs, ok := m.Data["qq"]
+						if !ok {
+							logrus.Warnln("[chat] invalid at message without qq")
+							continue
+						}
+						qq, err := strconv.ParseInt(qqs, 10, 64)
+						if err != nil {
+							logrus.Warnln("[chat] invalid at qq", qqs)
+							continue
+						}
+						if qq <= 0 {
+							logrus.Warnln("[chat] invalid at qq num", qq)
+							continue
+						}
+					}
+				}
 			}
 		}
 		checkedreqs = append(checkedreqs, req)
@@ -130,7 +164,11 @@ func logev(ctx *zero.Ctx) {
 	if ev == nil {
 		return
 	}
-	AgentOf(ctx.Event.SelfID).AddEvent(gid, ev)
+	c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
+	if !ok {
+		return
+	}
+	AgentOf(ctx.Event.SelfID, c.Service).AddEvent(gid, ev)
 }
 
 func init() {

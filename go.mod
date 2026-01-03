@@ -5,16 +5,16 @@ go 1.24.0
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
 	github.com/FloatTech/floatbox v0.0.0-20251002074805-f95cbc7edb31
-	github.com/FloatTech/imgfactory v0.2.2-0.20230315152233-49741fc994f9
+	github.com/FloatTech/imgfactory v0.2.2-0.20230413152719-e101cc3606ef
 	github.com/FloatTech/rendercard v0.2.0
 	github.com/FloatTech/sqlite v1.7.2
 	github.com/FloatTech/zbpctrl v1.7.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
 	github.com/RomiChan/websocket v1.4.3-0.20251002072000-d3eb41798438
 	github.com/fumiama/cron v1.3.0
-	github.com/fumiama/deepinfra v0.0.0-20250924162107-cf156d49a0fa
+	github.com/fumiama/deepinfra v0.0.0-20251221163610-e98ee3ba437a
 	github.com/fumiama/go-base16384 v1.7.1
-	github.com/fumiama/go-onebot-agent v0.0.0-20251221140154-74f64c788c43
+	github.com/fumiama/go-onebot-agent v0.0.0-20260103083631-4717f713114a
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.29.0
@@ -37,6 +37,7 @@ require (
 	github.com/bytedance/sonic v1.14.2 // indirect
 	github.com/bytedance/sonic/loader v0.4.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
+	github.com/corona10/goimagehash v1.1.1-0.20240121134706-d8115886f360 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
@@ -62,6 +63,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/goccy/go-yaml v1.19.1 // indirect
+	github.com/gofrs/flock v0.13.1-0.20260101122711-0520ba5dddac // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.3.0 // indirect
@@ -71,6 +73,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/ncruces/go-strftime v1.0.0 // indirect
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646 // indirect
 	github.com/pbnjay/memory v0.0.0-20210728143218-7b4eea64cf58 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
