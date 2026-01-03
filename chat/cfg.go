@@ -40,7 +40,7 @@ func (mt ModelType) String() string {
 	return apilist[mt]
 }
 
-func (mt ModelType) protocol(modn string, temp float32, topp float32, maxn uint) (mod model.Protocol, err error) {
+func (mt ModelType) Protocol(modn string, temp float32, topp float32, maxn uint) (mod model.Protocol, err error) {
 	switch AC.Type {
 	case 0:
 		mod = model.NewOpenAI(
