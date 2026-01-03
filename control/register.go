@@ -48,13 +48,15 @@ func AutoRegister(o *ctrl.Options[*zero.Ctx]) *Engine {
 // Register 注册插件控制器
 func Register(service string, o *ctrl.Options[*zero.Ctx]) *Engine {
 	if custpriomap != nil {
-		logrus.Debugln("[control] 插件", service, "已设置自定义优先级", prio)
-		engine := newengine(service, int(custpriomap[service]), o)
+		p := int(custpriomap[service])
+		logrus.Debugln("[control] 插件", service, "已设置自定义优先级", p)
+		engine := newengine(service, p, o)
 		enmap[service] = engine
 		return engine
 	}
-	logrus.Warnln("[control] 插件", service, "不在ab记录中, 自动设置优先级", prio)
-	engine := newengine(service, int(atomic.AddUint64(&prio, 10)), o)
+	p := int(atomic.AddUint64(&prio, 10))
+	logrus.Warnln("[control] 插件", service, "不在ab记录中, 自动设置优先级", p)
+	engine := newengine(service, p, o)
 	enmap[service] = engine
 	return engine
 }
