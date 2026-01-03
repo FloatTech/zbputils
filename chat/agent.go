@@ -16,7 +16,7 @@ import (
 	"github.com/tidwall/gjson"
 	"gopkg.in/yaml.v3"
 
-	ctrl "github.com/FloatTech/zbpctrl"
+	"github.com/FloatTech/floatbox/binary"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -164,11 +164,9 @@ func logev(ctx *zero.Ctx) {
 	if ev == nil {
 		return
 	}
-	c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
-	if !ok {
-		return
-	}
-	AgentOf(ctx.Event.SelfID, c.Service).AddEvent(gid, ev)
+	data, _ := json.Marshal(ev)
+	logrus.Debugln("[agent] AddEvent gid:", gid, "ev:", binary.BytesToString(data))
+	AgentOf(ctx.Event.SelfID, "aichat").AddEvent(gid, ev)
 }
 
 func init() {
