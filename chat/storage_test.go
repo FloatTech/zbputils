@@ -7,7 +7,7 @@ import (
 )
 
 func TestStorage_rate(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	// 测试默认值
 	if rate := s.Rate(); rate != 0 {
@@ -15,14 +15,14 @@ func TestStorage_rate(t *testing.T) {
 	}
 
 	// 设置值并测试
-	s = storage((ctxext.Storage)(s).Set(int64(100), BitmapRate))
+	s = Storage((ctxext.Storage)(s).Set(int64(100), BitmapRate))
 	if rate := s.Rate(); rate != 100 {
 		t.Errorf("rate() after set = %v, want 100", rate)
 	}
 }
 
 func TestStorage_temp(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	tests := []struct {
 		name     string
@@ -39,7 +39,7 @@ func TestStorage_temp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s = storage((ctxext.Storage)(s).Set(tt.setValue, BitmapTemp))
+			s = Storage((ctxext.Storage)(s).Set(tt.setValue, BitmapTemp))
 
 			result := s.Temp()
 			if result != tt.expected {
@@ -50,7 +50,7 @@ func TestStorage_temp(t *testing.T) {
 }
 
 func TestStorage_noagent(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	// 测试默认值
 	if noagent := s.NoAgent(); noagent != false {
@@ -58,14 +58,14 @@ func TestStorage_noagent(t *testing.T) {
 	}
 
 	// 设置为 true 并测试
-	s = storage((ctxext.Storage)(s).Set(1, BitmapNagt))
+	s = Storage((ctxext.Storage)(s).Set(1, BitmapNagt))
 	if noagent := s.NoAgent(); noagent != true {
 		t.Errorf("noagent() after set true = %v, want true", noagent)
 	}
 }
 
 func TestStorage_norecord(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	// 测试默认值
 	if norecord := s.NoRecord(); norecord != false {
@@ -73,14 +73,14 @@ func TestStorage_norecord(t *testing.T) {
 	}
 
 	// 设置为 true 并测试
-	s = storage((ctxext.Storage)(s).Set(1, BitmapNrec))
+	s = Storage((ctxext.Storage)(s).Set(1, BitmapNrec))
 	if norecord := s.NoRecord(); norecord != true {
 		t.Errorf("norecord() after set true = %v, want true", norecord)
 	}
 }
 
 func TestStorage_noreplyat(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	// 测试默认值
 	if noreplyat := s.NoReplyAt(); noreplyat != false {
@@ -88,21 +88,21 @@ func TestStorage_noreplyat(t *testing.T) {
 	}
 
 	// 设置为 true 并测试
-	s = storage((ctxext.Storage)(s).Set(1, BitmapNrat))
+	s = Storage((ctxext.Storage)(s).Set(1, BitmapNrat))
 	if noreplyat := s.NoReplyAt(); noreplyat != true {
 		t.Errorf("noreplyat() after set true = %v, want true", noreplyat)
 	}
 }
 
 func TestStorage_Integration(t *testing.T) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
 	// 设置各种值
-	s = storage((ctxext.Storage)(s).Set(int64(75), BitmapRate))
-	s = storage((ctxext.Storage)(s).Set(int64(85), BitmapTemp))
-	s = storage((ctxext.Storage)(s).Set(1, BitmapNagt))
-	s = storage((ctxext.Storage)(s).Set(0, BitmapNrec))
-	s = storage((ctxext.Storage)(s).Set(1, BitmapNrat))
+	s = Storage((ctxext.Storage)(s).Set(int64(75), BitmapRate))
+	s = Storage((ctxext.Storage)(s).Set(int64(85), BitmapTemp))
+	s = Storage((ctxext.Storage)(s).Set(1, BitmapNagt))
+	s = Storage((ctxext.Storage)(s).Set(0, BitmapNrec))
+	s = Storage((ctxext.Storage)(s).Set(1, BitmapNrat))
 
 	// 验证所有方法
 	if rate := s.Rate(); rate != 75 {
@@ -127,9 +127,9 @@ func TestStorage_Integration(t *testing.T) {
 }
 
 func BenchmarkStorage_rate(b *testing.B) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
-	s = storage((ctxext.Storage)(s).Set(int64(100), BitmapRate))
+	s = Storage((ctxext.Storage)(s).Set(int64(100), BitmapRate))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -138,9 +138,9 @@ func BenchmarkStorage_rate(b *testing.B) {
 }
 
 func BenchmarkStorage_temp(b *testing.B) {
-	s := storage(ctxext.Storage(0))
+	s := Storage(ctxext.Storage(0))
 
-	s = storage((ctxext.Storage)(s).Set(int64(80), BitmapTemp))
+	s = Storage((ctxext.Storage)(s).Set(int64(80), BitmapTemp))
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

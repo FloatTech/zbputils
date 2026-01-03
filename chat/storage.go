@@ -13,18 +13,18 @@ const (
 	BitmapNrat = 0x040000
 )
 
-type storage ctxext.Storage
+type Storage ctxext.Storage
 
-func NewStorage(ctx *zero.Ctx, gid int64) (storage, error) {
+func NewStorage(ctx *zero.Ctx, gid int64) (Storage, error) {
 	s, err := ctxext.NewStorage(ctx, gid)
-	return storage(s), err
+	return Storage(s), err
 }
 
-func (s storage) Rate() uint8 {
+func (s Storage) Rate() uint8 {
 	return uint8((ctxext.Storage)(s).Get(BitmapRate))
 }
 
-func (s storage) Temp() float32 {
+func (s Storage) Temp() float32 {
 	temp := int8((ctxext.Storage)(s).Get(BitmapTemp))
 	// 处理温度参数
 	if temp <= 0 {
@@ -36,14 +36,14 @@ func (s storage) Temp() float32 {
 	return float32(temp) / 100
 }
 
-func (s storage) NoAgent() bool {
+func (s Storage) NoAgent() bool {
 	return (ctxext.Storage)(s).GetBool(BitmapNagt)
 }
 
-func (s storage) NoRecord() bool {
+func (s Storage) NoRecord() bool {
 	return (ctxext.Storage)(s).GetBool(BitmapNrec)
 }
 
-func (s storage) NoReplyAt() bool {
+func (s Storage) NoReplyAt() bool {
 	return (ctxext.Storage)(s).GetBool(BitmapNrat)
 }
