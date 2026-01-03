@@ -53,7 +53,7 @@ func newengine(service string, prio int, o *ctrl.Options[*zero.Ctx]) (e *Engine)
 	if o.Extra != 0 {
 		s, ok := extramap[o.Extra]
 		if ok {
-			panic("Extra " + strconv.Itoa(int(o.Extra)) + " of service " + service + " has been required by service " + s)
+			logrus.Warnln("[control] extra " + strconv.Itoa(int(o.Extra)) + " of service " + service + " has been required by service " + s)
 		}
 		extramap[o.Extra] = service
 	}
