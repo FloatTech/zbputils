@@ -4,6 +4,8 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/json"
+	"errors"
+	"io"
 	"reflect"
 	"strconv"
 	"time"
@@ -73,7 +75,11 @@ var checkgids = map[string]struct{}{
 func CallAgent(ag *goba.Agent, issudo bool, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) []zero.APIRequest {
 	reqs, err := ag.GetAction(api, p, grp, role, false)
 	if err != nil {
-		logrus.Warnln("[chat] agent err:", err, reqs)
+		if !errors.Is(err, io.EOF) {
+			logrus.Warnln("[chat] agent err:", err, reqs)
+		} else {
+			logrus.Infoln("[chat] agent end action")
+		}
 		return nil
 	}
 	logrus.Infoln("[chat] agent do:", reqs)
