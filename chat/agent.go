@@ -176,12 +176,42 @@ func togobaev(ev *zero.Event) *goba.Event {
 	}
 }
 
+// countParamsLength 统计 params 中所有叶子节点字符串的长度之和（非递归实现）
+func countParamsLength(params map[string]any) int {
+	total := 0
+	// 使用栈存储待处理的 map
+	stack := []map[string]any{params}
+
+	for len(stack) > 0 {
+		// 弹出栈顶元素
+		current := stack[len(stack)-1]
+		stack = stack[:len(stack)-1]
+
+		// 遍历当前 map 的所有值
+		for _, v := range current {
+			switch val := v.(type) {
+			case string:
+				// 叶子节点，累加长度
+				total += len(val)
+			case map[string]any:
+				// 非叶子节点，压入栈中待处理
+				stack = append(stack, val)
+			}
+		}
+	}
+
+	return total
+}
+
 func logev(ctx *zero.Ctx) {
 	if !IsAgentCharReady {
 		return
 	}
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, err error) {
+			if countParamsLength(req.Params) > 256 { // skip too long req&resp
+				return
+			}
 			k := zero.StateKeyPrefixKeep + "_chat_agent_logev_logged__"
 			_, ok := ctx.State[k]
 			if ok {
