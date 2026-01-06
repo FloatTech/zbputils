@@ -29,6 +29,9 @@ import (
 //go:embed char.yaml
 var AgentChar []byte
 
+// IsAgentCharReady then logev works
+var IsAgentCharReady = false
+
 var ags = syncx.Map[int64, *goba.Agent]{}
 
 type charcfg struct {
@@ -174,8 +177,17 @@ func togobaev(ev *zero.Event) *goba.Event {
 }
 
 func logev(ctx *zero.Ctx) {
+	if !IsAgentCharReady {
+		return
+	}
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, err error) {
+			k := zero.StateKeyPrefixKeep + "_chat_agent_logev_logged__"
+			_, ok := ctx.State[k]
+			if ok {
+				return
+			}
+			ctx.State[k] = struct{}{}
 			gid := ctx.Event.GroupID
 			if gid == 0 {
 				gid = -ctx.Event.UserID

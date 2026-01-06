@@ -25,7 +25,7 @@ require (
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/tidwall/gjson v1.18.0
-	github.com/wdvxdr1123/ZeroBot v1.8.2
+	github.com/wdvxdr1123/ZeroBot v1.8.3-0.20260103120253-8a8f1347f983
 	gopkg.in/yaml.v3 v3.0.1
 )
 
