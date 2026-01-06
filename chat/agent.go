@@ -19,6 +19,7 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/zbputils/vevent"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
@@ -53,7 +54,7 @@ func AgentOf(id int64, service string) *goba.Agent {
 	ag := goba.NewAgent(
 		id, 16, 8, time.Hour*24,
 		zero.BotConfig.NickName[0],
-		cfg.Sex, cfg.Char, cfg.Default, mem, false,
+		cfg.Sex, cfg.Char, cfg.Default, mem, true, false,
 	)
 	ags.Store(id, &ag)
 	return &ag
@@ -161,7 +162,25 @@ func togobaev(ev *zero.Event) *goba.Event {
 }
 
 func logev(ctx *zero.Ctx) {
-	// 计算群组 ID（私聊时使用负的 UserID）
+	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
+		ctx, func(req zero.APIRequest, rsp zero.APIResponse, err error) {
+			gid := ctx.Event.GroupID
+			if gid == 0 {
+				gid = -ctx.Event.UserID
+			}
+			ag := AgentOf(ctx.Event.SelfID, "aichat")
+			logrus.Infoln("[chat] agent", gid, "add requ:", &req)
+			ag.AddRequest(gid, &req)
+			logrus.Infoln("[chat] agent", gid, "get resp:", &rsp)
+			ag.AddResponse(gid, &goba.APIResponse{
+				Status:  rsp.Status,
+				Data:    json.RawMessage(rsp.Data.Raw),
+				Message: rsp.Message,
+				Wording: rsp.Wording,
+				RetCode: rsp.RetCode,
+			})
+		}),
+	)
 	gid := ctx.Event.GroupID
 	if gid == 0 {
 		gid = -ctx.Event.UserID
@@ -171,7 +190,7 @@ func logev(ctx *zero.Ctx) {
 		return
 	}
 	data, _ := json.Marshal(ev)
-	logrus.Debugln("[agent] AddEvent gid:", gid, "ev:", binary.BytesToString(data))
+	logrus.Debugln("[chat] agent", gid, "add ev:", binary.BytesToString(data))
 	AgentOf(ctx.Event.SelfID, "aichat").AddEvent(gid, ev)
 }
 

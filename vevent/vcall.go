@@ -11,11 +11,11 @@ import (
 // APICallerReturnHook is a caller middleware
 type APICallerReturnHook struct {
 	caller   zero.APICaller
-	callback func(rsp zero.APIResponse, err error)
+	callback func(req zero.APIRequest, rsp zero.APIResponse, err error)
 }
 
 // NewAPICallerReturnHook hook ctx's caller
-func NewAPICallerReturnHook(ctx *zero.Ctx, callback func(rsp zero.APIResponse, err error)) (v *APICallerReturnHook) {
+func NewAPICallerReturnHook(ctx *zero.Ctx, callback func(req zero.APIRequest, rsp zero.APIResponse, err error)) (v *APICallerReturnHook) {
 	return &APICallerReturnHook{
 		caller:   (*(**Ctx)(unsafe.Pointer(&ctx))).caller,
 		callback: callback,
@@ -25,8 +25,8 @@ func NewAPICallerReturnHook(ctx *zero.Ctx, callback func(rsp zero.APIResponse, e
 // CallAPI call original caller and pass rsp to callback
 //
 //nolint:revive
-func (v *APICallerReturnHook) CallAPI(c context.Context, request zero.APIRequest) (rsp zero.APIResponse, err error) {
-	rsp, err = v.caller.CallAPI(c, request)
-	go v.callback(rsp, err)
+func (v *APICallerReturnHook) CallAPI(c context.Context, req zero.APIRequest) (rsp zero.APIResponse, err error) {
+	rsp, err = v.caller.CallAPI(c, req)
+	go v.callback(req, rsp, err)
 	return
 }
