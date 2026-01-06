@@ -62,7 +62,14 @@ func AgentOf(id int64, service string) *goba.Agent {
 
 // ResetAgents reset all agent log
 func ResetAgents() {
-	ags = syncx.Map[int64, *goba.Agent]{}
+	ks := make([]int64, 0, 8)
+	ags.Range(func(key int64, _ *goba.Agent) bool {
+		ks = append(ks, key)
+		return true
+	})
+	for _, k := range ks {
+		ags.Delete(k)
+	}
 }
 
 var checkgids = map[string]struct{}{
