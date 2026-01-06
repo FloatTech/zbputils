@@ -220,7 +220,7 @@ func logev(ctx *zero.Ctx) {
 			if countParamsLength(req.Params) > 256 { // skip too long req&resp
 				return
 			}
-			if !inActionMu.TryLock() {
+			if inActionMu.TryLock() {
 				defer inActionMu.Unlock()
 			} else {
 				return
@@ -248,7 +248,7 @@ func logev(ctx *zero.Ctx) {
 			})
 		}),
 	)
-	if !inActionMu.TryLock() {
+	if inActionMu.TryLock() {
 		defer inActionMu.Unlock()
 	} else {
 		return
