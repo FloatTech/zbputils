@@ -88,8 +88,8 @@ var checkgids = map[string]struct{}{
 }
 
 // CallAgent and check group API permission
-func CallAgent(ag *goba.Agent, issudo bool, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) []zero.APIRequest {
-	reqs, err := ag.GetAction(api, p, grp, role, false)
+func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) []zero.APIRequest {
+	reqs, err := ag.GetAction(api, p, grp, role, iter, false)
 	if err != nil {
 		if !errors.Is(err, io.EOF) {
 			logrus.Warnln("[chat] agent err:", err, reqs)
