@@ -97,6 +97,7 @@ type AgentConfig struct {
 	MaxN           uint
 	TopP           float32
 	SystemP        string
+	AgentChar      string
 	API            string
 	ImageAPI       string
 	AgentAPI       string
@@ -127,6 +128,7 @@ func (c *AgentConfig) String() string {
 	sb.WriteString(fmt.Sprintf("• 最大长度：%d\n", maxn))
 	sb.WriteString(fmt.Sprintf("• TopP：%.1f\n", topp))
 	sb.WriteString(fmt.Sprintf("• 系统提示词：%s\n", c.SystemP))
+	sb.WriteString(fmt.Sprintf("• Agent性格：%s\n", c.AgentChar))
 	sb.WriteString(fmt.Sprintf("• 接口地址：%s\n", c.API))
 	sb.WriteString(fmt.Sprintf("• 图像接口地址：%s\n", c.ImageAPI))
 	sb.WriteString(fmt.Sprintf("• Agent接口地址：%s\n", c.AgentAPI))
