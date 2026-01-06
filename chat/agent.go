@@ -60,6 +60,11 @@ func AgentOf(id int64, service string) *goba.Agent {
 	return &ag
 }
 
+// ResetAgents reset all agent log
+func ResetAgents() {
+	ags = syncx.Map[int64, *goba.Agent]{}
+}
+
 var checkgids = map[string]struct{}{
 	"send_group_msg":          {},
 	"set_group_kick":          {},
