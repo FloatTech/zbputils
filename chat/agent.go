@@ -119,12 +119,12 @@ func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model
 				continue
 			}
 			if role == goba.PermRoleUser { // check @all
-				msg, ok := req.Params["message"].(string)
-				if !ok {
-					logrus.Warnln("[chat] invalid message type", reflect.TypeOf(req.Params["message"]))
+				msgb, err := json.Marshal(req.Params["message"])
+				if err != nil {
+					logrus.Warnln("[chat] re-marshal msg err:", err)
 					continue
 				}
-				msgs := message.ParseMessageFromArray(gjson.Parse(msg))
+				msgs := message.ParseMessageFromArray(gjson.Parse(binary.BytesToString(msgb)))
 				for _, m := range msgs {
 					if m.Type == "at" {
 						qqs, ok := m.Data["qq"]
