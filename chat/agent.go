@@ -8,7 +8,6 @@ import (
 	"io"
 	"reflect"
 	"strconv"
-	"sync"
 	"time"
 
 	"github.com/RomiChan/syncx"
@@ -34,8 +33,7 @@ var AgentChar []byte
 var IsAgentCharReady = false
 
 var (
-	inActionMu = sync.Mutex{}
-	ags        = syncx.Map[int64, *goba.Agent]{}
+	ags = syncx.Map[int64, *goba.Agent]{}
 )
 
 type charcfg struct {
@@ -92,19 +90,15 @@ var checkgids = map[string]struct{}{
 }
 
 // CallAgent and check group API permission
-func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) (
-	[]zero.APIRequest, func(),
-) {
-	inActionMu.Lock()
+func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model.Protocol, grp int64, role goba.PermRole) []zero.APIRequest {
 	reqs, err := ag.GetAction(api, p, grp, role, iter, false)
 	if err != nil {
-		inActionMu.Unlock()
 		if !errors.Is(err, io.EOF) {
 			logrus.Warnln("[chat] agent err:", err, reqs)
 		} else {
 			logrus.Infoln("[chat] agent end action")
 		}
-		return nil, nil
+		return nil
 	}
 	logrus.Infoln("[chat] agent do:", reqs)
 	checkedreqs := make([]zero.APIRequest, 0, len(reqs))
@@ -153,7 +147,7 @@ func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model
 		}
 		checkedreqs = append(checkedreqs, req)
 	}
-	return checkedreqs, inActionMu.Unlock
+	return checkedreqs
 }
 
 func togobaev(ev *zero.Event) *goba.Event {
@@ -220,11 +214,6 @@ func logev(ctx *zero.Ctx) {
 			if countParamsLength(req.Params) > 256 { // skip too long req&resp
 				return
 			}
-			if inActionMu.TryLock() {
-				defer inActionMu.Unlock()
-			} else {
-				return
-			}
 			gid := ctx.Event.GroupID
 			if gid == 0 {
 				gid = -ctx.Event.UserID
@@ -242,11 +231,7 @@ func logev(ctx *zero.Ctx) {
 			})
 		}),
 	)
-	if inActionMu.TryLock() {
-		defer inActionMu.Unlock()
-	} else {
-		return
-	}
+	ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_hooked__"] = struct{}{}
 	gid := ctx.Event.GroupID
 	if gid == 0 {
 		gid = -ctx.Event.UserID
