@@ -225,12 +225,6 @@ func logev(ctx *zero.Ctx) {
 			} else {
 				return
 			}
-			k := zero.StateKeyPrefixKeep + "_chat_agent_logev_logged__"
-			_, ok := ctx.State[k]
-			if ok {
-				return
-			}
-			ctx.State[k] = struct{}{}
 			gid := ctx.Event.GroupID
 			if gid == 0 {
 				gid = -ctx.Event.UserID
