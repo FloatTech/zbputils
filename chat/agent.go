@@ -211,12 +211,14 @@ func logev(ctx *zero.Ctx) {
 	}
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, err error) {
-			if countParamsLength(req.Params) > 256 { // skip too long req&resp
-				return
-			}
 			gid := ctx.Event.GroupID
 			if gid == 0 {
 				gid = -ctx.Event.UserID
+			}
+			plen := countParamsLength(req.Params)
+			if plen > 1024 { // skip too long req&resp
+				logrus.Warnln("[chat] agent", gid, "skip too long requ:", &req)
+				return
 			}
 			ag := AgentOf(ctx.Event.SelfID, "aichat")
 			logrus.Infoln("[chat] agent", gid, "add requ:", &req)
