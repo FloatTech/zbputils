@@ -14,6 +14,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
+// AC is the global agent configuration
 var AC AgentConfig
 
 var (
@@ -40,6 +41,7 @@ func (mt ModelType) String() string {
 	return apilist[mt]
 }
 
+// Protocol creates a protocol instance based on the model type
 func (mt ModelType) Protocol(modn string, temp float32, topp float32, maxn uint) (mod model.Protocol, err error) {
 	switch AC.Type {
 	case 0:
@@ -87,6 +89,7 @@ func (mk ModelKey) String() string {
 	return key[:2] + strings.Repeat("*", len(key)-4) + key[len(key)-2:]
 }
 
+// AgentConfig holds the configuration for the chat agent
 type AgentConfig struct {
 	ModelName      string
 	ImageModelName string
@@ -144,7 +147,7 @@ func (c *AgentConfig) isvalid() bool {
 	return c.Key != ""
 }
 
-// 获取全局模型参数：TopP和最大长度
+// MParams returns the global model parameters: TopP and MaxN
 func (c *AgentConfig) MParams() (topp float32, maxn uint) {
 	// 处理TopP参数
 	topp = c.TopP
@@ -161,6 +164,7 @@ func (c *AgentConfig) MParams() (topp float32, maxn uint) {
 	return topp, maxn
 }
 
+// EnsureConfig ensures the configuration is loaded and valid
 func EnsureConfig(ctx *zero.Ctx) bool {
 	c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
 	if !ok {
@@ -179,6 +183,7 @@ func EnsureConfig(ctx *zero.Ctx) bool {
 	return true
 }
 
+// NewExtraSetStr creates a handler to set a string-based extra config value
 func NewExtraSetStr[T ~string](ptr *T) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := strings.TrimSpace(ctx.State["args"].(string))
@@ -197,6 +202,7 @@ func NewExtraSetStr[T ~string](ptr *T) func(ctx *zero.Ctx) {
 	}
 }
 
+// NewExtraSetBool creates a handler to set a boolean-based extra config value
 func NewExtraSetBool[T ~bool](ptr *T) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := ctx.State["regex_matched"].([]string)
@@ -216,6 +222,7 @@ func NewExtraSetBool[T ~bool](ptr *T) func(ctx *zero.Ctx) {
 	}
 }
 
+// NewExtraSetUint creates a handler to set a uint extra config value
 func NewExtraSetUint(ptr *uint) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := strings.TrimSpace(ctx.State["args"].(string))
@@ -243,6 +250,7 @@ func NewExtraSetUint(ptr *uint) func(ctx *zero.Ctx) {
 	}
 }
 
+// NewExtraSetFloat32 creates a handler to set a float32 extra config value
 func NewExtraSetFloat32(ptr *float32) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := strings.TrimSpace(ctx.State["args"].(string))
@@ -270,6 +278,7 @@ func NewExtraSetFloat32(ptr *float32) func(ctx *zero.Ctx) {
 	}
 }
 
+// NewExtraSetModelType creates a handler to set a ModelType extra config value
 func NewExtraSetModelType(ptr *ModelType) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := strings.TrimSpace(ctx.State["args"].(string))

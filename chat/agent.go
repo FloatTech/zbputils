@@ -210,7 +210,7 @@ func logev(ctx *zero.Ctx) {
 		return
 	}
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
-		ctx, func(req zero.APIRequest, rsp zero.APIResponse, err error) {
+		ctx, func(req zero.APIRequest, rsp zero.APIResponse, _ error) {
 			gid := ctx.Event.GroupID
 			if gid == 0 {
 				gid = -ctx.Event.UserID
