@@ -182,10 +182,6 @@ func EnsureConfig(ctx *zero.Ctx) bool {
 func NewExtraSetStr[T ~string](ptr *T) func(ctx *zero.Ctx) {
 	return func(ctx *zero.Ctx) {
 		args := strings.TrimSpace(ctx.State["args"].(string))
-		if args == "" {
-			ctx.SendChain(message.Text("ERROR: empty args"))
-			return
-		}
 		c, ok := ctx.State["manager"].(*ctrl.Control[*zero.Ctx])
 		if !ok {
 			ctx.SendChain(message.Text("ERROR: no such plugin"))

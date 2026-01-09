@@ -217,13 +217,23 @@ func logev(ctx *zero.Ctx) {
 			}
 			plen := countParamsLength(req.Params)
 			if plen > 1024 { // skip too long req&resp
-				logrus.Warnln("[chat] agent", gid, "skip too long requ:", &req)
+				logrus.Debugln("[chat] agent", gid, "skip too long requ:", &req)
+				return
+			}
+			if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_triggered__"]; ok {
+				logrus.Debugln("[chat] agent", gid, "skip agent triggered requ:", &req)
+				return
+			}
+			if req.Action != "send_private_msg" &&
+				req.Action != "send_group_msg" &&
+				req.Action != "delete_msg" {
+				logrus.Debugln("[chat] agent", gid, "skip non-msg other triggered action:", req.Action)
 				return
 			}
 			ag := AgentOf(ctx.Event.SelfID, "aichat")
-			logrus.Infoln("[chat] agent", gid, "add requ:", &req)
+			logrus.Debugln("[chat] agent others", gid, "add requ:", &req)
 			ag.AddRequest(gid, &req)
-			logrus.Infoln("[chat] agent", gid, "get resp:", &rsp)
+			logrus.Debugln("[chat] agent others", gid, "add resp:", &rsp)
 			ag.AddResponse(gid, &goba.APIResponse{
 				Status:  rsp.Status,
 				Data:    json.RawMessage(rsp.Data.Raw),
