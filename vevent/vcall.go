@@ -27,6 +27,6 @@ func NewAPICallerReturnHook(ctx *zero.Ctx, callback func(req zero.APIRequest, rs
 //nolint:revive
 func (v *APICallerReturnHook) CallAPI(c context.Context, req zero.APIRequest) (rsp zero.APIResponse, err error) {
 	rsp, err = v.caller.CallAPI(c, req)
-	go v.callback(req, rsp, err)
+	v.callback(req, rsp, err)
 	return
 }
