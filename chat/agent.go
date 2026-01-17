@@ -254,6 +254,19 @@ func truncatecopy(params map[string]any) map[string]any {
 }
 
 func logev(ctx *zero.Ctx) {
+	gid := ctx.Event.GroupID
+	if gid == 0 {
+		gid = -ctx.Event.UserID
+	}
+	ev := togobaev(ctx.Event)
+	if ev == nil {
+		return
+	}
+	data, _ := json.Marshal(ev)
+	logrus.Debugln("[chat] agent", gid, "add ev:", binary.BytesToString(data))
+	AgentOf(ctx.Event.SelfID, "aichat").AddEvent(gid, ev)
+	ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_hooked__"] = struct{}{}
+
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, _ error) {
 			gid := ctx.Event.GroupID
@@ -284,18 +297,6 @@ func logev(ctx *zero.Ctx) {
 			})
 		}),
 	)
-	ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_hooked__"] = struct{}{}
-	gid := ctx.Event.GroupID
-	if gid == 0 {
-		gid = -ctx.Event.UserID
-	}
-	ev := togobaev(ctx.Event)
-	if ev == nil {
-		return
-	}
-	data, _ := json.Marshal(ev)
-	logrus.Debugln("[chat] agent", gid, "add ev:", binary.BytesToString(data))
-	AgentOf(ctx.Event.SelfID, "aichat").AddEvent(gid, ev)
 }
 
 func init() {
