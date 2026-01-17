@@ -25,10 +25,10 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// agentChar 将 char.yaml 内容嵌入为默认 agent 性格
+// agentchar 将 char.yaml 内容嵌入为默认 agent 性格
 //
 //go:embed char.yaml
-var agentChar []byte
+var agentchar []byte
 
 var agentcharcfg charcfg
 
@@ -38,13 +38,12 @@ var AgentCharConfig *goba.Config
 var ags = syncx.Map[int64, *goba.Agent]{}
 
 type charcfg struct {
-	Sex     string `yaml:"sex"`
-	Char    string `yaml:"char"`
-	Default string `yaml:"default"`
+	Sex  string `yaml:"sex"`
+	Char string `yaml:"char"`
 }
 
 func init() {
-	err := yaml.NewDecoder(bytes.NewReader(agentChar)).Decode(&agentcharcfg)
+	err := yaml.NewDecoder(bytes.NewReader(agentchar)).Decode(&agentcharcfg)
 	if err != nil {
 		panic(err)
 	}
@@ -60,12 +59,11 @@ func AgentOf(id int64, service string) *goba.Agent {
 	if ag, ok := ags.Load(id); ok {
 		return ag
 	}
-
 	mem, err := atomicgetmemstorage(service)
 	if err != nil {
 		panic(err)
 	}
-	ag := goba.NewAgent(AgentCharConfig, 16, 8, time.Hour*24, agentcharcfg.Default, mem, true, false)
+	ag := goba.NewAgent(AgentCharConfig, 16, 8, time.Hour*24, "", mem, true, false)
 	ags.Store(id, &ag)
 	return &ag
 }

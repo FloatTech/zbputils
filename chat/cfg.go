@@ -101,6 +101,7 @@ type AgentConfig struct {
 	TopP           float32
 	SystemP        string
 	AgentChar      string
+	AgentSex       string
 	API            string
 	ImageAPI       string
 	AgentAPI       string
@@ -132,6 +133,7 @@ func (c *AgentConfig) String() string {
 	sb.WriteString(fmt.Sprintf("• TopP：%.1f\n", topp))
 	sb.WriteString(fmt.Sprintf("• 系统提示词：%s\n", c.SystemP))
 	sb.WriteString(fmt.Sprintf("• Agent性格：%s\n", c.AgentChar))
+	sb.WriteString(fmt.Sprintf("• Agent性别：%s\n", c.AgentSex))
 	sb.WriteString(fmt.Sprintf("• 接口地址：%s\n", c.API))
 	sb.WriteString(fmt.Sprintf("• 图像接口地址：%s\n", c.ImageAPI))
 	sb.WriteString(fmt.Sprintf("• Agent接口地址：%s\n", c.AgentAPI))
@@ -179,6 +181,12 @@ func EnsureConfig(ctx *zero.Ctx) bool {
 		if !cfgp.isvalid() {
 			AC = newconfig()
 		}
+	}
+	if AgentCharConfig.Sex != AC.AgentSex {
+		AC.AgentSex = AgentCharConfig.Sex
+	}
+	if AgentCharConfig.Chars != AC.AgentChar {
+		AC.AgentChar = AgentCharConfig.Chars
 	}
 	return true
 }
