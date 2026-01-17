@@ -195,43 +195,53 @@ func togobaev(ev *zero.Event) *goba.Event {
 	}
 }
 
-func truncate(params map[string]any) {
-	stack := []map[string]any{params}
-	for len(stack) > 0 {
-		// 弹出栈顶元素
-		current := stack[len(stack)-1]
-		stack = stack[:len(stack)-1]
-
-		// 遍历当前 map 的所有值
-		for k, v := range current {
-			switch val := v.(type) {
-			case string:
-				if len(val) > 512 {
-					current[k] = val[:200] + " ... " + val[len(val)-200:]
-				}
-			case int64, int:
-			case map[string]any:
-				// 非叶子节点，压入栈中待处理
-				stack = append(stack, val)
-			case message.Message:
-				for _, m := range val {
-					for k, v := range m.Data {
-						if len(v) > 512 {
-							m.Data[k] = v[:200] + " ... " + v[len(v)-200:]
-						}
-					}
-				}
-			case message.Segment:
-				for k, v := range val.Data {
-					if len(v) > 512 {
-						val.Data[k] = v[:200] + " ... " + v[len(v)-200:]
-					}
-				}
-			default:
-				logrus.Warnln("[chat] agent unknown params typ:", reflect.TypeOf(v))
+func truncatecopy(params map[string]any) map[string]any {
+	cpp := make(map[string]any, len(params))
+	for k, v := range params {
+		switch val := v.(type) {
+		case string:
+			if len(val) > 512 {
+				cpp[k] = val[:200] + " ... " + val[len(val)-200:]
+			} else {
+				cpp[k] = val
 			}
+		case int64, int:
+			cpp[k] = val
+		case message.Message:
+			valCopy := make(message.Message, len(val))
+			copy(valCopy, val)
+			for i, m := range val {
+				valCopy[i] = message.Segment{
+					Type: m.Type,
+					Data: make(map[string]string, len(m.Data)),
+				}
+				for k, v := range m.Data {
+					if len(v) > 512 {
+						valCopy[i].Data[k] = v[:200] + " ... " + v[len(v)-200:]
+					} else {
+						valCopy[i].Data[k] = v
+					}
+				}
+			}
+			cpp[k] = valCopy
+		case message.Segment:
+			valCopy := message.Segment{
+				Type: val.Type,
+				Data: make(map[string]string, len(val.Data)),
+			}
+			for k, v := range val.Data {
+				if len(v) > 512 {
+					valCopy.Data[k] = v[:200] + " ... " + v[len(v)-200:]
+				} else {
+					valCopy.Data[k] = v
+				}
+			}
+			cpp[k] = valCopy
+		default:
+			logrus.Warnln("[chat] agent unknown params typ:", reflect.TypeOf(v))
 		}
 	}
+	return cpp
 }
 
 func logev(ctx *zero.Ctx) {
@@ -254,7 +264,7 @@ func logev(ctx *zero.Ctx) {
 				logrus.Debugln("[chat] agent", gid, "skip non-msg other triggered action:", req.Action)
 				return
 			}
-			truncate(req.Params)
+			req.Params = truncatecopy(req.Params)
 			ag := AgentOf(ctx.Event.SelfID, "aichat")
 			logrus.Debugln("[chat] agent others", gid, "add requ:", &req)
 			ag.AddRequest(gid, &req)
