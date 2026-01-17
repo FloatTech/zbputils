@@ -80,6 +80,12 @@ func ResetAgents() {
 	}
 }
 
+// ResetAgentCharConfig resert agent char & sex
+func ResetAgentCharConfig() {
+	AC.AgentChar = agentcharcfg.Char
+	AC.AgentSex = agentcharcfg.Sex
+}
+
 var checkgids = map[string]struct{}{
 	"send_group_msg":          {},
 	"set_group_kick":          {},
