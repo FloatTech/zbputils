@@ -8,6 +8,7 @@ import (
 	"io"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/RomiChan/syncx"
@@ -24,17 +25,17 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 )
 
-// AgentChar 将 char.yaml 内容嵌入为默认 agent 性格
+// agentChar 将 char.yaml 内容嵌入为默认 agent 性格
 //
 //go:embed char.yaml
-var AgentChar []byte
+var agentChar []byte
 
-// IsAgentCharReady then logev works
-var IsAgentCharReady = false
+var agentcharcfg charcfg
 
-var (
-	ags = syncx.Map[int64, *goba.Agent]{}
-)
+// AgentCharConfig 可随时更改的 agent 性格配置
+var AgentCharConfig *goba.Config
+
+var ags = syncx.Map[int64, *goba.Agent]{}
 
 type charcfg struct {
 	Sex     string `yaml:"sex"`
@@ -42,25 +43,29 @@ type charcfg struct {
 	Default string `yaml:"default"`
 }
 
+func init() {
+	err := yaml.NewDecoder(bytes.NewReader(agentChar)).Decode(&agentcharcfg)
+	if err != nil {
+		panic(err)
+	}
+	AgentCharConfig = &goba.Config{
+		Nickname: strings.Join(zero.BotConfig.NickName, "/"),
+		Sex:      agentcharcfg.Sex,
+		Chars:    agentcharcfg.Char,
+	}
+}
+
 // AgentOf id is self_id
 func AgentOf(id int64, service string) *goba.Agent {
 	if ag, ok := ags.Load(id); ok {
 		return ag
 	}
-	var cfg charcfg
-	err := yaml.NewDecoder(bytes.NewReader(AgentChar)).Decode(&cfg)
-	if err != nil {
-		panic(err)
-	}
+
 	mem, err := atomicgetmemstorage(service)
 	if err != nil {
 		panic(err)
 	}
-	ag := goba.NewAgent(
-		id, 16, 8, time.Hour*24,
-		zero.BotConfig.NickName[0],
-		cfg.Sex, cfg.Char, cfg.Default, mem, true, false,
-	)
+	ag := goba.NewAgent(AgentCharConfig, 16, 8, time.Hour*24, agentcharcfg.Default, mem, true, false)
 	ags.Store(id, &ag)
 	return &ag
 }
@@ -245,9 +250,6 @@ func truncatecopy(params map[string]any) map[string]any {
 }
 
 func logev(ctx *zero.Ctx) {
-	if !IsAgentCharReady {
-		return
-	}
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, _ error) {
 			gid := ctx.Event.GroupID
