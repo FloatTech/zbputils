@@ -157,6 +157,23 @@ func togobaev(ev *zero.Event) *goba.Event {
 	} else {
 		return nil
 	}
+	msgd := ev.NativeMessage
+	if len(msgd) > 1024 {
+		msg := message.ParseMessage(msgd)
+		for _, m := range msg {
+			for k, v := range m.Data {
+				if len(v) > 512 {
+					m.Data[k] = v[:200] + " ... " + v[len(v)-200:]
+				}
+			}
+		}
+		raw, err := json.Marshal(&msg)
+		if err != nil {
+			msgd = []byte(`[]`)
+		} else {
+			msgd = raw
+		}
+	}
 	return &goba.Event{
 		Time:        ev.Time,
 		PostType:    ev.PostType,
@@ -174,7 +191,7 @@ func togobaev(ev *zero.Event) *goba.Event {
 		Flag:        ev.Flag,
 		Comment:     ev.Comment,
 		Sender:      ev.Sender,
-		Message:     ev.NativeMessage,
+		Message:     msgd,
 	}
 }
 
@@ -217,7 +234,7 @@ func logev(ctx *zero.Ctx) {
 			}
 			plen := countParamsLength(req.Params)
 			if plen > 1024 { // skip too long req&resp
-				logrus.Debugln("[chat] agent", gid, "skip too long requ:", &req)
+				logrus.Debugln("[chat] agent", gid, "skip too long", plen, "bytes requ:", &req)
 				return
 			}
 			if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_triggered__"]; ok {
