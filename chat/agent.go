@@ -215,6 +215,8 @@ func countParamsLength(params map[string]any) int {
 			case map[string]any:
 				// 非叶子节点，压入栈中待处理
 				stack = append(stack, val)
+			default:
+				logrus.Warnln("[chat] agent unknown params typ:", reflect.TypeOf(v))
 			}
 		}
 	}
@@ -234,7 +236,7 @@ func logev(ctx *zero.Ctx) {
 			}
 			plen := countParamsLength(req.Params)
 			if plen > 1024 { // skip too long req&resp
-				logrus.Debugln("[chat] agent", gid, "skip too long", plen, "bytes requ:", &req)
+				logrus.Infoln("[chat] agent", gid, "skip too long", plen, "bytes requ.")
 				return
 			}
 			if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_triggered__"]; ok {
