@@ -14,6 +14,6 @@ func (m *Matcher) SetBlock(block bool) *Matcher {
 }
 
 // Handle 直接处理事件
-func (m *Matcher) Handle(handler zero.Handler) {
-	_ = (*zero.Matcher)(m).Handle(handler)
+func (m *Matcher) Handle(handler ...zero.Handler) {
+	_ = (*zero.Matcher)(m).Handle(handler...)
 }

@@ -20,12 +20,12 @@ require (
 	github.com/go-playground/validator/v10 v10.29.0
 	github.com/google/uuid v1.6.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.1
 	github.com/swaggo/swag v1.16.6
 	github.com/tidwall/gjson v1.18.0
-	github.com/wdvxdr1123/ZeroBot v1.8.3-0.20260108153355-cbf2ab0dd527
+	github.com/wdvxdr1123/ZeroBot v1.8.3-0.20260117102541-393033a35adb
 	gopkg.in/yaml.v3 v3.0.1
 )
 
