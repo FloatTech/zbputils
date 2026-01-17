@@ -195,33 +195,43 @@ func togobaev(ev *zero.Event) *goba.Event {
 	}
 }
 
-// countParamsLength 统计 params 中所有叶子节点字符串的长度之和（非递归实现）
-func countParamsLength(params map[string]any) int {
-	total := 0
-	// 使用栈存储待处理的 map
+func truncate(params map[string]any) {
 	stack := []map[string]any{params}
-
 	for len(stack) > 0 {
 		// 弹出栈顶元素
 		current := stack[len(stack)-1]
 		stack = stack[:len(stack)-1]
 
 		// 遍历当前 map 的所有值
-		for _, v := range current {
+		for k, v := range current {
 			switch val := v.(type) {
 			case string:
-				// 叶子节点，累加长度
-				total += len(val)
+				if len(val) > 512 {
+					current[k] = val[:200] + " ... " + val[len(val)-200:]
+				}
+			case int64, int:
 			case map[string]any:
 				// 非叶子节点，压入栈中待处理
 				stack = append(stack, val)
+			case message.Message:
+				for _, m := range val {
+					for k, v := range m.Data {
+						if len(v) > 512 {
+							m.Data[k] = v[:200] + " ... " + v[len(v)-200:]
+						}
+					}
+				}
+			case message.Segment:
+				for k, v := range val.Data {
+					if len(v) > 512 {
+						val.Data[k] = v[:200] + " ... " + v[len(v)-200:]
+					}
+				}
 			default:
 				logrus.Warnln("[chat] agent unknown params typ:", reflect.TypeOf(v))
 			}
 		}
 	}
-
-	return total
 }
 
 func logev(ctx *zero.Ctx) {
@@ -234,11 +244,6 @@ func logev(ctx *zero.Ctx) {
 			if gid == 0 {
 				gid = -ctx.Event.UserID
 			}
-			plen := countParamsLength(req.Params)
-			if plen > 1024 { // skip too long req&resp
-				logrus.Infoln("[chat] agent", gid, "skip too long", plen, "bytes requ.")
-				return
-			}
 			if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_triggered__"]; ok {
 				logrus.Debugln("[chat] agent", gid, "skip agent triggered requ:", &req)
 				return
@@ -249,6 +254,7 @@ func logev(ctx *zero.Ctx) {
 				logrus.Debugln("[chat] agent", gid, "skip non-msg other triggered action:", req.Action)
 				return
 			}
+			truncate(req.Params)
 			ag := AgentOf(ctx.Event.SelfID, "aichat")
 			logrus.Debugln("[chat] agent others", gid, "add requ:", &req)
 			ag.AddRequest(gid, &req)
