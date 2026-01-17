@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/RomiChan/syncx"
@@ -253,6 +254,8 @@ func truncatecopy(params map[string]any) map[string]any {
 	return cpp
 }
 
+var logevmu sync.Mutex
+
 func logev(ctx *zero.Ctx) {
 	gid := ctx.Event.GroupID
 	if gid == 0 {
@@ -265,7 +268,14 @@ func logev(ctx *zero.Ctx) {
 	data, _ := json.Marshal(ev)
 	logrus.Debugln("[chat] agent", gid, "add ev:", binary.BytesToString(data))
 	AgentOf(ctx.Event.SelfID, "aichat").AddEvent(gid, ev)
+
+	logevmu.Lock()
+	if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_hooked__"]; ok {
+		logevmu.Unlock()
+		return
+	}
 	ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_hooked__"] = struct{}{}
+	logevmu.Unlock()
 
 	vevent.HookCtxCaller(ctx, vevent.NewAPICallerReturnHook(
 		ctx, func(req zero.APIRequest, rsp zero.APIResponse, _ error) {
@@ -273,10 +283,13 @@ func logev(ctx *zero.Ctx) {
 			if gid == 0 {
 				gid = -ctx.Event.UserID
 			}
+			logevmu.Lock()
 			if _, ok := ctx.State[zero.StateKeyPrefixKeep+"_chat_ag_triggered__"]; ok {
+				logevmu.Unlock()
 				logrus.Debugln("[chat] agent", gid, "skip agent triggered requ:", &req)
 				return
 			}
+			logevmu.Unlock()
 			if req.Action != "send_private_msg" &&
 				req.Action != "send_group_msg" &&
 				req.Action != "delete_msg" {
