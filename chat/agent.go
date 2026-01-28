@@ -179,6 +179,7 @@ func togobaev(ev *zero.Event) *goba.Event {
 		}
 		raw, err := json.Marshal(&msg)
 		if err != nil {
+			logrus.Warnln("[chat] togobaev marshal truncated", len(msgd), "bytes message err:", err)
 			msgd = []byte(`[]`)
 		} else {
 			msgd = raw
