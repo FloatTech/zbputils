@@ -176,7 +176,7 @@ func EnsureConfig(ctx *zero.Ctx) bool {
 	if !cfgp.isvalid() {
 		err := c.GetExtra(cfgp)
 		if err != nil {
-			logrus.Warnln("ERROR: get extra err:", err)
+			logrus.Debugln("ERROR: get extra err:", err)
 		}
 		if !cfgp.isvalid() {
 			AC = newconfig()

@@ -10,6 +10,9 @@ const (
 )
 
 func addsyncxstate(ctx *zero.Ctx) bool {
+	if _, ok := ctx.State[StateKeySyncxState]; ok {
+		return true
+	}
 	ctx.State[StateKeySyncxState] = &syncx.Map[string, any]{}
 	return true
 }
