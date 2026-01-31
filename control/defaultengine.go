@@ -15,5 +15,6 @@ func init() {
 			// 防止自触发
 			return ctx.Event.UserID != ctx.Event.SelfID || ctx.Event.PostType != "message"
 		},
+		addsyncxstate,
 	)
 }
