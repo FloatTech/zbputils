@@ -140,23 +140,30 @@ func CallAgent(ag *goba.Agent, issudo bool, iter int, api deepinfra.API, p model
 					continue
 				}
 				msgs := message.ParseMessageFromArray(gjson.Parse(binary.BytesToString(msgb)))
+				isvalid := true
 				for _, m := range msgs {
 					if m.Type == "at" {
 						qqs, ok := m.Data["qq"]
 						if !ok {
 							logrus.Warnln("[chat] invalid at message without qq")
-							continue
+							isvalid = false
+							break
 						}
 						qq, err := strconv.ParseInt(qqs, 10, 64)
 						if err != nil {
 							logrus.Warnln("[chat] invalid at qq", qqs)
-							continue
+							isvalid = false
+							break
 						}
 						if qq <= 0 {
 							logrus.Warnln("[chat] invalid at qq num", qq)
-							continue
+							isvalid = false
+							break
 						}
 					}
+				}
+				if !isvalid {
+					continue
 				}
 			}
 		}
