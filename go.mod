@@ -1,12 +1,12 @@
 module github.com/FloatTech/zbputils
 
-go 1.24.0
+go 1.24.2
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
 	github.com/FloatTech/floatbox v0.0.0-20251002074805-f95cbc7edb31
 	github.com/FloatTech/imgfactory v0.2.2-0.20230413152719-e101cc3606ef
-	github.com/FloatTech/rendercard v0.2.0
+	github.com/FloatTech/rendercard v0.2.2
 	github.com/FloatTech/sqlite v1.7.2
 	github.com/FloatTech/zbpctrl v1.7.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
