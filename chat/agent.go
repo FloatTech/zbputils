@@ -25,9 +25,6 @@ import (
 	"github.com/FloatTech/zbputils/vevent"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
-
-	"github.com/FloatTech/zbputils/control"
-	"github.com/FloatTech/zbputils/vevent"
 )
 
 const (
