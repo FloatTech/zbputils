@@ -6,6 +6,7 @@ import (
 )
 
 const (
+	// StateKeySyncxState is to store the syncx map that will not be cleared after one match turn
 	StateKeySyncxState = zero.StateKeyPrefixKeep + "_ctrl_syncx_state__"
 )
 
