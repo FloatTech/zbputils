@@ -98,8 +98,6 @@ func (f *FCClient) Listen(handler func([]byte, zero.APICaller)) {
 }
 
 // CallAPI 发送请求
-//
-//nolint:revive
 func (f *FCClient) CallAPI(_ context.Context, req zero.APIRequest) (zero.APIResponse, error) {
 	req.Echo = f.nextSeq()
 	rsp, err := f.handleRequest(&req)

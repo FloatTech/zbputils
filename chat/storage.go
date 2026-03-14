@@ -1,8 +1,9 @@
 package chat
 
 import (
-	"github.com/FloatTech/zbputils/ctxext"
 	zero "github.com/wdvxdr1123/ZeroBot"
+
+	"github.com/FloatTech/zbputils/ctxext"
 )
 
 // Bitmap constants for storage
