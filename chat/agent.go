@@ -20,6 +20,9 @@ import (
 	"gopkg.in/yaml.v3"
 
 	"github.com/FloatTech/floatbox/binary"
+	"github.com/FloatTech/floatbox/process"
+	"github.com/FloatTech/zbputils/control"
+	"github.com/FloatTech/zbputils/vevent"
 	zero "github.com/wdvxdr1123/ZeroBot"
 	"github.com/wdvxdr1123/ZeroBot/message"
 
@@ -28,7 +31,9 @@ import (
 )
 
 const (
-	StateKeyAgentHooked    = zero.StateKeyPrefixKeep + "_chat_ag_hooked__"
+	// StateKeyAgentHooked indicates that whether the agent log is in recording
+	StateKeyAgentHooked = zero.StateKeyPrefixKeep + "_chat_ag_hooked__"
+	// StateKeyAgentTriggered shows that this message has already triggered an agent run
 	StateKeyAgentTriggered = zero.StateKeyPrefixKeep + "_chat_ag_triggered__"
 )
 
@@ -55,10 +60,15 @@ func init() {
 		panic(err)
 	}
 	AgentCharConfig = &goba.Config{
-		Nickname: strings.Join(zero.BotConfig.NickName, "/"),
-		Sex:      agentcharcfg.Sex,
-		Chars:    agentcharcfg.Char,
+		Sex:   agentcharcfg.Sex,
+		Chars: agentcharcfg.Char,
 	}
+	go func() {
+		process.GlobalInitMutex.Lock()
+		AgentCharConfig.Nickname = strings.Join(zero.BotConfig.NickName, "/")
+		logrus.Infoln("[chat] 设置 agent 昵称:", AgentCharConfig.Nickname)
+		process.GlobalInitMutex.Unlock()
+	}()
 }
 
 // AgentOf id is self_id
