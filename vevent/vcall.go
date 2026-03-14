@@ -23,8 +23,6 @@ func NewAPICallerReturnHook(ctx *zero.Ctx, callback func(req zero.APIRequest, rs
 }
 
 // CallAPI call original caller and pass rsp to callback
-//
-
 func (v *APICallerReturnHook) CallAPI(c context.Context, req zero.APIRequest) (rsp zero.APIResponse, err error) {
 	rsp, err = v.caller.CallAPI(c, req)
 	v.callback(req, rsp, err)
