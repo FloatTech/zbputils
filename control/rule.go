@@ -11,7 +11,7 @@ import (
 	"github.com/wdvxdr1123/ZeroBot/message"
 
 	"github.com/FloatTech/floatbox/binary"
-	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/gg/factory"
 	"github.com/FloatTech/rendercard"
 	ctrl "github.com/FloatTech/zbpctrl"
 )
@@ -434,7 +434,7 @@ func init() {
 				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
-			data, err := imgfactory.ToBytes(imgs) // 生成图片
+			data, err := factory.ToBytes(imgs) // 生成图片
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR: ", err))
 				return
@@ -455,7 +455,7 @@ func init() {
 				ctx.SendChain(message.Text("ERROR: ", err))
 				return
 			}
-			b64, err := imgfactory.ToBase64(img)
+			b64, err := factory.ToBase64(img)
 			if err != nil {
 				ctx.SendChain(message.Text("ERROR: ", err))
 				return

@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/FloatTech/floatbox/file"
-	"github.com/FloatTech/imgfactory"
+	"github.com/FloatTech/gg/factory"
 )
 
 // 加载数据库
@@ -23,7 +23,7 @@ func RenderToBase64(text, font string, width, fontSize int) (base64Bytes []byte,
 		log.Println("[txt2img]", err)
 		return nil, err
 	}
-	base64Bytes, err = imgfactory.ToBase64(im)
+	base64Bytes, err = factory.ToBase64(im)
 	if err != nil {
 		log.Println("[txt2img]", err)
 		return nil, err
@@ -38,5 +38,5 @@ func Render(text, font string, width, fontSize int) (txtPic image.Image, err err
 		return
 	}
 
-	return imgfactory.RenderTextWith(text, data, width, fontSize)
+	return factory.RenderTextWith(text, data, width, fontSize)
 }

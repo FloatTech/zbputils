@@ -1,12 +1,12 @@
 module github.com/FloatTech/zbputils
 
-go 1.24.2
+go 1.26.1
 
 require (
 	github.com/FloatTech/ZeroBot-Plugin-Webui v1.0.1-0.20230412164529-cfe878675931
 	github.com/FloatTech/floatbox v0.0.0-20251002074805-f95cbc7edb31
-	github.com/FloatTech/imgfactory v0.2.2-0.20230413152719-e101cc3606ef
-	github.com/FloatTech/rendercard v0.2.3
+	github.com/FloatTech/gg v1.1.4-0.20260404155637-671db2feeebb
+	github.com/FloatTech/rendercard v0.2.4-0.20260404155919-1fede0bcd22b
 	github.com/FloatTech/sqlite v1.7.2
 	github.com/FloatTech/zbpctrl v1.7.1
 	github.com/RomiChan/syncx v0.0.0-20240418144900-b7402ffdebc7
@@ -30,7 +30,7 @@ require (
 )
 
 require (
-	github.com/FloatTech/gg v1.1.3 // indirect
+	github.com/FloatTech/imgfactory v0.2.2-0.20230413152719-e101cc3606ef // indirect
 	github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
@@ -40,10 +40,12 @@ require (
 	github.com/corona10/goimagehash v1.1.1-0.20240121134706-d8115886f360 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/ebitengine/purego v0.10.0 // indirect
 	github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 // indirect
 	github.com/fumiama/go-registry v0.2.7 // indirect
 	github.com/fumiama/go-simple-protobuf v0.2.0 // indirect
 	github.com/fumiama/gofastTEA v0.1.3 // indirect
+	github.com/fumiama/gozel v0.0.0-20260329105205-a95fde52433a // indirect
 	github.com/fumiama/imgsz v0.0.4 // indirect
 	github.com/fumiama/orbyte v0.0.0-20251002065953-3bb358367eb5 // indirect
 	github.com/fumiama/terasu v1.0.2 // indirect
@@ -86,14 +88,14 @@ require (
 	go.uber.org/mock v0.6.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.23.0 // indirect
-	golang.org/x/crypto v0.46.0 // indirect
-	golang.org/x/image v0.34.0 // indirect
-	golang.org/x/mod v0.31.0 // indirect
-	golang.org/x/net v0.48.0 // indirect
-	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.39.0 // indirect
-	golang.org/x/text v0.32.0 // indirect
-	golang.org/x/tools v0.40.0 // indirect
+	golang.org/x/crypto v0.48.0 // indirect
+	golang.org/x/image v0.38.0 // indirect
+	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/net v0.50.0 // indirect
+	golang.org/x/sync v0.20.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.35.0 // indirect
+	golang.org/x/tools v0.42.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	modernc.org/libc v1.67.1 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
