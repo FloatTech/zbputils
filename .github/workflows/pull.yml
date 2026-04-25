@@ -8,7 +8,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@master
         with:
-          go-version: "1.24"
+          go-version: "^1.26"
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@master
@@ -33,3 +33,5 @@ jobs:
 
           # Optional: if set to true then the action don't cache or restore ~/.cache/go-build.
           # skip-build-cache: true
+
+          install-mode: goinstall

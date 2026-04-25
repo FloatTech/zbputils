@@ -8,7 +8,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@master
         with:
-          go-version: "1.24"
+          go-version: "^1.26"
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@master
@@ -18,6 +18,8 @@ jobs:
         with:
           version: latest
           args: --issues-exit-code=0 --timeout=10m
+          install-mode: goinstall
+
       - name: Commit back
         continue-on-error: true
         run: |
