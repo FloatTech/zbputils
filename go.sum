@@ -44,8 +44,8 @@ github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4 h1:BBade+Jl
 github.com/ericpauley/go-quantize v0.0.0-20200331213906-ae555eb2afa4/go.mod h1:H7chHJglrhPPzetLdzBleF8d22WYOv7UM/lEKYiwlKM=
 github.com/fumiama/cron v1.3.0 h1:ZWlwuexF+HQHl3cYytEE5HNwD99q+3vNZF1GrEiXCFo=
 github.com/fumiama/cron v1.3.0/go.mod h1:bz5Izvgi/xEUI8tlBN8BI2jr9Moo8N4or0KV8xXuPDY=
-github.com/fumiama/deepinfra v0.0.0-20251221163610-e98ee3ba437a h1:a0+2vaXajfxsNcIaYG7A/cAb2e4+M3s5J6oyIiPsL3c=
-github.com/fumiama/deepinfra v0.0.0-20251221163610-e98ee3ba437a/go.mod h1:uqsWK/GM9OvKV0pXZOQB63rWugBbiXInY8E1JoRKhkg=
+github.com/fumiama/deepinfra v0.0.0-20260425085418-d2615e46ea66 h1:tHvzebYMYwPHeIYS483WDe3tNPpQCan47XbuPtC8kjM=
+github.com/fumiama/deepinfra v0.0.0-20260425085418-d2615e46ea66/go.mod h1:uqsWK/GM9OvKV0pXZOQB63rWugBbiXInY8E1JoRKhkg=
 github.com/fumiama/go-base16384 v1.7.1 h1:1P1x6FWRvd7PtbH4idDAGWAjKKcVxggxlROYKRXbw58=
 github.com/fumiama/go-base16384 v1.7.1/go.mod h1:OEn+947GV5gsbTAnyuUW/SrfxJYUdYupSIQXOuGOcXM=
 github.com/fumiama/go-onebot-agent v0.0.0-20260314041356-bc4ca0e119d5 h1:e2WSMApv2JvDsoO+htcccJcOGy/ArZLwyorT85gU6uA=
