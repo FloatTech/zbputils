@@ -14,7 +14,7 @@ require (
 	github.com/fumiama/cron v1.3.0
 	github.com/fumiama/deepinfra v0.0.0-20260425085418-d2615e46ea66
 	github.com/fumiama/go-base16384 v1.7.1
-	github.com/fumiama/go-onebot-agent v0.0.0-20260314041356-bc4ca0e119d5
+	github.com/fumiama/go-onebot-agent v0.0.0-20260425093914-9c92a03776e3
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.29.0
@@ -30,7 +30,6 @@ require (
 )
 
 require (
-	github.com/FloatTech/imgfactory v0.2.2-0.20230413152719-e101cc3606ef // indirect
 	github.com/FloatTech/ttl v0.0.0-20250224045156-012b1463287d // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect

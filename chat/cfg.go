@@ -47,7 +47,7 @@ func (mt ModelType) Protocol(modn string, temp float32, topp float32, maxn uint)
 	case 0:
 		mod = model.NewOpenAI(
 			modn, AC.Separator,
-			temp, topp, maxn, "low",
+			temp, topp, maxn, "off",
 		)
 	case 1:
 		mod = model.NewOLLaMA(
