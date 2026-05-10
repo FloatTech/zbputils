@@ -91,25 +91,26 @@ func (mk ModelKey) String() string {
 
 // AgentConfig holds the configuration for the chat agent
 type AgentConfig struct {
-	ModelName      string
-	ImageModelName string
-	AgentModelName string
-	Type           ModelType
-	ImageType      ModelType
-	AgentType      ModelType
-	MaxN           uint
-	TopP           float32
-	SystemP        string
-	AgentChar      string
-	AgentSex       string
-	API            string
-	ImageAPI       string
-	AgentAPI       string
-	Key            ModelKey
-	ImageKey       ModelKey
-	AgentKey       ModelKey
-	Separator      string
-	NoSystemP      ModelBool
+	ModelName       string
+	ImageModelName  string
+	AgentModelName  string
+	Type            ModelType
+	ImageType       ModelType
+	AgentType       ModelType
+	MaxN            uint
+	TopP            float32
+	SystemP         string
+	AgentChar       string
+	AgentSex        string
+	API             string
+	ImageAPI        string
+	AgentAPI        string
+	Key             ModelKey
+	ImageKey        ModelKey
+	AgentKey        ModelKey
+	Separator       string
+	ReasoningEffort string
+	NoSystemP       ModelBool
 }
 
 func newconfig() AgentConfig {
@@ -123,25 +124,26 @@ func newconfig() AgentConfig {
 func (c *AgentConfig) String() string {
 	topp, maxn := c.MParams()
 	sb := strings.Builder{}
-	sb.WriteString(fmt.Sprintf("• 模型名：%s\n", c.ModelName))
-	sb.WriteString(fmt.Sprintf("• 图像模型名：%s\n", c.ImageModelName))
-	sb.WriteString(fmt.Sprintf("• Agent模型名：%s\n", c.AgentModelName))
-	sb.WriteString(fmt.Sprintf("• 接口类型：%v\n", c.Type))
-	sb.WriteString(fmt.Sprintf("• 图像接口类型：%v\n", c.ImageType))
-	sb.WriteString(fmt.Sprintf("• Agent接口类型：%v\n", c.AgentType))
-	sb.WriteString(fmt.Sprintf("• 最大长度：%d\n", maxn))
-	sb.WriteString(fmt.Sprintf("• TopP：%.1f\n", topp))
-	sb.WriteString(fmt.Sprintf("• 系统提示词：%s\n", c.SystemP))
-	sb.WriteString(fmt.Sprintf("• Agent性格：%s\n", c.AgentChar))
-	sb.WriteString(fmt.Sprintf("• Agent性别：%s\n", c.AgentSex))
-	sb.WriteString(fmt.Sprintf("• 接口地址：%s\n", c.API))
-	sb.WriteString(fmt.Sprintf("• 图像接口地址：%s\n", c.ImageAPI))
-	sb.WriteString(fmt.Sprintf("• Agent接口地址：%s\n", c.AgentAPI))
-	sb.WriteString(fmt.Sprintf("• 密钥：%v\n", c.Key))
-	sb.WriteString(fmt.Sprintf("• 图像密钥：%v\n", c.ImageKey))
-	sb.WriteString(fmt.Sprintf("• Agent密钥：%v\n", c.AgentKey))
-	sb.WriteString(fmt.Sprintf("• 分隔符：%s\n", c.Separator))
-	sb.WriteString(fmt.Sprintf("• 支持系统提示词：%v\n", !c.NoSystemP))
+	fmt.Fprintf(&sb, "• 模型名：%s\n", c.ModelName)
+	fmt.Fprintf(&sb, "• 图像模型名：%s\n", c.ImageModelName)
+	fmt.Fprintf(&sb, "• Agent模型名：%s\n", c.AgentModelName)
+	fmt.Fprintf(&sb, "• 接口类型：%v\n", c.Type)
+	fmt.Fprintf(&sb, "• 图像接口类型：%v\n", c.ImageType)
+	fmt.Fprintf(&sb, "• Agent接口类型：%v\n", c.AgentType)
+	fmt.Fprintf(&sb, "• 最大长度：%d\n", maxn)
+	fmt.Fprintf(&sb, "• TopP：%.1f\n", topp)
+	fmt.Fprintf(&sb, "• 系统提示词：%s\n", c.SystemP)
+	fmt.Fprintf(&sb, "• Agent性格：%s\n", c.AgentChar)
+	fmt.Fprintf(&sb, "• Agent性别：%s\n", c.AgentSex)
+	fmt.Fprintf(&sb, "• 接口地址：%s\n", c.API)
+	fmt.Fprintf(&sb, "• 图像接口地址：%s\n", c.ImageAPI)
+	fmt.Fprintf(&sb, "• Agent接口地址：%s\n", c.AgentAPI)
+	fmt.Fprintf(&sb, "• 密钥：%v\n", c.Key)
+	fmt.Fprintf(&sb, "• 图像密钥：%v\n", c.ImageKey)
+	fmt.Fprintf(&sb, "• Agent密钥：%v\n", c.AgentKey)
+	fmt.Fprintf(&sb, "• 分隔符：%s\n", c.Separator)
+	fmt.Fprintf(&sb, "• 推理努力度：%s\n", c.ReasoningEffort)
+	fmt.Fprintf(&sb, "• 支持系统提示词：%v\n", !c.NoSystemP)
 	return sb.String()
 }
 
