@@ -42,12 +42,12 @@ func (mt ModelType) String() string {
 }
 
 // Protocol creates a protocol instance based on the model type
-func (mt ModelType) Protocol(modn string, temp float32, topp float32, maxn uint) (mod model.Protocol, err error) {
+func (mt ModelType) Protocol(modn string, temp float32, topp float32, maxn uint, reasoning string) (mod model.Protocol, err error) {
 	switch AC.Type {
 	case 0:
 		mod = model.NewOpenAI(
 			modn, AC.Separator,
-			temp, topp, maxn, "none",
+			temp, topp, maxn, reasoning,
 		)
 	case 1:
 		mod = model.NewOLLaMA(
